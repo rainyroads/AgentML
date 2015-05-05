@@ -1,0 +1,197 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+    <!-- Software Agent Markup Language, v0.1 -->
+    <start>
+        <element name="saml" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <attribute name="version">
+                <data type="float"/>
+            </attribute>
+            <oneOrMore>
+                <choice>
+                    <ref name="triggerGroup"/>
+                    <ref name="emotionsGroup"/>
+                </choice>
+            </oneOrMore>
+        </element>
+    </start>
+
+    <!-- [Group] Trigger -->
+    <!--
+        A trigger group can be defined by either a <trigger> element directly,
+        or grouped into <topic> and/or <emotion> elements for convenience
+    -->
+    <define name="triggerGroup">
+        <choice>
+            <oneOrMore>
+                <ref name="trigger"/>
+            </oneOrMore>
+            <element name="emotion">
+                <attribute name="name"/>
+                <choice>
+                    <oneOrMore>
+                        <ref name="trigger"/>
+                    </oneOrMore>
+                    <element name="topic">
+                        <attribute name="name"/>
+                        <oneOrMore>
+                            <ref name="trigger"/>
+                        </oneOrMore>
+                    </element>
+                </choice>
+            </element>
+            <element name="topic">
+                <attribute name="name"/>
+                <choice>
+                    <oneOrMore>
+                        <ref name="trigger"/>
+                    </oneOrMore>
+                    <element name="emotion">
+                        <attribute name="name"/>
+                        <oneOrMore>
+                            <ref name="trigger"/>
+                        </oneOrMore>
+                    </element>
+                </choice>
+            </element>
+        </choice>
+    </define>
+
+    <!-- [Element] Trigger -->
+    <define name="trigger">
+        <element name="trigger">
+            <interleave>
+                <optional>
+                    <ref name="trigger.topic"/>
+                </optional>
+
+                <optional>
+                    <ref name="trigger.emotion"/>
+                </optional>
+
+                <oneOrMore>
+                    <ref name="trigger.pattern"/>
+                </oneOrMore>
+
+                <oneOrMore>
+                    <ref name="trigger.response"/>
+                </oneOrMore>
+
+                <optional>
+                    <ref name="trigger.limit"/>
+                </optional>
+
+                <optional>
+                    <ref name="trigger.reaction"/>
+                </optional>
+            </interleave>
+        </element>
+    </define>
+
+    <!-- [Attributes] Trigger -->
+    <define name="trigger.topic">
+        <element name="topic">
+            <text/>
+        </element>
+    </define>
+
+    <define name="trigger.emotion">
+        <element name="emotion">
+            <text/>
+        </element>
+    </define>
+
+    <define name="trigger.pattern">
+        <element name="pattern">
+            <text/>
+        </element>
+    </define>
+
+    <define name="trigger.response">
+        <element name="response" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="weight">
+                    <data type="integer"/>
+                </attribute>
+            </optional>
+            <text/>
+        </element>
+    </define>
+
+    <define name="trigger.limit">
+        <element name="limit">
+            <optional>
+                <attribute name="unit">
+                    <choice>
+                        <value>seconds</value>
+                        <value>minutes</value>
+                        <value>hours</value>
+                        <value>days</value>
+                        <value>weeks</value>
+                        <value>months</value>
+                        <value>years</value>
+                    </choice>
+                </attribute>
+            </optional>
+            <text/>
+        </element>
+    </define>
+
+    <define name="trigger.reaction">
+        <element name="reaction">
+            <optional>
+                <element name="topic">
+                    <text/>
+                </element>
+            </optional>
+            <optional>
+                <element name="emotion" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+                    <element name="name">
+                        <text/>
+                    </element>
+                    <element name="level">
+                        <data type="integer"/>
+                    </element>
+                </element>
+            </optional>
+        </element>
+    </define>
+
+    <!-- [Element] Emotions -->
+    <!--
+        Emotions are defined once in a single <emotions> element. Any subsequent use of this
+        element will overwrite the previous definition.
+
+        Emotions are defined on three levels: primary, secondary and tertiary emotions
+    -->
+    <define name="emotionsGroup">
+        <element name="emotions">
+            <oneOrMore>
+                <ref name="emotions.primary"/>
+            </oneOrMore>
+        </element>
+    </define>
+
+    <!-- [Attributes] Emotions -->
+    <define name="emotions.primary">
+        <element name="primary">
+            <attribute name="name"/>
+            <zeroOrMore>
+                <ref name="emotions.secondary"/>
+            </zeroOrMore>
+        </element>
+    </define>
+
+    <define name="emotions.secondary">
+        <element name="secondary">
+            <attribute name="name"/>
+            <zeroOrMore>
+                <ref name="emotions.tertiary"/>
+            </zeroOrMore>
+        </element>
+    </define>
+
+    <define name="emotions.tertiary">
+        <element name="tertiary">
+            <attribute name="name"/>
+        </element>
+    </define>
+</grammar>
