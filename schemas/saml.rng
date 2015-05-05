@@ -119,6 +119,19 @@
             <zeroOrMore>
                 <ref name="tagsResponseGroup"/>
             </zeroOrMore>
+            <optional>
+                <ref name="trigger.topic"/>
+            </optional>
+            <optional>
+                <ref name="trigger.emotion"/>
+            </optional>
+            <optional>
+                <ref name="trigger.limit"/>
+            </optional>
+
+            <optional>
+                <ref name="trigger.reaction"/>
+            </optional>
             <text/>
         </element>
     </define>
