@@ -80,6 +80,7 @@
     <xs:element name="pattern" type="xs:string"/>
     <xs:element name="response">
         <xs:complexType mixed="true">
+            <xs:group minOccurs="0" maxOccurs="unbounded" ref="tagsResponseGroup"/>
             <xs:attribute name="weight" type="xs:integer"/>
         </xs:complexType>
     </xs:element>
@@ -95,6 +96,14 @@
                         <xs:enumeration value="weeks"/>
                         <xs:enumeration value="months"/>
                         <xs:enumeration value="years"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="type">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="global"/>
+                        <xs:enumeration value="user"/>
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
@@ -117,6 +126,57 @@
     </xs:element>
     <xs:element name="name" type="xs:string"/>
     <xs:element name="level" type="xs:integer"/>
+    <!-- [Group] Tags -->
+    <!-- TBA -->
+    <!-- <define name="tagsPatternGroup"> -->
+    <!-- <zeroOrMore> -->
+    <!-- <choice> -->
+    <!-- ... -->
+    <!-- </choice> -->
+    <!-- </zeroOrMore> -->
+    <!-- </define> -->
+    <xs:group name="tagsResponseGroup">
+        <xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="random"/>
+                <xs:element ref="star"/>
+                <xs:element ref="var"/>
+                <xs:element ref="call"/>
+            </xs:choice>
+        </xs:sequence>
+    </xs:group>
+    <!-- [Elements] Tags -->
+    <xs:element name="random">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="i"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="i" type="xs:string"/>
+    <xs:element name="star">
+        <xs:complexType>
+            <xs:attribute name="index" type="xs:integer"/>
+            <xs:attribute name="previous" type="xs:boolean"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="var">
+        <xs:complexType mixed="true">
+            <xs:attribute name="type">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="global"/>
+                        <xs:enumeration value="user"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="call">
+        <xs:complexType mixed="true">
+            <xs:attribute name="handler"/>
+        </xs:complexType>
+    </xs:element>
     <!-- [Group] Emotions -->
     <!--
         Emotions are defined once in a single <emotions> element. Any subsequent use of this

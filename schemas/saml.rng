@@ -102,6 +102,9 @@
 
     <define name="trigger.pattern">
         <element name="pattern">
+            <!--<zeroOrMore>-->
+                <!--<ref name="tagsPatternGroup"/>-->
+            <!--</zeroOrMore>-->
             <text/>
         </element>
     </define>
@@ -113,6 +116,9 @@
                     <data type="integer"/>
                 </attribute>
             </optional>
+            <zeroOrMore>
+                <ref name="tagsResponseGroup"/>
+            </zeroOrMore>
             <text/>
         </element>
     </define>
@@ -129,6 +135,14 @@
                         <value>weeks</value>
                         <value>months</value>
                         <value>years</value>
+                    </choice>
+                </attribute>
+            </optional>
+            <optional>
+                <attribute name="type">
+                    <choice>
+                        <value>global</value>
+                        <value>user</value>
                     </choice>
                 </attribute>
             </optional>
@@ -153,6 +167,80 @@
                     </element>
                 </element>
             </optional>
+        </element>
+    </define>
+
+    <!-- [Group] Tags -->
+    <!--
+        TBA
+    -->
+    <!--<define name="tagsPatternGroup">-->
+        <!--<zeroOrMore>-->
+            <!--<choice>-->
+                <!--...-->
+            <!--</choice>-->
+        <!--</zeroOrMore>-->
+    <!--</define>-->
+
+    <define name="tagsResponseGroup">
+        <zeroOrMore>
+            <choice>
+                <ref name="tags.random"/>
+                <ref name="tags.star"/>
+                <ref name="tags.var"/>
+                <ref name="tags.call"/>
+            </choice>
+        </zeroOrMore>
+    </define>
+
+    <!-- [Elements] Tags -->
+    <define name="tags.random">
+        <element name="random">
+            <oneOrMore>
+                <element name="i">
+                    <text/>
+                </element>
+            </oneOrMore>
+        </element>
+    </define>
+
+    <define name="tags.star">
+        <element name="star" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="index">
+                    <data type="integer"/>
+                </attribute>
+            </optional>
+            <optional>
+                <attribute name="previous">
+                    <data type="boolean"/>
+                </attribute>
+            </optional>
+        </element>
+    </define>
+
+    <define name="tags.var">
+        <element name="var">
+            <optional>
+                <attribute name="type">
+                    <choice>
+                        <value>global</value>
+                        <value>user</value>
+                    </choice>
+                </attribute>
+            </optional>
+            <text/>
+        </element>
+    </define>
+
+    <define name="tags.call">
+        <element name="call">
+            <optional>
+                <attribute name="handler">
+                    <text/>
+                </attribute>
+            </optional>
+            <text/>
         </element>
     </define>
 
