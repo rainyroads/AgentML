@@ -6,11 +6,12 @@
             <xs:choice maxOccurs="unbounded">
                 <xs:group ref="triggerGroup"/>
                 <xs:element ref="emotions"/>
+                <xs:element ref="identity"/>
             </xs:choice>
             <xs:attribute name="version" use="required" type="xs:float"/>
         </xs:complexType>
     </xs:element>
-    <!-- Trigger Group -->
+    <!-- [Group] Trigger -->
     <!--
         A trigger group can be defined by either a <trigger> element directly,
         or grouped into <topic> and/or <emotion> elements for convenience
@@ -116,7 +117,7 @@
     </xs:element>
     <xs:element name="name" type="xs:string"/>
     <xs:element name="level" type="xs:integer"/>
-    <!-- [Element] Emotions -->
+    <!-- [Group] Emotions -->
     <!--
         Emotions are defined once in a single <emotions> element. Any subsequent use of this
         element will overwrite the previous definition.
@@ -130,7 +131,7 @@
             </xs:sequence>
         </xs:complexType>
     </xs:element>
-    <!-- [Attributes] Emotions -->
+    <!-- [Elements] Emotions -->
     <xs:element name="primary">
         <xs:complexType>
             <xs:sequence>
@@ -152,4 +153,31 @@
             <xs:attribute name="name" use="required"/>
         </xs:complexType>
     </xs:element>
+    <!-- [Group] Identity -->
+    <!--
+        This element contains miscellaneous information about the Software Agent's identity,
+        such as the name, nicknames, age (epoch) and gender
+    -->
+    <xs:element name="identity">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="name"/>
+                <xs:element ref="nickname"/>
+                <xs:element ref="gender"/>
+                <xs:element ref="epoch"/>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+    <!-- [Elements] Identity -->
+    <xs:element name="nickname" type="xs:string"/>
+    <xs:element name="gender">
+        <xs:simpleType>
+            <xs:restriction base="xs:token">
+                <xs:enumeration value="male"/>
+                <xs:enumeration value="female"/>
+                <xs:enumeration value="neutral"/>
+            </xs:restriction>
+        </xs:simpleType>
+    </xs:element>
+    <xs:element name="epoch" type="xs:integer"/>
 </xs:schema>

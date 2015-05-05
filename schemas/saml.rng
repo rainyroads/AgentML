@@ -9,6 +9,7 @@
                 <choice>
                     <ref name="triggerGroup"/>
                     <ref name="emotionsGroup"/>
+                    <ref name="identityGroup"/>
                 </choice>
             </oneOrMore>
         </element>
@@ -155,7 +156,7 @@
         </element>
     </define>
 
-    <!-- [Element] Emotions -->
+    <!-- [Group] Emotions -->
     <!--
         Emotions are defined once in a single <emotions> element. Any subsequent use of this
         element will overwrite the previous definition.
@@ -170,7 +171,7 @@
         </element>
     </define>
 
-    <!-- [Attributes] Emotions -->
+    <!-- [Elements] Emotions -->
     <define name="emotions.primary">
         <element name="primary">
             <attribute name="name"/>
@@ -192,6 +193,57 @@
     <define name="emotions.tertiary">
         <element name="tertiary">
             <attribute name="name"/>
+        </element>
+    </define>
+
+    <!-- [Group] Identity -->
+    <!--
+        This element contains miscellaneous information about the Software Agent's identity,
+        such as the name, nicknames, age (epoch) and gender
+    -->
+    <define name="identityGroup">
+        <element name="identity">
+            <interleave>
+                <ref name="identity.name"/>
+                <zeroOrMore>
+                    <ref name="identity.nickname"/>
+                </zeroOrMore>
+                <optional>
+                    <ref name="identity.gender"/>
+                </optional>
+                <optional>
+                    <ref name="identity.epoch"/>
+                </optional>
+            </interleave>
+        </element>
+    </define>
+
+    <!-- [Elements] Identity -->
+    <define name="identity.name">
+        <element name="name">
+            <text/>
+        </element>
+    </define>
+
+    <define name="identity.nickname">
+        <element name="nickname">
+            <text/>
+        </element>
+    </define>
+
+    <define name="identity.gender">
+        <element name="gender">
+            <choice>
+                <value>male</value>
+                <value>female</value>
+                <value>neutral</value>
+            </choice>
+        </element>
+    </define>
+
+    <define name="identity.epoch">
+        <element name="epoch" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <data type="integer"/>
         </element>
     </define>
 </grammar>
