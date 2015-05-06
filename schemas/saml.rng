@@ -10,6 +10,7 @@
                     <ref name="triggerGroup"/>
                     <ref name="emotionsGroup"/>
                     <ref name="identityGroup"/>
+                    <ref name="initGroup"/>
                 </choice>
             </oneOrMore>
         </element>
@@ -345,6 +346,43 @@
     <define name="identity.epoch">
         <element name="epoch" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
             <data type="integer"/>
+        </element>
+    </define>
+
+    <!-- [Group] Init -->
+    <!--
+        TBA
+    -->
+    <define name="initGroup">
+        <element name="init">
+            <interleave>
+                <zeroOrMore>
+                    <ref name="init.var"/>
+                </zeroOrMore>
+                <zeroOrMore>
+                    <ref name="init.substitute"/>
+                </zeroOrMore>
+            </interleave>
+        </element>
+    </define>
+
+    <!-- [Elements] Init -->
+    <define name="init.var">
+        <element name="var">
+            <text/>
+        </element>
+    </define>
+
+    <define name="init.substitute">
+        <element name="sub">
+            <oneOrMore>
+                <element name="old">
+                    <text/>
+                </element>
+            </oneOrMore>
+            <element name="new">
+                <text/>
+            </element>
         </element>
     </define>
 </grammar>

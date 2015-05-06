@@ -7,6 +7,7 @@
                 <xs:group ref="triggerGroup"/>
                 <xs:element ref="emotions"/>
                 <xs:element ref="identity"/>
+                <xs:element ref="init"/>
             </xs:choice>
             <xs:attribute name="version" use="required" type="xs:float"/>
         </xs:complexType>
@@ -146,7 +147,7 @@
             <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:element ref="random"/>
                 <xs:element ref="star"/>
-                <xs:element ref="var"/>
+                <xs:group ref="tags.var"/>
                 <xs:element ref="call"/>
             </xs:choice>
         </xs:sequence>
@@ -166,18 +167,22 @@
             <xs:attribute name="previous" type="xs:boolean"/>
         </xs:complexType>
     </xs:element>
-    <xs:element name="var">
-        <xs:complexType mixed="true">
-            <xs:attribute name="type">
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="global"/>
-                        <xs:enumeration value="user"/>
-                    </xs:restriction>
-                </xs:simpleType>
-            </xs:attribute>
-        </xs:complexType>
-    </xs:element>
+    <xs:group name="tags.var">
+        <xs:sequence>
+            <xs:element name="var">
+                <xs:complexType mixed="true">
+                    <xs:attribute name="type">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:token">
+                                <xs:enumeration value="global"/>
+                                <xs:enumeration value="user"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:group>
     <xs:element name="call">
         <xs:complexType mixed="true">
             <xs:attribute name="handler"/>
@@ -246,4 +251,30 @@
         </xs:simpleType>
     </xs:element>
     <xs:element name="epoch" type="xs:integer"/>
+    <!-- [Group] Init -->
+    <!-- TBA -->
+    <xs:element name="init">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="init.var"/>
+                <xs:element ref="sub"/>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+    <!-- [Elements] Init -->
+    <xs:group name="init.var">
+        <xs:sequence>
+            <xs:element name="var" type="xs:string"/>
+        </xs:sequence>
+    </xs:group>
+    <xs:element name="sub">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="old"/>
+                <xs:element ref="new"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="old" type="xs:string"/>
+    <xs:element name="new" type="xs:string"/>
 </xs:schema>
