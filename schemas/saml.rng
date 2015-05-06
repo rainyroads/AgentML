@@ -5,6 +5,7 @@
             <attribute name="version">
                 <data type="float"/>
             </attribute>
+
             <oneOrMore>
                 <choice>
                     <ref name="triggerGroup"/>
@@ -18,20 +19,25 @@
 
     <!-- [Group] Trigger -->
     <!--
-        A trigger group can be defined by either a <trigger> element directly,
-        or grouped into <topic> and/or <emotion> elements for convenience
+        A trigger group can be initialized by either a <trigger> element directly,
+        or grouped into <topic> and/or <emotion> elements for convenience.
+
+        Triggers grouped into <topic> / <emotion> tags will automatically have the
+        specified topic / emotion applied to all the contained triggers.
     -->
     <define name="triggerGroup">
         <choice>
             <oneOrMore>
                 <ref name="trigger"/>
             </oneOrMore>
+
             <element name="emotion">
                 <attribute name="name"/>
                 <choice>
                     <oneOrMore>
                         <ref name="trigger"/>
                     </oneOrMore>
+
                     <element name="topic">
                         <attribute name="name"/>
                         <oneOrMore>
@@ -40,12 +46,14 @@
                     </element>
                 </choice>
             </element>
+
             <element name="topic">
                 <attribute name="name"/>
                 <choice>
                     <oneOrMore>
                         <ref name="trigger"/>
                     </oneOrMore>
+
                     <element name="emotion">
                         <attribute name="name"/>
                         <oneOrMore>
@@ -103,9 +111,6 @@
 
     <define name="trigger.pattern">
         <element name="pattern">
-            <!--<zeroOrMore>-->
-                <!--<ref name="tagsPatternGroup"/>-->
-            <!--</zeroOrMore>-->
             <text/>
         </element>
     </define>
@@ -117,15 +122,27 @@
                     <data type="integer"/>
                 </attribute>
             </optional>
+
             <zeroOrMore>
+                <optional>
+                    <text/>
+                </optional>
+
                 <ref name="tagsResponseGroup"/>
+
+                <optional>
+                    <text/>
+                </optional>
             </zeroOrMore>
+
             <optional>
                 <ref name="trigger.topic"/>
             </optional>
+
             <optional>
                 <ref name="trigger.emotion"/>
             </optional>
+
             <optional>
                 <ref name="trigger.limit"/>
             </optional>
@@ -133,6 +150,7 @@
             <optional>
                 <ref name="trigger.reaction"/>
             </optional>
+
             <text/>
         </element>
     </define>
@@ -152,6 +170,7 @@
                     </choice>
                 </attribute>
             </optional>
+
             <optional>
                 <attribute name="type">
                     <choice>
@@ -160,6 +179,7 @@
                     </choice>
                 </attribute>
             </optional>
+
             <text/>
         </element>
     </define>
@@ -171,6 +191,7 @@
                     <text/>
                 </element>
             </optional>
+
             <optional>
                 <element name="emotion" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
                     <element name="name">
@@ -186,16 +207,13 @@
 
     <!-- [Group] Tags -->
     <!--
-        TBA
-    -->
-    <!--<define name="tagsPatternGroup">-->
-        <!--<zeroOrMore>-->
-            <!--<choice>-->
-                <!--...-->
-            <!--</choice>-->
-        <!--</zeroOrMore>-->
-    <!--</define>-->
+        Tags used to insert dynamic data into response strings.
 
+        Random - Used to insert a random word into a response string
+        Star - Used to insert trigger pattern wildcards into a response string
+        Var - Used to insert a global / user variable into a response string
+        Call - Inserts the returned value of an executed object into a response string
+    -->
     <define name="tagsResponseGroup">
         <zeroOrMore>
             <choice>
@@ -225,6 +243,7 @@
                     <data type="integer"/>
                 </attribute>
             </optional>
+
             <optional>
                 <attribute name="previous">
                     <data type="boolean"/>
@@ -243,6 +262,7 @@
                     </choice>
                 </attribute>
             </optional>
+
             <text/>
         </element>
     </define>
@@ -254,6 +274,7 @@
                     <text/>
                 </attribute>
             </optional>
+
             <text/>
         </element>
     </define>
@@ -263,7 +284,7 @@
         Emotions are defined once in a single <emotions> element. Any subsequent use of this
         element will overwrite the previous definition.
 
-        Emotions are defined on three levels: primary, secondary and tertiary emotions
+        Emotions are defined on three levels: primary, secondary and tertiary emotions.
     -->
     <define name="emotionsGroup">
         <element name="emotions">
@@ -277,6 +298,7 @@
     <define name="emotions.primary">
         <element name="primary">
             <attribute name="name"/>
+
             <zeroOrMore>
                 <ref name="emotions.secondary"/>
             </zeroOrMore>
@@ -286,6 +308,7 @@
     <define name="emotions.secondary">
         <element name="secondary">
             <attribute name="name"/>
+
             <zeroOrMore>
                 <ref name="emotions.tertiary"/>
             </zeroOrMore>
@@ -301,18 +324,21 @@
     <!-- [Group] Identity -->
     <!--
         This element contains miscellaneous information about the Software Agent's identity,
-        such as the name, nicknames, age (epoch) and gender
+        such as the name, nicknames, age (epoch) and gender.
     -->
     <define name="identityGroup">
         <element name="identity">
             <interleave>
                 <ref name="identity.name"/>
+
                 <zeroOrMore>
                     <ref name="identity.nickname"/>
                 </zeroOrMore>
+
                 <optional>
                     <ref name="identity.gender"/>
                 </optional>
+
                 <optional>
                     <ref name="identity.epoch"/>
                 </optional>
@@ -351,7 +377,8 @@
 
     <!-- [Group] Init -->
     <!--
-        TBA
+        Contains tasks to be executed once on startup, such as pre-defining
+        global variables and substitutions.
     -->
     <define name="initGroup">
         <element name="init">
@@ -359,6 +386,7 @@
                 <zeroOrMore>
                     <ref name="init.var"/>
                 </zeroOrMore>
+
                 <zeroOrMore>
                     <ref name="init.substitute"/>
                 </zeroOrMore>
@@ -380,6 +408,7 @@
                     <text/>
                 </element>
             </oneOrMore>
+
             <element name="new">
                 <text/>
             </element>

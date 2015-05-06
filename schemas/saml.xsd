@@ -14,8 +14,11 @@
     </xs:element>
     <!-- [Group] Trigger -->
     <!--
-        A trigger group can be defined by either a <trigger> element directly,
-        or grouped into <topic> and/or <emotion> elements for convenience
+        A trigger group can be initialized by either a <trigger> element directly,
+        or grouped into <topic> and/or <emotion> elements for convenience.
+        
+        Triggers grouped into <topic> / <emotion> tags will automatically have the
+        specified topic / emotion applied to all the contained triggers.
     -->
     <xs:group name="triggerGroup">
         <xs:choice>
@@ -134,14 +137,14 @@
     <xs:element name="name" type="xs:string"/>
     <xs:element name="level" type="xs:integer"/>
     <!-- [Group] Tags -->
-    <!-- TBA -->
-    <!-- <define name="tagsPatternGroup"> -->
-    <!-- <zeroOrMore> -->
-    <!-- <choice> -->
-    <!-- ... -->
-    <!-- </choice> -->
-    <!-- </zeroOrMore> -->
-    <!-- </define> -->
+    <!--
+        Tags used to insert dynamic data into response strings.
+        
+        Random - Used to insert a random word into a response string
+        Star - Used to insert trigger pattern wildcards into a response string
+        Var - Used to insert a global / user variable into a response string
+        Call - Inserts the returned value of an executed object into a response string
+    -->
     <xs:group name="tagsResponseGroup">
         <xs:sequence>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -193,7 +196,7 @@
         Emotions are defined once in a single <emotions> element. Any subsequent use of this
         element will overwrite the previous definition.
         
-        Emotions are defined on three levels: primary, secondary and tertiary emotions
+        Emotions are defined on three levels: primary, secondary and tertiary emotions.
     -->
     <xs:element name="emotions">
         <xs:complexType>
@@ -227,7 +230,7 @@
     <!-- [Group] Identity -->
     <!--
         This element contains miscellaneous information about the Software Agent's identity,
-        such as the name, nicknames, age (epoch) and gender
+        such as the name, nicknames, age (epoch) and gender.
     -->
     <xs:element name="identity">
         <xs:complexType>
@@ -252,7 +255,10 @@
     </xs:element>
     <xs:element name="epoch" type="xs:integer"/>
     <!-- [Group] Init -->
-    <!-- TBA -->
+    <!--
+        Contains tasks to be executed once on startup, such as pre-defining
+        global variables and substitutions.
+    -->
     <xs:element name="init">
         <xs:complexType>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
