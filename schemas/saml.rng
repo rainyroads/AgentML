@@ -77,9 +77,7 @@
                     <ref name="trigger.emotion"/>
                 </optional>
 
-                <oneOrMore>
-                    <ref name="trigger.pattern"/>
-                </oneOrMore>
+                <ref name="trigger.pattern"/>
 
                 <oneOrMore>
                     <ref name="trigger.response"/>
