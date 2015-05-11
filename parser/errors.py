@@ -1,5 +1,4 @@
-class SamlError(Exception):
-    pass
+from errors import SamlError
 
 
 class SamlSyntaxError(SamlError):
