@@ -1,0 +1,23 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+    <!-- SAML Var Tag -->
+    <start>
+        <element name="var" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="type">
+                    <choice>
+                        <value>global</value>
+                        <value>user</value>
+                    </choice>
+                </attribute>
+            </optional>
+
+            <optional>
+                <attribute name="default">
+                    <text/>
+                </attribute>
+            </optional>
+
+            <text/>
+        </element>
+    </start>
+</grammar>

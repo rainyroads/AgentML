@@ -1,0 +1,23 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+    <!-- SAML Random Tag -->
+    <start>
+        <element name="random" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="weight">
+                    <data type="float"/>
+                </attribute>
+            </optional>
+
+            <oneOrMore>
+                <choice>
+                    <element name="i">
+                        <text/>
+                    </element>
+                    <element name="item">
+                        <text/>
+                    </element>
+                </choice>
+            </oneOrMore>
+        </element>
+    </start>
+</grammar>
