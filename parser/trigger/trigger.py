@@ -1,22 +1,23 @@
 import logging
 from parser import Element
+from parser.trigger.response import Response
 
 
 class Trigger(Element):
     def __init__(self, saml, element, file_path, **kwargs):
-        super().__init__(saml, element, file_path)
-        self._log = logging.getLogger('saml.trigger')
-
         # Default attributes
         self.topic = kwargs['topic'] if 'topic' in kwargs else None
         self.emotion = kwargs['emotion'] if 'emotion' in kwargs else None
 
-        # Responses
+        self.pattern = kwargs['pattern'] if 'pattern' in kwargs else None
         self._responses = kwargs['responses'] if 'responses' in kwargs else []
 
         # Global / user limits
         self._global_limits = {}
         self._user_limit = {}
+
+        super().__init__(saml, element, file_path)
+        self._log = logging.getLogger('saml.trigger')
 
     def _parse_topic(self, element):
         """
@@ -34,15 +35,32 @@ class Trigger(Element):
         """
         self.emotion = self._normalize(element.text)
 
+    def _parse_pattern(self, element):
+        """
+        Parse a pattern element
+        :param element: The XML Element object
+        :type  element: etree._Element
+        """
+        self.pattern = self._normalize(element.text)
+
+    def _parse_response(self, element):
+        """
+        Parse a response element
+        :param element: The XML Element object
+        :type  element: etree._Element
+        """
+        # If the response has no tags, just store the string text
+        if not len(element):
+            self._responses.append(element.text)
+        else:
+            self._responses.append(Response(self.saml, element, self.file_path))
+
     def _parse_trigger(self, element):
         """
         Parse a trigger element
         :param element: The XML Element object
         :type  element: etree._Element
         """
-        pattern = NotImplemented
-        responses = []
-
         for child in element:
             # Set the topic
             if child.tag == 'topic':
@@ -54,15 +72,15 @@ class Trigger(Element):
                 continue
             # Add a trigger
             elif child.tag == 'pattern':
-                pattern = child.text
+                self.pattern = child.text
                 continue
             # Add a response
             elif child.tag == 'response':
                 # If the response has no tags, just store the string text
                 if len(child) == 1:
-                    responses.append(child.text)
+                    self._responses.append(child.text)
                 else:
-                    responses.append(child)
+                    self._responses.append(child)
                 continue
             # Parse a reaction
             elif child.tag == 'reaction':

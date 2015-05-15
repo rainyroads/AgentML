@@ -1,7 +1,4 @@
-import os
-import logging
 from lxml import etree
-from parser.errors import SamlSyntaxError
 
 
 class Element:
@@ -20,3 +17,13 @@ class Element:
         self.saml = saml
         self._element = element
         self.file_path = file_path
+
+        self._parse()
+
+    def _parse(self):
+        for child in self._element:
+            method_name = '_parse_' + child.tag
+
+            if hasattr(self, method_name):
+                parse = getattr(self, method_name)
+                parse(child)

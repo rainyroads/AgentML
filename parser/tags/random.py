@@ -22,21 +22,23 @@ class Random(Tag):
         with open(os.path.join(self.saml.script_path, 'schemas', 'tags', 'random.rng')) as file:
             self.schema = schema(file.read())
 
-        self._responses = {}
+        self._responses = []
+        self._element_to_dict()
 
     def _element_to_dict(self):
         """
         Generates a dictionary of responses from a <random> element
         """
         for child in self._element:
-            self._responses[child.text] = 1
+            self._log.debug('Appending response with weight {weight}: {response}'.format(weight=1, response=child.text))
+            self._responses.append((child.text, 1))
 
     @staticmethod
     def weighted_choice(choices):
         """
         Provides a weighted version of random.choice
         :param choices: A dictionary of choices, with the choice as the key and weight the value
-        :type  choices: dict of (str, int)
+        :type  choices: list of tuple of (str, int)
         """
         total = sum(weight for choice, weight in choices)
         rand = random.uniform(0, total)

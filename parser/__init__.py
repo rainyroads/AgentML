@@ -1,3 +1,3 @@
-from .element import Element, SamlSyntaxError
+from .element import Element
 from .common import schema
-from .errors import SamlError
+from .errors import SamlError, SamlSyntaxError
