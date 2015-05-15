@@ -1,10 +1,9 @@
 import os
 import logging
 from lxml import etree
-from parser import SamlSyntaxError
 from parser.trigger import Trigger
 from parser.tags import Random, Var
-from errors import VarNotDefinedError, UserNotDefinedError
+from errors import SamlSyntaxError, VarNotDefinedError, UserNotDefinedError, NoTagParserError
 
 
 class Saml:

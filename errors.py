@@ -2,6 +2,10 @@ class SamlError(Exception):
     pass
 
 
+class SamlSyntaxError(SamlError):
+    pass
+
+
 class UserNotDefinedError(SamlError):
     pass
 
@@ -11,4 +15,8 @@ class VarNotDefinedError(SamlError):
 
 
 class InvalidVarTypeError(SamlError):
+    pass
+
+
+class NoTagParserError(SamlError):
     pass
