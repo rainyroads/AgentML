@@ -1,7 +1,6 @@
 import os
 import logging
-import random
-from parser import schema
+from parser import schema, weighted_choice
 from parser.tags import Tag
 
 
@@ -33,21 +32,5 @@ class Random(Tag):
             self._log.debug('Appending response with weight {weight}: {response}'.format(weight=1, response=child.text))
             self._responses.append((child.text, 1))
 
-    @staticmethod
-    def weighted_choice(choices):
-        """
-        Provides a weighted version of random.choice
-        :param choices: A dictionary of choices, with the choice as the key and weight the value
-        :type  choices: list of tuple of (str, int)
-        """
-        total = sum(weight for choice, weight in choices)
-        rand = random.uniform(0, total)
-        most = 0
-
-        for choice, weight in choices:
-            if most + weight > rand:
-                return choice
-            most += weight
-
     def __str__(self):
-        return self.weighted_choice(self._responses)
+        return weighted_choice(self._responses)
