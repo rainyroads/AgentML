@@ -1,6 +1,7 @@
 import os
 import logging
 from lxml import etree
+from parser import schema
 from parser.trigger import Trigger
 from parser.tags import Random, Var
 from errors import SamlSyntaxError, VarNotDefinedError, UserNotDefinedError, NoTagParserError
@@ -16,8 +17,8 @@ class Saml:
         self._schema_path = os.path.join(self.script_path, 'schemas', 'saml.rng')
 
         # Schema validator
-        self._schema_doc = etree.parse(self._schema_path)
-        self._schema = etree.RelaxNG(self._schema_doc)
+        with open(self._schema_path) as file:
+            self._schema = schema(file.read())
 
         # State data
         self.topic = None
