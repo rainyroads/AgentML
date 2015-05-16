@@ -32,6 +32,8 @@ class Saml:
         self._triggers      = {}
         self._substitutions = {}
 
+        self.load_directory(os.path.join(self.script_path, 'intelligence'))
+
     def load_directory(self, dir_path):
         self._log.info('Loading all SAML files contained in: ' + dir_path)
 
@@ -63,14 +65,25 @@ class Saml:
         # Get our root element and parse all elements inside of it
         root = etree.parse(file_path).getroot()
         for element in root:
-            # Make sure we have a parser for this element
-            # if element.tag not in self._parsers:
-            #     self._log.warn('No parser for element "{tag}" found, skipping'.format(tag=element.tag))
-            #     continue
-
             # Retrieve and execute the parser method
             if element.tag == 'trigger':
                 self._triggers[element.find('pattern').text] = Trigger(self, element, file_path)
+
+    def get_reply(self, user, message):
+        """
+        Attempt to retrieve a reply to the provided message
+        :param user: The user / client. This can be a hostmask, IP address, database ID or any other unique identifier
+        :type  user: str
+
+        :param message: The message to retrieve a reply to
+        :type  message: str
+
+        :rtype: str or None
+        """
+        for trigger in self._triggers.values():
+            match = trigger.match(message)
+            if match:
+                return match
 
     def get_var(self, name, user=None):
         """
