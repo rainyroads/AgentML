@@ -1,5 +1,5 @@
 import logging
-from parser import Element, normalize
+from parser import Element, weighted_choice, normalize
 from parser.trigger.response import Response
 
 
@@ -22,7 +22,6 @@ class Trigger(Element):
     def match(self, message):
         """
         Returns a response message if a match is found, otherwise returns None
-
         :param message: The message to test
         :type  message: str
 
@@ -31,7 +30,15 @@ class Trigger(Element):
         message = normalize(message)
 
         if message == self.pattern:
-            return message
+            return self.response
+
+    @property
+    def response(self):
+        """
+        Return a random response for this trigger
+        :rtype: str
+        """
+        return str(weighted_choice(self._responses))
 
     def _parse_topic(self, element):
         """
@@ -63,11 +70,22 @@ class Trigger(Element):
         :param element: The XML Element object
         :type  element: etree._Element
         """
+        # Get the responses weight
+        try:
+            weight = int(element.get('weight'))
+        except TypeError:
+            # Weight attribute not defined, set a default value of 1
+            weight = 1
+        except ValueError:
+            # A value was returned, but it wasn't an integer. This should never happen with proper schema validation.
+            self._log.warn('Received non-integer value for weight attribute: ' + str(element.get('weight')))
+            weight = 1
+
         # If the response has no tags, just store the string text
         if not len(element):
-            self._responses.append(element.text)
+            self._responses.append((element.text, weight))
         else:
-            self._responses.append(Response(self.saml, element, self.file_path))
+            self._responses.append((Response(self.saml, element, self.file_path), weight))
 
     def _parse_trigger(self, element):
         """
@@ -108,3 +126,6 @@ class Trigger(Element):
         :type  element: etree._Element
         """
         pass
+
+    def __str__(self):
+        return self.response
