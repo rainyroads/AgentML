@@ -1,3 +1,4 @@
+import re
 import random
 from lxml import etree
 
@@ -28,3 +29,17 @@ def weighted_choice(choices):
         if most + weight > rand:
             return choice
         most += weight
+
+def normalize(self, string):
+    """
+    Normalize input for comparison with other input
+    :param string: The string to normalize
+    :type  string: str
+
+    :rtype: str
+    """
+    if not isinstance(string, str):
+        self._log.warn('Attempted to normalize a non-string')
+        return ''
+
+    return re.sub(r'([^\s\w]|_)+', '', string.strip().casefold())

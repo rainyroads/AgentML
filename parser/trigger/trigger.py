@@ -1,5 +1,5 @@
 import logging
-from parser import Element
+from parser import Element, normalize
 from parser.trigger.response import Response
 
 
@@ -19,13 +19,27 @@ class Trigger(Element):
         super().__init__(saml, element, file_path)
         self._log = logging.getLogger('saml.trigger')
 
+    def match(self, message):
+        """
+        Returns a response message if a match is found, otherwise returns None
+
+        :param message: The message to test
+        :type  message: str
+
+        :rtype: bool
+        """
+        message = normalize(message)
+
+        if message == self.pattern:
+            return message
+
     def _parse_topic(self, element):
         """
         Parse a topic element
         :param element: The XML Element object
         :type  element: etree._Element
         """
-        self.topic = self._normalize(element.text)
+        self.topic = normalize(element.text)
 
     def _parse_emotion(self, element):
         """
@@ -33,7 +47,7 @@ class Trigger(Element):
         :param element: The XML Element object
         :type  element: etree._Element
         """
-        self.emotion = self._normalize(element.text)
+        self.emotion = normalize(element.text)
 
     def _parse_pattern(self, element):
         """
@@ -41,7 +55,7 @@ class Trigger(Element):
         :param element: The XML Element object
         :type  element: etree._Element
         """
-        self.pattern = self._normalize(element.text)
+        self.pattern = normalize(element.text)
 
     def _parse_response(self, element):
         """
@@ -94,10 +108,3 @@ class Trigger(Element):
         :type  element: etree._Element
         """
         pass
-
-    def _normalize(self, string):
-        if not isinstance(string, str):
-            self._log.warn('Attempted to normalize a non-string')
-            return ''
-
-        return string.strip().casefold()
