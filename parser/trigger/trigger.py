@@ -15,6 +15,10 @@ class Trigger(Element):
         self.pattern = kwargs['pattern'] if 'pattern' in kwargs else None
         self._responses = kwargs['responses'] if 'responses' in kwargs else []
 
+        # Trigger attributes
+        self.normalize = bool_attribute(self._element, 'normalize')
+        self.substitute = bool_attribute(self._element, 'substitute')
+
         # Global / user limits
         self._global_limits = {}
         self._user_limit = {}
@@ -30,7 +34,8 @@ class Trigger(Element):
 
         :rtype: bool
         """
-        message = normalize(message)
+        if self.normalize:
+            message = normalize(message)
 
         # String match
         if isinstance(self.pattern, str) and message == self.pattern:
