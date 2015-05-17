@@ -108,7 +108,25 @@
     </define>
 
     <define name="trigger.pattern">
-        <element name="pattern">
+        <element name="pattern" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="regex">
+                    <data type="boolean"/>
+                </attribute>
+            </optional>
+
+            <optional>
+                <attribute name="normalize">
+                    <data type="boolean"/>
+                </attribute>
+            </optional>
+
+            <optional>
+                <attribute name="substitute">
+                    <data type="boolean"/>
+                </attribute>
+            </optional>
+
             <text/>
         </element>
     </define>

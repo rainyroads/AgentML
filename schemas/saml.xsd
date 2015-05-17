@@ -81,7 +81,13 @@
             <xs:element name="emotion" type="xs:string"/>
         </xs:sequence>
     </xs:group>
-    <xs:element name="pattern" type="xs:string"/>
+    <xs:element name="pattern">
+        <xs:complexType mixed="true">
+            <xs:attribute name="regex" type="xs:boolean"/>
+            <xs:attribute name="normalize" type="xs:boolean"/>
+            <xs:attribute name="substitute" type="xs:boolean"/>
+        </xs:complexType>
+    </xs:element>
     <xs:element name="response">
         <xs:complexType mixed="true">
             <xs:sequence>
