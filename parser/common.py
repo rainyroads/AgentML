@@ -47,3 +47,24 @@ def normalize(string, pattern=False):
         return ''
 
     return regex.sub('', string.strip().casefold())
+
+def bool_attribute(element, attribute, default=True):
+    """
+    Returns the bool value of an attribute, or a default if it's not defined
+    :param element: The XML Element object
+    :type  element: etree._Element
+
+    :param attribute: The name of the attribute to evaluate
+    :type  attribute: str
+
+    :param default: The default boolean to return if the attribute is not defined
+    :type  default: bool
+
+    :rtype: bool
+    """
+    attribute_value = element.get(attribute)
+
+    if attribute_value:
+        return True if (attribute_value == 'true') else False
+
+    return default

@@ -1,7 +1,7 @@
 import logging
 import re
 import sre_constants
-from parser import Element, weighted_choice, normalize
+from parser import Element, weighted_choice, normalize, bool_attribute
 from parser.trigger.response import Response
 from errors import SamlSyntaxError
 
@@ -71,7 +71,7 @@ class Trigger(Element):
         :type  element: etree._Element
         """
         # If this is a raw regular expression, compile it and immediately return
-        regex = True if (self._element.get('regex') == 'true') else False
+        regex = bool_attribute(self._element, 'regex', False)
         if regex:
             try:
                 self.pattern = re.compile(element.text)
