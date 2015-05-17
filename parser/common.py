@@ -30,15 +30,20 @@ def weighted_choice(choices):
             return choice
         most += weight
 
-def normalize(string):
+def normalize(string, pattern=False):
     """
     Normalize input for comparison with other input
     :param string: The string to normalize
     :type  string: str
 
+    :param pattern: Allow wildcard symbols for triggers
+    :type  pattern: bool
+
     :rtype: str
     """
+    regex = re.compile(r'([^\s\w\*#])+') if pattern else re.compile(r'([^\s\w]|_)+')
+
     if not isinstance(string, str):
         return ''
 
-    return re.sub(r'([^\s\w]|_)+', '', string.strip().casefold())
+    return regex.sub('', string.strip().casefold())

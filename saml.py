@@ -4,7 +4,7 @@ from lxml import etree
 from parser import schema
 from parser.trigger import Trigger
 from parser.tags import Random, Var
-from errors import SamlSyntaxError, VarNotDefinedError, UserNotDefinedError, NoTagParserError
+from errors import SamlError, SamlSyntaxError, VarNotDefinedError, UserNotDefinedError, NoTagParserError
 
 
 class Saml:
@@ -68,7 +68,10 @@ class Saml:
         for element in root:
             # Retrieve and execute the parser method
             if element.tag == 'trigger':
-                self._triggers[element.find('pattern').text] = Trigger(self, element, file_path)
+                try:
+                    self._triggers[element.find('pattern').text] = Trigger(self, element, file_path)
+                except SamlError:
+                    self._log.warn('Skipping pattern due to an error')
 
     def get_reply(self, user, message):
         """

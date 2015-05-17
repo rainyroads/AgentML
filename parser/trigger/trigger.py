@@ -1,6 +1,9 @@
 import logging
+import re
+import sre_constants
 from parser import Element, weighted_choice, normalize
 from parser.trigger.response import Response
+from errors import SamlSyntaxError
 
 
 class Trigger(Element):
@@ -29,7 +32,12 @@ class Trigger(Element):
         """
         message = normalize(message)
 
-        if message == self.pattern:
+        # String match
+        if isinstance(self.pattern, str) and message == self.pattern:
+            return self.response
+
+        # Regular expression match
+        if hasattr(self.pattern, 'match') and self.pattern.match(message):
             return self.response
 
     @property
@@ -62,7 +70,46 @@ class Trigger(Element):
         :param element: The XML Element object
         :type  element: etree._Element
         """
-        self.pattern = normalize(element.text)
+        # If this is a raw regular expression, compile it and immediately return
+        regex = True if (self._element.get('regex') == 'true') else False
+        if regex:
+            try:
+                self.pattern = re.compile(element.text)
+            except sre_constants.error:
+                self._log.warn('Attempted to compile an invalid regular expression in {path} : {regex}'
+                               .format(path=self.file_path, regex=element.text))
+                raise SamlSyntaxError
+            return
+
+        self.pattern = normalize(element.text, True)
+
+        # Wildcard patterns
+        wildcard = re.compile(r'(?<!\\)\*')
+        wild_numeric = re.compile(r'(?<!\\)#')
+        wild_alpha = re.compile(r'(?<!\\)_')
+
+        # General wildcards
+        wildcard_match = wildcard.search(self.pattern)
+        if wildcard_match:
+            self.pattern = wildcard.sub(r'(.+)', self.pattern)
+
+        # Numeric wildcards
+        wild_numeric_match = wild_numeric.search(self.pattern)
+        if wild_numeric_match:
+            self.pattern = wild_numeric.sub(r'(\d+)', self.pattern)
+
+        # Alpha wildcards
+        wild_alpha_match = wild_alpha.search(self.pattern)
+        if wild_alpha_match:
+            self.pattern = wild_alpha.sub(r'(\w+)', self.pattern)
+
+        if wildcard_match or wild_numeric_match or wild_alpha_match:
+            self.pattern = re.compile(self.pattern)
+        else:
+            # Replace any escaped wildcard symbols
+            self.pattern = self.pattern.replace('\*', '*')
+            self.pattern = self.pattern.replace('\#', '#')
+            self.pattern = self.pattern.replace('\_', '_')
 
     def _parse_response(self, element):
         """
