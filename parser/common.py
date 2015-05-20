@@ -68,3 +68,27 @@ def bool_attribute(element, attribute, default=True):
         return True if (attribute_value == 'true') else False
 
     return default
+
+def int_attribute(element, attribute, default=0):
+    """
+    Returns the int value of an attribute, or a default if it's not defined
+    :param element: The XML Element object
+    :type  element: etree._Element
+
+    :param attribute: The name of the attribute to evaluate
+    :type  attribute: str
+
+    :param default: The default value to return if the attribute is not defined
+    :type  default: int
+
+    :rtype: int
+    """
+    attribute_value = element.get(attribute)
+
+    if attribute_value:
+        try:
+            return int(attribute_value)
+        except (TypeError, ValueError):
+            return default
+
+    return default
