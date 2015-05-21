@@ -37,17 +37,22 @@ class Trigger(Element):
 
         :rtype: bool
         """
+        self._log.info('Attempting to match message against Pattern: {pattern}'
+                       .format(pattern=self.pattern.pattern if hasattr(self.pattern, 'pattern') else self.pattern))
         if self.normalize:
             message = normalize(message)
+            self._log.debug('Normalizing message: {message}'.format(message=message))
 
         # String match
         if isinstance(self.pattern, str) and message == self.pattern:
+            self._log.info('String Pattern matched: {match}'.format(match=self.pattern))
             return self.response
 
         # Regular expression match
         if hasattr(self.pattern, 'match'):
             match = self.pattern.match(message)
             if match:
+                self._log.info('Regex Pattern matched: {match}'.format(match=self.pattern.pattern))
                 self.stars = match.groups()
                 return self.response
 
@@ -69,6 +74,7 @@ class Trigger(Element):
 
         :rtype: tuple of str
         """
+        self._log.debug('Retrieving and resetting Trigger wildcards')
         stars = self._stars
         self._stars = ()
 
@@ -81,12 +87,13 @@ class Trigger(Element):
         :param stars: Trigger wildcards
         :type  stars: tuple of str
         """
+        self._log.debug('Setting Trigger wildcards: {wildcards}'.format(wildcards=stars))
         self._stars = stars
 
     @staticmethod
     def replace_wildcards(string, wildcard, regex):
         """
-
+        Replace wildcard symbols with regular expressions
         :param wildcard:
         :type  wildcard: _sre.SRE_Pattern
 
@@ -100,6 +107,7 @@ class Trigger(Element):
 
         if match:
             string = wildcard.sub(regex, string)
+            logging.getLogger('saml.trigger').debug('Parsing Pattern wildcards: {pattern}'.format(pattern=string))
             replaced = True
 
         return string, replaced
@@ -127,8 +135,10 @@ class Trigger(Element):
         :type  element: etree._Element
         """
         # If this is a raw regular expression, compile it and immediately return
+        self._log.info('Parsing Trigger Pattern: ' + element.text)
         regex = bool_attribute(self._element, 'regex', False)
         if regex:
+            self._log.info('Attempting to compile trigger as a raw regex')
             try:
                 self.pattern = re.compile(element.text)
             except sre_constants.error:
@@ -138,6 +148,7 @@ class Trigger(Element):
             return
 
         self.pattern = normalize(element.text, True)
+        self._log.debug('Normalizing pattern: ' + self.pattern)
         compile_as_regex = False
 
         # Wildcard patterns and replacements
@@ -161,14 +172,14 @@ class Trigger(Element):
 
         for wildcard, replacement in wildcard_replacements:
             self.pattern, match = self.replace_wildcards(self.pattern, wildcard, replacement)
-            self._log.debug('Parsing pattern wildcards: ' + self.pattern)
             compile_as_regex = match or compile_as_regex
 
         # Required and optional choices
-        req_choice = re.compile(r'\((\w+\|?)\)')
+        req_choice = re.compile(r'\(([\w\|]+)\)')
         opt_choice = re.compile(r'\[([\w\s\|]+)\]\s?')
 
         if req_choice.search(self.pattern):
+            self._log.debug('Pattern contains required choices, will be compiled as a regex')
             compile_as_regex = True
 
         if opt_choice.search(self.pattern):
@@ -177,13 +188,15 @@ class Trigger(Element):
                 return r'(?:{options})?\s?'.format(options='|'.join(patterns))
 
             self.pattern = opt_choice.sub(sub_optional, self.pattern)
-            self._log.debug('Parsing pattern optional choices: ' + self.pattern)
+            self._log.debug('Parsing Pattern optional choices: ' + self.pattern)
             compile_as_regex = True
 
         if compile_as_regex:
+            self._log.debug('Compiling Pattern as regex')
             self.pattern = re.compile(self.pattern)
         else:
             # Replace any escaped wildcard symbols
+            self._log.debug('Replacing any escaped sequences in Pattern')
             self.pattern = self.pattern.replace('\*', '*')
             self.pattern = self.pattern.replace('\#', '#')
             self.pattern = self.pattern.replace('\_', '_')
@@ -200,14 +213,17 @@ class Trigger(Element):
         :type  element: etree._Element
         """
         # Get the responses weight
+        self._log.info('Parsing new Response')
         try:
             weight = int(element.get('weight'))
+            self._log.info('Setting Response weight: {weight}'.format(weight=weight))
         except TypeError:
             # Weight attribute not defined, set a default value of 1
+            self._log.debug('Setting default Response weight of 1')
             weight = 1
         except ValueError:
             # A value was returned, but it wasn't an integer. This should never happen with proper schema validation.
-            self._log.warn('Received non-integer value for weight attribute: ' + str(element.get('weight')))
+            self._log.warn('Received non-integer value for weight attribute: {weight}'.format(element.get('weight')))
             weight = 1
 
         # If the response has no tags, just store the string text
