@@ -1,6 +1,9 @@
+<!DOCTYPE saml SYSTEM "saml.rng">
 <saml version="0.1">
     <init>
-        <mood>neutral</mood>
-        <topic>random</topic>
+        <sub>
+            <old>youre</old>
+            <new>you are</new>
+        </sub>
     </init>
 </saml>

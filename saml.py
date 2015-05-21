@@ -11,6 +11,12 @@ class Saml:
     def __init__(self):
         # Debug logger
         self._log = logging.getLogger('saml')
+        self._log.setLevel(logging.DEBUG)
+        log_formatter = logging.Formatter("[%(asctime)s] %(levelname)s.%(name)s: %(message)s")
+        console_logger = logging.StreamHandler()
+        console_logger.setLevel(logging.DEBUG)
+        console_logger.setFormatter(log_formatter)
+        self._log.addHandler(console_logger)
 
         # Paths
         self.script_path = os.path.dirname(os.path.realpath(__file__))
