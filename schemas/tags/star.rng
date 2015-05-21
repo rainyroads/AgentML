@@ -1,0 +1,29 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+    <!-- SAML Star Tag -->
+    <start>
+        <element name="star" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="index">
+                    <data type="integer"/>
+                </attribute>
+            </optional>
+
+            <optional>
+                <attribute name="format">
+                    <choice>
+                        <value>title</value>
+                        <value>upper</value>
+                        <value>lower</value>
+                        <value>none</value>
+                    </choice>
+                </attribute>
+            </optional>
+
+            <optional>
+                <attribute name="previous">
+                    <data type="boolean"/>
+                </attribute>
+            </optional>
+        </element>
+    </start>
+</grammar>
