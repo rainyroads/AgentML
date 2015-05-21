@@ -12,6 +12,11 @@
             <xs:attribute name="version" use="required" type="xs:float"/>
         </xs:complexType>
     </xs:element>
+    <xs:group name="anyElement">
+        <xs:sequence>
+            <xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip"/>
+        </xs:sequence>
+    </xs:group>
     <!-- [Group] Trigger -->
     <!--
         A trigger group can be initialized by either a <trigger> element directly,
@@ -91,7 +96,7 @@
     <xs:element name="response">
         <xs:complexType mixed="true">
             <xs:sequence>
-                <xs:group minOccurs="0" maxOccurs="unbounded" ref="tagsResponseGroup"/>
+                <xs:group minOccurs="0" maxOccurs="unbounded" ref="anyElement"/>
                 <xs:group minOccurs="0" ref="trigger.topic"/>
                 <xs:group minOccurs="0" ref="trigger.emotion"/>
                 <xs:element minOccurs="0" ref="limit"/>
@@ -142,61 +147,6 @@
     </xs:element>
     <xs:element name="name" type="xs:string"/>
     <xs:element name="level" type="xs:integer"/>
-    <!-- [Group] Tags -->
-    <!--
-        Tags used to insert dynamic data into response strings.
-        
-        Random - Used to insert a random word into a response string
-        Star - Used to insert trigger pattern wildcards into a response string
-        Var - Used to insert a global / user variable into a response string
-        Call - Inserts the returned value of an executed object into a response string
-    -->
-    <xs:group name="tagsResponseGroup">
-        <xs:sequence>
-            <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element ref="random"/>
-                <xs:element ref="star"/>
-                <xs:group ref="tags.var"/>
-                <xs:element ref="call"/>
-            </xs:choice>
-        </xs:sequence>
-    </xs:group>
-    <!-- [Elements] Tags -->
-    <xs:element name="random">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element maxOccurs="unbounded" ref="i"/>
-            </xs:sequence>
-        </xs:complexType>
-    </xs:element>
-    <xs:element name="i" type="xs:string"/>
-    <xs:element name="star">
-        <xs:complexType>
-            <xs:attribute name="index" type="xs:integer"/>
-            <xs:attribute name="previous" type="xs:boolean"/>
-        </xs:complexType>
-    </xs:element>
-    <xs:group name="tags.var">
-        <xs:sequence>
-            <xs:element name="var">
-                <xs:complexType mixed="true">
-                    <xs:attribute name="type">
-                        <xs:simpleType>
-                            <xs:restriction base="xs:token">
-                                <xs:enumeration value="global"/>
-                                <xs:enumeration value="user"/>
-                            </xs:restriction>
-                        </xs:simpleType>
-                    </xs:attribute>
-                </xs:complexType>
-            </xs:element>
-        </xs:sequence>
-    </xs:group>
-    <xs:element name="call">
-        <xs:complexType mixed="true">
-            <xs:attribute name="handler"/>
-        </xs:complexType>
-    </xs:element>
     <!-- [Group] Emotions -->
     <!--
         Emotions are defined once in a single <emotions> element. Any subsequent use of this
@@ -268,17 +218,13 @@
     <xs:element name="init">
         <xs:complexType>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:group ref="init.var"/>
+                <xs:element ref="var"/>
                 <xs:element ref="sub"/>
             </xs:choice>
         </xs:complexType>
     </xs:element>
     <!-- [Elements] Init -->
-    <xs:group name="init.var">
-        <xs:sequence>
-            <xs:element name="var" type="xs:string"/>
-        </xs:sequence>
-    </xs:group>
+    <xs:element name="var" type="xs:string"/>
     <xs:element name="sub">
         <xs:complexType>
             <xs:sequence>
