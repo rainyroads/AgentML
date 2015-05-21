@@ -41,7 +41,7 @@ def normalize(string, pattern=False):
 
     :rtype: str
     """
-    regex = re.compile(r'([^\s\w\(\)\[\]\*#])+') if pattern else re.compile(r'([^\s\w]|_)+')
+    regex = re.compile(r'([^\s\w\(\)\[\]\|\*#])+') if pattern else re.compile(r'([^\s\w]|_)+')
 
     if not isinstance(string, str):
         return ''

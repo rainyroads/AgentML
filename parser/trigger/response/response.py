@@ -1,13 +1,19 @@
+import os
 import logging
-from parser import Element
+from parser import Element, attribute, int_attribute
+from parser.common import schema
 
 
 class Response(Element):
-    def __init__(self, saml, element, file_path):
+    def __init__(self, trigger, element, file_path):
+        self.trigger = trigger
         self._response = []
 
+        with open(os.path.join(self.trigger.saml.script_path, 'schemas', 'tags', 'star.rng')) as file:
+            self.schema = schema(file.read())
+
         self._log = logging.getLogger('saml.parser.trigger.response')
-        super().__init__(saml, element, file_path)
+        super().__init__(trigger.saml, element, file_path)
 
     def _parse(self):
         # If the response element has no tags, just store the raw text as the only response
@@ -24,9 +30,18 @@ class Response(Element):
 
         # Parse the contained tags and add their associated string objects to the response list
         for child in self._element:
+            # Parse star tags internally
+            if child.tag == 'star':
+                star_index = int_attribute(child, 'index', 1)
+                star_format = attribute(child, 'format', 'none')
+                self._log.debug('Appending Star tag object on index {no}'.format(no=star_index))
+
+                self._response.append(Star(self.trigger, star_index, star_format))
+                continue
+
             # Make sure a parser for this tag exists
             if child.tag not in self.saml.tags:
-                self._log.warn('No parse available for tag "{tag}", skipping'.format(tag=child.tag))
+                self._log.warn('No parses available for tag "{tag}", skipping'.format(tag=child.tag))
                 continue
 
             # Append the tag object to the response string
@@ -43,3 +58,24 @@ class Response(Element):
     def __str__(self):
         self._log.debug('Converting Response object to string form')
         return ''.join(map(str, self._response)).strip()
+
+
+class Star:
+    def __init__(self, trigger, index=1, star_format='none'):
+        self.trigger = trigger
+        self.index = index
+        self.format = star_format
+        self._log = logging.getLogger('saml.parser.trigger.star')
+
+    def __str__(self):
+        try:
+            star = str(self.trigger.stars[self.index - 1])
+        except IndexError:
+            self._log.warn('No wildcard with the index {index} exists for this response'.format(index=self.index))
+            return ''
+
+        if self.format in ['title', 'upper', 'lower']:
+            self._log.debug('Formatting star as: {format}'.format(format=self.format))
+            star = getattr(star, self.format)()
+
+        return star

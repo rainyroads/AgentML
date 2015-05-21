@@ -16,15 +16,18 @@ class Trigger(Element):
         self._responses = kwargs['responses'] if 'responses' in kwargs else []
 
         # Trigger attributes
-        self.normalize = bool_attribute(self._element, 'normalize')
-        self.substitute = bool_attribute(self._element, 'substitute')
+        self.normalize = bool_attribute(element, 'normalize')
+        self.substitute = bool_attribute(element, 'substitute')
 
         # Global / user limits
         self._global_limits = {}
         self._user_limit = {}
 
-        super().__init__(saml, element, file_path)
+        # Wildcards placeholder
+        self._stars = ()
+
         self._log = logging.getLogger('saml.trigger')
+        super().__init__(saml, element, file_path)
 
     def match(self, message):
         """
@@ -42,16 +45,64 @@ class Trigger(Element):
             return self.response
 
         # Regular expression match
-        if hasattr(self.pattern, 'match') and self.pattern.match(message):
-            return self.response
+        if hasattr(self.pattern, 'match'):
+            match = self.pattern.match(message)
+            if match:
+                self.stars = match.groups()
+                return self.response
 
     @property
     def response(self):
         """
         Return a random response for this trigger
+        :param stars: Trigger wildcards
+        :type  stars: list of str
+
         :rtype: str
         """
         return str(weighted_choice(self._responses))
+
+    @property
+    def stars(self):
+        """
+        Pulls the wildcards for this trigger event
+
+        :rtype: tuple of str
+        """
+        stars = self._stars
+        self._stars = ()
+
+        return stars
+
+    @stars.setter
+    def stars(self, stars):
+        """
+        Define the wildcards for this trigger event
+        :param stars: Trigger wildcards
+        :type  stars: tuple of str
+        """
+        self._stars = stars
+
+    @staticmethod
+    def replace_wildcards(string, wildcard, regex):
+        """
+
+        :param wildcard:
+        :type  wildcard: _sre.SRE_Pattern
+
+        :param regex:
+        :type  regex: str
+
+        :rtype: tuple of (str, bool)
+        """
+        replaced = False
+        match = wildcard.search(string)
+
+        if match:
+            string = wildcard.sub(regex, string)
+            replaced = True
+
+        return string, replaced
 
     def _parse_topic(self, element):
         """
@@ -81,40 +132,66 @@ class Trigger(Element):
             try:
                 self.pattern = re.compile(element.text)
             except sre_constants.error:
-                self._log.warn('Attempted to compile an invalid regular expression in {path} : {regex}'
+                self._log.warn('Attempted to compile an invalid regular expression in {path} ; {regex}'
                                .format(path=self.file_path, regex=element.text))
                 raise SamlSyntaxError
             return
 
         self.pattern = normalize(element.text, True)
+        compile_as_regex = False
 
-        # Wildcard patterns
+        # Wildcard patterns and replacements
+        captured_wildcard = re.compile(r'(?<!\\)\(\*\)')
         wildcard = re.compile(r'(?<!\\)\*')
+
+        capt_wild_numeric = re.compile(r'(?<!\\)\(#\)')
         wild_numeric = re.compile(r'(?<!\\)#')
+
+        capt_wild_alpha = re.compile(r'(?<!\\)\(_\)')
         wild_alpha = re.compile(r'(?<!\\)_')
 
-        # General wildcards
-        wildcard_match = wildcard.search(self.pattern)
-        if wildcard_match:
-            self.pattern = wildcard.sub(r'(.+)', self.pattern)
+        wildcard_replacements = [
+            (captured_wildcard, r'(.+)'),
+            (wildcard,          r'(?:.+)'),
+            (capt_wild_numeric, r'(\d+)'),
+            (wild_numeric,      r'(?:\d+)'),
+            (capt_wild_alpha,   r'(\w+)'),
+            (wild_alpha,        r'(?:\w+)'),
+        ]
 
-        # Numeric wildcards
-        wild_numeric_match = wild_numeric.search(self.pattern)
-        if wild_numeric_match:
-            self.pattern = wild_numeric.sub(r'(\d+)', self.pattern)
+        for wildcard, replacement in wildcard_replacements:
+            self.pattern, match = self.replace_wildcards(self.pattern, wildcard, replacement)
+            self._log.debug('Parsing pattern wildcards: ' + self.pattern)
+            compile_as_regex = match or compile_as_regex
 
-        # Alpha wildcards
-        wild_alpha_match = wild_alpha.search(self.pattern)
-        if wild_alpha_match:
-            self.pattern = wild_alpha.sub(r'(\w+)', self.pattern)
+        # Required and optional choices
+        req_choice = re.compile(r'\((\w+\|?)\)')
+        opt_choice = re.compile(r'\[([\w\s\|]+)\]\s?')
 
-        if wildcard_match or wild_numeric_match or wild_alpha_match:
+        if req_choice.search(self.pattern):
+            compile_as_regex = True
+
+        if opt_choice.search(self.pattern):
+            def sub_optional(pattern):
+                patterns = pattern.group(1).split('|')
+                return r'(?:{options})?\s?'.format(options='|'.join(patterns))
+
+            self.pattern = opt_choice.sub(sub_optional, self.pattern)
+            self._log.debug('Parsing pattern optional choices: ' + self.pattern)
+            compile_as_regex = True
+
+        if compile_as_regex:
             self.pattern = re.compile(self.pattern)
         else:
             # Replace any escaped wildcard symbols
             self.pattern = self.pattern.replace('\*', '*')
             self.pattern = self.pattern.replace('\#', '#')
             self.pattern = self.pattern.replace('\_', '_')
+
+            # TODO: This needs revisiting
+            self.pattern = self.pattern.replace('\(*)', '(*)')
+            self.pattern = self.pattern.replace('\(#)', '(#)')
+            self.pattern = self.pattern.replace('\(_)', '(_)')
 
     def _parse_response(self, element):
         """
@@ -137,7 +214,7 @@ class Trigger(Element):
         if not len(element):
             self._responses.append((element.text, weight))
         else:
-            self._responses.append((Response(self.saml, element, self.file_path), weight))
+            self._responses.append((Response(self, element, self.file_path), weight))
 
     def _parse_trigger(self, element):
         """
