@@ -25,7 +25,7 @@ class Response(Element):
         # Add the starting text to the response list
         head = self._element.text if isinstance(self._element.text, str) else None
         if head:
-            self._log.debug('Appending heading text')
+            self._log.debug('Appending heading text: {text}'.format(text=head))
             self._response.append(head)
 
         # Parse the contained tags and add their associated string objects to the response list
@@ -34,29 +34,29 @@ class Response(Element):
             if child.tag == 'star':
                 star_index = int_attribute(child, 'index', 1)
                 star_format = attribute(child, 'format', 'none')
-                self._log.debug('Appending Star tag object on index {no}'.format(no=star_index))
+                self._log.debug('Appending Star tag object with index {no}'.format(no=star_index))
 
                 self._response.append(Star(self.trigger, star_index, star_format))
                 continue
 
             # Make sure a parser for this tag exists
             if child.tag not in self.saml.tags:
-                self._log.warn('No parses available for tag "{tag}", skipping'.format(tag=child.tag))
+                self._log.warn('No parsers available for Tag "{tag}", skipping'.format(tag=child.tag))
                 continue
 
             # Append the tag object to the response string
             tag = self.saml.tags[child.tag]
-            self._log.debug('Appending tag object')
+            self._log.debug('Appending {tag} Tag object'.format(tag=child.tag.capitalize()))
             self._response.append(tag(self.saml, child))
 
             # Append the trailing text to the response string (if there is any)
             tail = child.tail if isinstance(child.tail, str) else None
             if tail:
-                self._log.debug('Appending trailing text')
+                self._log.debug('Appending trailing text: {text}'.format(text=tail))
                 self._response.append(tail)
 
     def __str__(self):
-        self._log.debug('Converting Response object to string form')
+        self._log.debug('Converting Response object to string format')
         return ''.join(map(str, self._response)).strip()
 
 
@@ -75,7 +75,7 @@ class Star:
             return ''
 
         if self.format in ['title', 'upper', 'lower']:
-            self._log.debug('Formatting star as: {format}'.format(format=self.format))
+            self._log.debug('Formatting wildcard as {format}'.format(format=self.format))
             star = getattr(star, self.format)()
 
         return star

@@ -24,6 +24,8 @@ class Var(Tag):
 
     def __str__(self):
         try:
+            self._log.debug('Attempting to assign var: {var}'.format(var=self._element.text))
             return self.saml.get_var(self._element.text)
         except SamlError:
+            self._log.info('Attempted to assign an unset variable to Response: {var}'.format(var=self._element.text))
             return ''

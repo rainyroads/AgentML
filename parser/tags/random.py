@@ -22,14 +22,14 @@ class Random(Tag):
             self.schema = schema(file.read())
 
         self._responses = []
-        self._element_to_dict()
+        self._parse()
 
-    def _element_to_dict(self):
+    def _parse(self):
         """
         Generates a dictionary of responses from a <random> element
         """
         for child in self._element:
-            self._log.debug('Appending response with weight {weight}: {response}'.format(weight=1, response=child.text))
+            self._log.debug('Parsing random entry with weight {weight}: {entry}'.format(weight=1, entry=child.text))
             self._responses.append((child.text, 1))
 
     def __str__(self):
