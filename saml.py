@@ -35,8 +35,9 @@ class Saml:
 
         # Containers
         self._global_vars   = {}
-        self._user_vars     = {}
-        self._triggers      = {}
+        # self._user_vars     = {} TBD
+        self._users         = {}
+        self._triggers      = {}  # TODO: Make this a list
         self._substitutions = {}
 
         self.load_directory(os.path.join(self.script_path, 'intelligence'))
@@ -72,7 +73,7 @@ class Saml:
         # Get our root element and parse all elements inside of it
         root = etree.parse(file_path).getroot()
         for element in root:
-            # Retrieve and execute the parser method
+            # Parse a standard Trigger element
             if element.tag == 'trigger':
                 try:
                     self._triggers[element.find('pattern').text] = Trigger(self, element, file_path)
@@ -90,8 +91,10 @@ class Saml:
 
         :rtype: str or None
         """
+        user = self.get_user(user)
+
         for trigger in self._triggers.values():
-            match = trigger.match(message)
+            match = trigger.match(user, message)
             if match:
                 return match
 
@@ -150,6 +153,15 @@ class Saml:
         # Set a global variable
         self._global_vars[name] = value
 
+    def get_user(self, identifier):
+        # Does this user already exist?
+        if identifier in self._users:
+            return self._users[identifier]
+
+        # User does not exist, so let's create a new one
+        self._users[identifier] = User(identifier)
+        return self._users[identifier]
+
     def get_tag(self, element):
         """
         Retrieve an instantiated Tag object
@@ -162,3 +174,15 @@ class Saml:
         """
         if element.tag not in self.tags:
             raise NoTagParserError
+
+    def _parse_trigger(self, element, file_path):
+        try:
+            self._triggers[element.find('pattern').text] = Trigger(self, element, file_path)
+        except SamlError:
+            self._log.warn('Skipping pattern due to an error')
+
+
+class User:
+    def __init__(self, identifier):
+        self.id = identifier
+        self.topic = None

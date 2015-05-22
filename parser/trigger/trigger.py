@@ -29,9 +29,12 @@ class Trigger(Element):
         self._log = logging.getLogger('saml.trigger')
         super().__init__(saml, element, file_path)
 
-    def match(self, message):
+    def match(self, user, message):
         """
         Returns a response message if a match is found, otherwise returns None
+        :param user: The requesting client
+        :type  user: saml.User
+
         :param message: The message to test
         :type  message: str
 
@@ -39,6 +42,13 @@ class Trigger(Element):
         """
         self._log.info('Attempting to match message against Pattern: {pattern}'
                        .format(pattern=self.pattern.pattern if hasattr(self.pattern, 'pattern') else self.pattern))
+
+        # Make sure the topic matches (if one is defined)
+        if user.topic != self.topic:
+            self._log.debug('User topic "{u_topic}" does not match Trigger topic "{t_topic}", skipping check'
+                            .format(u_topic=user.topic, t_topic=self.topic))
+            return
+
         if self.normalize:
             message = normalize(message)
             self._log.debug('Normalizing message: {message}'.format(message=message))

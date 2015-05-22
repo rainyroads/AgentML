@@ -1,3 +1,5 @@
+<!DOCTYPE saml SYSTEM "saml.rng">
+<!--
 <saml version="0.1">
     <trigger>
         <topic>introduction</topic>
@@ -21,4 +23,33 @@
         <pattern>my favorite color is [definitely|absolutely|without a doubt] (red|blue|green)</pattern>
         <response>Really? Your favorite color is <star index="1"/></response>
     </trigger>
+</saml>-->
+
+<saml version="0.1" xmlns="">
+    <trigger>
+        <pattern>(hello|hi|hiya|good evening|good morning)</pattern>
+
+        <response>
+            <message>
+                <random>
+                    <item>Hi! What is your name?</item>
+                    <item>Hello! What's your name?</item>
+                    <item>Hiya! Who are you?</item>
+                </random>
+            </message>
+            <topic>introduction</topic>
+            <limit unit="seconds">15</limit>
+        </response>
+    </trigger>
+
+    <topic name="introduction">
+        <trigger>
+            <topic>introduction</topic>
+            <pattern>(*)</pattern>
+
+            <response weight="3">Hello <star format="title"/>, it's nice to meet you!</response>
+            <response>Nice to meet you, <star format="title"/>!</response>
+            <response>Hi <star format="title"/>, my name is Yuki!</response>
+        </trigger>
+    </topic>
 </saml>
