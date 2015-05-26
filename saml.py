@@ -1,7 +1,7 @@
 import os
 import logging
 from lxml import etree
-from parser import schema
+from parser import schema, attribute, int_attribute
 from parser.trigger import Trigger
 from parser.tags import Random, Var
 from errors import SamlError, SamlSyntaxError, VarNotDefinedError, UserNotDefinedError, NoTagParserError
@@ -147,7 +147,7 @@ class Saml:
             if user not in self._user_vars:
                 raise UserNotDefinedError
 
-            self._user_vars[user][name] = value
+            self._user_vars[user][name] = value  # TODO
             return
 
         # Set a global variable
@@ -175,6 +175,49 @@ class Saml:
         if element.tag not in self.tags:
             raise NoTagParserError
 
+    def set_tag(self):
+        pass  # TODO
+
+    def parse_tags(self, element):
+        """
+        Parse tags in an XML element
+        :param element: The response [message] XML element
+        :type  element: etree._Element
+
+        :return: A list of strings and Tag objects in the order they are parsed
+        :rtype : list of (str or parser.tags.tag,Tag)
+        """
+        response = []
+        
+        # Parse the contained tags and add their associated string objects to the response list
+        for child in element:
+            # Parse star tags internally
+            if child.tag == 'star':
+                star_index = int_attribute(child, 'index', 1)
+                star_format = attribute(child, 'format', 'none')
+                self._log.debug('Appending Star tag object with index {no}'.format(no=star_index))
+
+                response.append(Star(self.trigger, star_index, star_format))
+                continue
+
+            # Make sure a parser for this tag exists
+            if child.tag not in self.tags:
+                self._log.warn('No parsers available for Tag "{tag}", skipping'.format(tag=child.tag))
+                continue
+
+            # Append the tag object to the response string
+            tag = self.tags[child.tag]
+            self._log.debug('Appending {tag} Tag object'.format(tag=child.tag.capitalize()))
+            response.append(tag(self, child))
+
+            # Append the trailing text to the response string (if there is any)
+            tail = child.tail if isinstance(child.tail, str) else None
+            if tail:
+                self._log.debug('Appending trailing text: {text}'.format(text=tail))
+                response.append(tail)
+
+        return response
+
     def _parse_trigger(self, element, file_path):
         try:
             self._triggers[element.find('pattern').text] = Trigger(self, element, file_path)
@@ -186,3 +229,24 @@ class User:
     def __init__(self, identifier):
         self.id = identifier
         self.topic = None
+
+
+class Star:
+    def __init__(self, trigger, index=1, star_format='none'):
+        self.trigger = trigger
+        self.index = index
+        self.format = star_format
+        self._log = logging.getLogger('saml.parser.trigger.star')
+
+    def __str__(self):
+        try:
+            star = str(self.trigger.stars[self.index - 1])
+        except IndexError:
+            self._log.warn('No wildcard with the index {index} exists for this response'.format(index=self.index))
+            return ''
+
+        if self.format in ['title', 'upper', 'lower']:
+            self._log.debug('Formatting wildcard as {format}'.format(format=self.format))
+            star = getattr(star, self.format)()
+
+        return star
