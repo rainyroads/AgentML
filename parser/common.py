@@ -15,6 +15,7 @@ def schema(relaxng):
     tree = etree.fromstring(relaxng)
     return etree.RelaxNG(tree)
 
+
 def weighted_choice(choices):
     """
     Provides a weighted version of random.choice
@@ -29,6 +30,7 @@ def weighted_choice(choices):
         if most + weight > rand:
             return choice
         most += weight
+
 
 def normalize(string, pattern=False):
     """
@@ -48,6 +50,7 @@ def normalize(string, pattern=False):
 
     return regex.sub('', string.strip().casefold())
 
+
 def attribute(element, attribute, default=None):
     """
     Returns the value of an attribute, or a default if it's not defined
@@ -62,6 +65,7 @@ def attribute(element, attribute, default=None):
     attribute_value = element.get(attribute)
 
     return attribute_value if attribute_value is not None else default
+
 
 def bool_attribute(element, attribute, default=True):
     """
@@ -83,6 +87,7 @@ def bool_attribute(element, attribute, default=True):
         return True if (attribute_value == 'true') else False
 
     return default
+
 
 def int_attribute(element, attribute, default=0):
     """

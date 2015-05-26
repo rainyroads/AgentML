@@ -56,7 +56,7 @@ class Trigger(Element):
         # String match
         if isinstance(self.pattern, str) and message == self.pattern:
             self._log.info('String Pattern matched: {match}'.format(match=self.pattern))
-            return self.response
+            return self.response(user)
 
         # Regular expression match
         if hasattr(self.pattern, 'match'):
@@ -64,18 +64,20 @@ class Trigger(Element):
             if match:
                 self._log.info('Regex Pattern matched: {match}'.format(match=self.pattern.pattern))
                 self.stars = match.groups()
-                return self.response
+                return self.response(user)
 
-    @property
-    def response(self):
+    def response(self, user=None):
         """
         Return a random response for this trigger
-        :param stars: Trigger wildcards
-        :type  stars: list of str
+        :param user: The User to apply response reactions to
+        :type  user: saml.User
 
         :rtype: str
         """
-        return str(weighted_choice(self._responses))
+        response = weighted_choice(self._responses)
+        if user:
+            response.apply_reactions(user)
+        return str(response)
 
     @property
     def stars(self):
@@ -185,7 +187,7 @@ class Trigger(Element):
             compile_as_regex = match or compile_as_regex
 
         # Required and optional choices
-        req_choice = re.compile(r'\(([\w\|]+)\)')
+        req_choice = re.compile(r'\(([\w\s\|]+)\)')
         opt_choice = re.compile(r'\[([\w\s\|]+)\]\s?')
 
         if req_choice.search(self.pattern):
@@ -225,7 +227,7 @@ class Trigger(Element):
         # Get the responses weight
         self._log.info('Parsing new Response')
         try:
-            weight = int(element.get('weight'))
+            weight = int(element.get('weight') or element.find('weight'))
             self._log.info('Setting Response weight: {weight}'.format(weight=weight))
         except TypeError:
             # Weight attribute not defined, set a default value of 1

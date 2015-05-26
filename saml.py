@@ -35,9 +35,9 @@ class Saml:
 
         # Containers
         self._global_vars   = {}
-        # self._user_vars     = {} TBD
+        # self._user_vars     = {} TODO: TBD
         self._users         = {}
-        self._triggers      = {}  # TODO: Make this a list
+        self._triggers      = []
         self._substitutions = {}
 
         self.load_directory(os.path.join(self.script_path, 'intelligence'))
@@ -72,13 +72,45 @@ class Saml:
 
         # Get our root element and parse all elements inside of it
         root = etree.parse(file_path).getroot()
-        for element in root:
-            # Parse a standard Trigger element
-            if element.tag == 'trigger':
-                try:
-                    self._triggers[element.find('pattern').text] = Trigger(self, element, file_path)
-                except SamlError:
-                    self._log.warn('Skipping pattern due to an error')
+        # defaults = {'group': None, 'topic': None, 'emotion': None}
+        defaults = {}
+
+        def parse_element(element):
+            for child in element:
+                # Set the group
+                if child.tag == 'group':
+                    self._log.info('Setting Trigger group: {group}'.format(group=child.get('name')))
+                    defaults['group'] = child.get('name')
+                    parse_element(child)
+                    return
+
+                # Set the topic
+                if child.tag == 'topic':
+                    self._log.info('Setting Trigger topic: {topic}'.format(topic=child.get('name')))
+                    defaults['topic'] = child.get('name')
+                    parse_element(child)
+                    return
+
+                # Set the emotion
+                if child.tag == 'emotion':
+                    self._log.info('Setting Trigger emotion: {emotion}'.format(emotion=child.get('name')))
+                    defaults['emotion'] = child.get('name')
+                    parse_element(child)
+                    return
+
+                # Parse a standard Trigger element
+                if child.tag == 'trigger':
+                    try:
+                        self._triggers.append(Trigger(self, child, file_path, **defaults))
+                    except SamlError:
+                        self._log.warn('Skipping Trigger due to an error', exc_info=True)
+                    finally:
+                        # Reset the dictionary of default attributes for the next trigger iteration
+                        self._log.debug('Resetting default Trigger attributes')
+                        defaults.clear()
+
+        # Begin element iteration by parsing the initial root element
+        parse_element(root)
 
     def get_reply(self, user, message):
         """
@@ -93,7 +125,7 @@ class Saml:
         """
         user = self.get_user(user)
 
-        for trigger in self._triggers.values():
+        for trigger in self._triggers:
             match = trigger.match(user, message)
             if match:
                 return match
@@ -178,7 +210,7 @@ class Saml:
     def set_tag(self):
         pass  # TODO
 
-    def parse_tags(self, element):
+    def parse_tags(self, element, trigger):
         """
         Parse tags in an XML element
         :param element: The response [message] XML element
@@ -188,6 +220,19 @@ class Saml:
         :rtype : list of (str or parser.tags.tag,Tag)
         """
         response = []
+
+        # Add the starting text to the response list
+        head = element.text if isinstance(element.text, str) else None
+        if head:
+            self._log.debug('Appending heading text: {text}'.format(text=head))
+            response.append(head)
+
+        def append_tail(element):
+            # Append the trailing text to the response string (if there is any)
+            tail = child.tail if isinstance(child.tail, str) else None
+            if tail:
+                self._log.debug('Appending trailing text: {text}'.format(text=tail))
+                response.append(tail)
         
         # Parse the contained tags and add their associated string objects to the response list
         for child in element:
@@ -197,7 +242,8 @@ class Saml:
                 star_format = attribute(child, 'format', 'none')
                 self._log.debug('Appending Star tag object with index {no}'.format(no=star_index))
 
-                response.append(Star(self.trigger, star_index, star_format))
+                response.append(Star(trigger, star_index, star_format))
+                append_tail(child)
                 continue
 
             # Make sure a parser for this tag exists
@@ -208,13 +254,10 @@ class Saml:
             # Append the tag object to the response string
             tag = self.tags[child.tag]
             self._log.debug('Appending {tag} Tag object'.format(tag=child.tag.capitalize()))
-            response.append(tag(self, child))
+            response.append(tag(trigger, child))
 
             # Append the trailing text to the response string (if there is any)
-            tail = child.tail if isinstance(child.tail, str) else None
-            if tail:
-                self._log.debug('Appending trailing text: {text}'.format(text=tail))
-                response.append(tail)
+            append_tail(child)
 
         return response
 
@@ -240,7 +283,7 @@ class Star:
 
     def __str__(self):
         try:
-            star = str(self.trigger.stars[self.index - 1])
+            star = str(self.trigger.stars[self.index - 1])  # TODO: Stars are reset after first request, this won't work
         except IndexError:
             self._log.warn('No wildcard with the index {index} exists for this response'.format(index=self.index))
             return ''

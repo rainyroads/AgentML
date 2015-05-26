@@ -6,16 +6,16 @@ from errors import SamlError
 
 
 class Var(Tag):
-    def __init__(self, saml, element):
+    def __init__(self, trigger, element):
         """
         Initialize a new Random Tag instance
-        :param saml: The parent SAML instance
-        :type  saml: Saml
+        :param trigger: The parent SAML instance
+        :type  trigger: Saml
 
         :param element: The XML Element object
         :type  element: etree._Element
         """
-        super().__init__(saml, element)
+        super().__init__(trigger, element)
         self._log = logging.getLogger('saml.parser.tags.var')
 
         # Define our schema

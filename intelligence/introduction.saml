@@ -37,15 +37,15 @@
                     <item>Hiya! Who are you?</item>
                 </random>
             </message>
+
             <topic>introduction</topic>
-            <limit unit="seconds">15</limit>
+            <limit>15</limit>
         </response>
     </trigger>
 
     <topic name="introduction">
         <trigger>
-            <topic>introduction</topic>
-            <pattern>(*)</pattern>
+            <pattern>(_)</pattern>
 
             <response weight="3">Hello <star format="title"/>, it's nice to meet you!</response>
             <response>Nice to meet you, <star format="title"/>!</response>
