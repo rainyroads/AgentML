@@ -1,10 +1,12 @@
 import os
+import time
 import logging
 from lxml import etree
 from parser import schema, attribute, int_attribute
 from parser.trigger import Trigger
 from parser.tags import Random, Var
-from errors import SamlError, SamlSyntaxError, VarNotDefinedError, UserNotDefinedError, NoTagParserError
+from errors import SamlError, SamlSyntaxError, VarNotDefinedError, UserNotDefinedError, NoTagParserError, \
+    TriggerBlockingError, LimitError
 
 
 class Saml:
@@ -227,9 +229,9 @@ class Saml:
             self._log.debug('Appending heading text: {text}'.format(text=head))
             response.append(head)
 
-        def append_tail(element):
-            # Append the trailing text to the response string (if there is any)
-            tail = child.tail if isinstance(child.tail, str) else None
+        # Internal method for appending an elements tail to the response list
+        def append_tail(e):
+            tail = e.tail if isinstance(e.tail, str) else None
             if tail:
                 self._log.debug('Appending trailing text: {text}'.format(text=tail))
                 response.append(tail)
@@ -269,9 +271,52 @@ class Saml:
 
 
 class User:
+    """
+    User session object
+    """
     def __init__(self, identifier):
+        """
+        Initialize a new User instance
+        :param identifier: The unique identifier for the User. Examples include IRC hostmasks, IP addresses, and DB ID's
+        :type  identifier: str
+        """
+        self._log = logging.getLogger('saml.user')
+        self._log.info('Creating new user: {id}'.format(id=identifier))
+
+        # User attributes
         self.id = identifier
         self.topic = None
+        self._limits = {}  # Dictionary of trigger id()'s as keys, limit expiration's in epoch as values
+
+    def is_limited(self, trigger):
+        """
+        Test whether or not there is an active User limit for the specified Trigger instance
+        :param trigger: The Trigger to test for a limit
+        :type  trigger: parser.trigger.trigger.Trigger
+
+        :return: True if there is a limit enforced, otherwise False
+        :rtype : bool
+        """
+        # Get the object ID of the Trigger instance
+        trigger_id = id(trigger)
+
+        # If there is a limit for this Trigger assigned, make sure it hasn't expired
+        if trigger_id in self._limits:
+            limit, blocking = self._limits[trigger_id]
+            if time.time() < limit:
+                # Limit exists and is active, return True
+                self._log.debug('User "{uid}" has a limit enforced for Object {oid}'
+                                .format(uid=self.id, oid=trigger_id))
+                if blocking:
+                    raise LimitError
+                return True
+            else:
+                # Limit has expired, remove it
+                del self._limits[trigger_id]
+
+        # We're still here, so there are no active limits. Return False
+        self._log.debug('User "{uid}" has no limit enforced for Object {oid}'.format(uid=self.id, oid=trigger_id))
+        return False
 
 
 class Star:

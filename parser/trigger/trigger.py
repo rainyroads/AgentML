@@ -1,7 +1,7 @@
 import logging
 import re
 import sre_constants
-from parser import Element, weighted_choice, normalize, bool_attribute
+from parser import Element, weighted_choice, normalize, attribute, bool_attribute
 from parser.trigger.response import Response
 from errors import SamlSyntaxError
 
@@ -19,9 +19,13 @@ class Trigger(Element):
         self.normalize = bool_attribute(element, 'normalize')
         self.substitute = bool_attribute(element, 'substitute')
 
-        # Global / user limits
-        self._global_limits = {}
-        self._user_limit = {}
+        # Global trigger limit
+        self._limit = 0
+        self._limit_blocking = True
+
+        # TODO: Trigger chance
+        self._chance = 100
+        self._chance_blocking = True
 
         # Wildcards placeholder
         self._stars = ()
@@ -56,7 +60,7 @@ class Trigger(Element):
         # String match
         if isinstance(self.pattern, str) and message == self.pattern:
             self._log.info('String Pattern matched: {match}'.format(match=self.pattern))
-            return self.response(user)
+            return str(self.response(user) or '')
 
         # Regular expression match
         if hasattr(self.pattern, 'match'):
@@ -64,7 +68,7 @@ class Trigger(Element):
             if match:
                 self._log.info('Regex Pattern matched: {match}'.format(match=self.pattern.pattern))
                 self.stars = match.groups()
-                return self.response(user)
+                return str(self.response(user) or '')
 
     def response(self, user=None):
         """
@@ -74,10 +78,19 @@ class Trigger(Element):
 
         :rtype: str
         """
-        response = weighted_choice(self._responses)
+        # If we have a User, only fetch responses that are not limited
+        if user:
+            responses = [response for response in self._responses if not user.is_limited(response)]
+        else:
+            responses = self._responses
+
+        # Fetch the response and apply any reactions
+        response = weighted_choice(responses)
         if user:
             response.apply_reactions(user)
-        return str(response)
+
+        # Return the Response object
+        return response
 
     @property
     def stars(self):
@@ -184,7 +197,7 @@ class Trigger(Element):
 
         for wildcard, replacement in wildcard_replacements:
             self.pattern, match = self.replace_wildcards(self.pattern, wildcard, replacement)
-            compile_as_regex = match or compile_as_regex
+            compile_as_regex = bool(match) or compile_as_regex
 
         # Required and optional choices
         req_choice = re.compile(r'\(([\w\s\|]+)\)')
@@ -276,13 +289,79 @@ class Trigger(Element):
                 self._parse_reaction(child)
                 continue
 
-    def _parse_reaction(self, element):
+    def _parse_limit(self, element):
         """
-        Parse a trigger element
+        Parse a limit element
         :param element: The XML Element object
         :type  element: etree._Element
         """
-        pass
+        self._limit_blocking = bool_attribute(element, 'blocking')
+
+        # Is this a Global or User limit?
+        limit_type = attribute(element, 'type', 'user')
+        if limit_type not in ['user', 'global']:
+            self._log.warn('Unrecognized limit type: {type}'.format(type=limit_type))
+            return
+
+        # If we're setting the limit using static units..
+        unit_conversions = {
+            'minutes': 60,
+            'hours': 3600,
+            'days': 86400,
+            'weeks': 604800,
+            'months': 2592000,
+            'years': 31536000
+        }
+        units = attribute(element, 'units')
+        if units:
+            if units not in unit_conversions:
+                self._log.warn('Unrecognized time unit: {unit}'.format(unit=units))
+                return
+
+            try:
+                limit = float(element.text)
+            except (ValueError, TypeError):
+                self._log.warn('Limit must contain a valid float when using units (Invalid limit: "{limit}")'
+                               .format(limit=element.text))
+                return
+
+            if limit_type == 'global':
+                self.global_limit = limit * unit_conversions[units]
+            elif limit_type == 'user':
+                self.user_limit = limit * unit_conversions[units]
+
+            return
+
+        try:
+            limit = float(element.text)
+        except (ValueError, TypeError):
+            self._log.warn('Invalid time string: {string}'.format(string=element.text))
+            return
+
+        if limit_type == 'global':
+            self.global_limit = limit
+        elif limit_type == 'user':
+            self.user_limit = limit
+
+    def _parse_chance(self, element):
+        """
+        Parse a chance element
+        :param element: The XML Element object
+        :type  element: etree._Element
+        """
+        try:
+            chance = element.text.strip('%')
+            chance = float(chance)
+        except (ValueError, TypeError, AttributeError):
+            self._log.warn('Invalid Chance string: {chance}'.format(chance=element.text))
+            return
+
+        # Make sure the chance is a valid percentage
+        if not (0 <= chance <= 100):
+            self._log.warn('Chance percent must contain an integer or float between 0 and 100')
+            return
+
+        self.chance = chance
 
     def __str__(self):
         return self.response

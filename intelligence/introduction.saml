@@ -30,13 +30,13 @@
         <pattern>(hello|hi|hiya|good evening|good morning)</pattern>
 
         <response>
-            <message>
+            <template>
                 <random>
                     <item>Hi! What is your name?</item>
                     <item>Hello! What's your name?</item>
                     <item>Hiya! Who are you?</item>
                 </random>
-            </message>
+            </template>
 
             <topic>introduction</topic>
             <limit>15</limit>

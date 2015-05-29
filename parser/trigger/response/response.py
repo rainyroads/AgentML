@@ -1,7 +1,8 @@
 import os
+import time
 import logging
 from parser import Element
-from parser.common import schema
+from parser.common import schema, normalize, attribute
 
 
 class Response(Element):
@@ -10,8 +11,11 @@ class Response(Element):
         self._response = ()
 
         # Assignment attributes
-        self.topic = None
-        self.mood = None
+        self.topic = False
+        self.mood = False
+        self.global_limit = False
+        self.user_limit = False
+        self.chance = 100
 
         with open(os.path.join(self.trigger.saml.script_path, 'schemas', 'tags', 'star.rng')) as file:
             self.schema = schema(file.read())
@@ -20,28 +24,41 @@ class Response(Element):
         super().__init__(trigger.saml, element, file_path)
 
     def apply_reactions(self, user):
-        self._log.debug('Setting topic to: ' + str(self.topic))
-        user.topic = self.topic
+        # User attributes
+        if self.topic is not False:
+            self._log.debug('Setting User Topic to: {0}'.format(self.topic))
+            user.topic = self.topic
+
+        if self.global_limit is not False:
+            self._log.debug('Setting Global Limit to {0} seconds'.format(self.global_limit))
+            pass  # TODO
+
+        if self.user_limit is not False:
+            self._log.debug('Setting User Limit to {0} seconds'.format(self.user_limit))
+            user._limits[id(self)] = ((time.time() + self.user_limit), False)
+
         # saml.mood = self.mood
 
     def _parse(self):
         # Assign the message as the element itself, or a sub message element if one has been defined
-        message = self._element.find('message')
-        if message:
+        template = self._element.find('template')
+        if template:
             for child in self._element:
-                if child.tag == 'topic':
-                    self.topic = child.text
-                    continue
+                method_name = '_parse_' + child.tag
+
+                if hasattr(self, method_name):
+                    parse = getattr(self, method_name)
+                    parse(child)
         else:
-            message = self._element
+            template = self._element
 
         # If the response element has no tags, just store the raw text as the only response
-        if not len(message):
-            self._response = (message.text,)
+        if not len(template):
+            self._response = (template.text,)
             self._log.info('Assigning text only response')
             return
 
-        self._response = tuple(self.saml.parse_tags(message, self.trigger))
+        self._response = tuple(self.saml.parse_tags(template, self.trigger))
 
     def __str__(self):
         self._log.debug('Converting Response object to string format')
