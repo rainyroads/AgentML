@@ -1,56 +1,77 @@
 import os
 import time
 import logging
-from parser import Element
+from parser import RestrictableElement
 from parser.common import schema, normalize, attribute
 
 
-class Response(Element):
-    def __init__(self, trigger, element, file_path):
+class Response(RestrictableElement):
+    """
+    SAML Response object
+    """
+    def __init__(self, trigger, element, file_path, **kwargs):
+        """
+        Initialize a new Response instance
+        :param saml: The parent SAML instance
+        :type  saml: Saml
+
+        :param element: The XML Element object
+        :type  element: etree._Element
+
+        :param file_path: The absolute path to the SAML file
+        :type  file_path: str
+
+        :param kwargs: Default attributes
+        """
+        # Containers and default attributes
         self.trigger = trigger
         self._response = ()
-
-        # Assignment attributes
         self.topic = False
-        self.mood = False
-        self.global_limit = False
-        self.user_limit = False
-        self.chance = 100
+
+        # Parent __init__ must be initialized BEFORE default attributes are assigned, but AFTER the above containers
+        super().__init__(trigger.saml, element, file_path)
+
+        # Default attributes
+        self.emotion = kwargs['emotion'] if 'emotion' in kwargs else None
 
         with open(os.path.join(self.trigger.saml.script_path, 'schemas', 'tags', 'star.rng')) as file:
             self.schema = schema(file.read())
 
         self._log = logging.getLogger('saml.parser.trigger.response')
-        super().__init__(trigger.saml, element, file_path)
 
     def apply_reactions(self, user):
+        """
+        Set active topics and limits after a response has been triggered
+        :param user: The user triggering the response
+        :type  user: saml.User
+        """
         # User attributes
         if self.topic is not False:
-            self._log.debug('Setting User Topic to: {0}'.format(self.topic))
+            self._log.info('Setting User Topic to: {topic}'.format(topic=self.topic))
             user.topic = self.topic
 
-        if self.global_limit is not False:
-            self._log.debug('Setting Global Limit to {0} seconds'.format(self.global_limit))
+        if self.global_limit:
+            self._log.info('Enforcing Global Response Limit of {num} seconds'.format(num=self.global_limit))
             pass  # TODO
 
-        if self.user_limit is not False:
-            self._log.debug('Setting User Limit to {0} seconds'.format(self.user_limit))
-            user._limits[id(self)] = ((time.time() + self.user_limit), False)
+        if self.user_limit:
+            self._log.info('Enforcing User Response Limit of {num} seconds'.format(num=self.user_limit))
+            user.set_limit(id(self), (time.time() + self.user_limit))
 
         # saml.mood = self.mood
 
     def _parse(self):
-        # Assign the message as the element itself, or a sub message element if one has been defined
+        """
+        Loop through all child elements and execute any available parse methods for them
+        """
+        # Find the template and parse any other defined tags
         template = self._element.find('template')
-        if template:
-            for child in self._element:
-                method_name = '_parse_' + child.tag
+        for child in self._element:
+            method_name = '_parse_' + child.tag
 
-                if hasattr(self, method_name):
-                    parse = getattr(self, method_name)
-                    parse(child)
-        else:
-            template = self._element
+            if hasattr(self, method_name):
+                parse = getattr(self, method_name)
+                parse(child)
 
         # If the response element has no tags, just store the raw text as the only response
         if not len(template):
@@ -62,5 +83,9 @@ class Response(Element):
 
     def __str__(self):
         self._log.debug('Converting Response object to string format')
-        return ''.join(map(str, self._response)).strip()
+        response = ''.join(map(str, self._response)).strip()
+
+        self._log.debug('Resetting parent Trigger\'s stars')
+        self.trigger.stars = ()
+        return response
 

@@ -26,42 +26,31 @@
         specified topic / emotion applied to all the contained triggers.
     -->
     <xs:group name="triggerGroup">
-        <xs:choice>
-            <xs:element maxOccurs="unbounded" ref="trigger"/>
-            <xs:element name="emotion">
-                <xs:complexType>
-                    <xs:choice>
-                        <xs:element maxOccurs="unbounded" ref="trigger"/>
-                        <xs:element name="topic">
-                            <xs:complexType>
-                                <xs:sequence>
-                                    <xs:element maxOccurs="unbounded" ref="trigger"/>
-                                </xs:sequence>
-                                <xs:attribute name="name" use="required"/>
-                            </xs:complexType>
-                        </xs:element>
-                    </xs:choice>
-                    <xs:attribute name="name" use="required"/>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="topic">
-                <xs:complexType>
-                    <xs:choice>
-                        <xs:element maxOccurs="unbounded" ref="trigger"/>
-                        <xs:element name="emotion">
-                            <xs:complexType>
-                                <xs:sequence>
-                                    <xs:element maxOccurs="unbounded" ref="trigger"/>
-                                </xs:sequence>
-                                <xs:attribute name="name" use="required"/>
-                            </xs:complexType>
-                        </xs:element>
-                    </xs:choice>
-                    <xs:attribute name="name" use="required"/>
-                </xs:complexType>
-            </xs:element>
-        </xs:choice>
+        <xs:sequence>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element ref="trigger"/>
+                <xs:element ref="group"/>
+                <xs:element name="emotion">
+                    <xs:complexType>
+                        <xs:group ref="triggerGroup"/>
+                        <xs:attribute name="name" use="required"/>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="topic">
+                    <xs:complexType>
+                        <xs:group ref="triggerGroup"/>
+                        <xs:attribute name="name" use="required"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:choice>
+        </xs:sequence>
     </xs:group>
+    <xs:element name="group">
+        <xs:complexType>
+            <xs:group ref="triggerGroup"/>
+            <xs:attribute name="name" use="required"/>
+        </xs:complexType>
+    </xs:element>
     <!-- [Element] Trigger -->
     <xs:element name="trigger">
         <xs:complexType>
@@ -71,7 +60,7 @@
                 <xs:element ref="pattern"/>
                 <xs:element ref="response"/>
                 <xs:element ref="limit"/>
-                <xs:element ref="reaction"/>
+                <xs:element ref="chance"/>
             </xs:choice>
         </xs:complexType>
     </xs:element>
@@ -95,58 +84,66 @@
     </xs:element>
     <xs:element name="response">
         <xs:complexType mixed="true">
-            <xs:sequence>
-                <xs:group minOccurs="0" maxOccurs="unbounded" ref="anyElement"/>
-                <xs:group minOccurs="0" ref="trigger.topic"/>
-                <xs:group minOccurs="0" ref="trigger.emotion"/>
-                <xs:element minOccurs="0" ref="limit"/>
-                <xs:element minOccurs="0" ref="reaction"/>
-            </xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="template"/>
+                <xs:group ref="trigger.topic"/>
+                <xs:group ref="trigger.emotion"/>
+                <xs:element ref="limit"/>
+                <xs:element ref="chance"/>
+            </xs:choice>
             <xs:attribute name="weight" type="xs:integer"/>
         </xs:complexType>
     </xs:element>
-    <xs:element name="limit">
+    <xs:element name="template">
         <xs:complexType mixed="true">
-            <xs:attribute name="unit">
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="seconds"/>
-                        <xs:enumeration value="minutes"/>
-                        <xs:enumeration value="hours"/>
-                        <xs:enumeration value="days"/>
-                        <xs:enumeration value="weeks"/>
-                        <xs:enumeration value="months"/>
-                        <xs:enumeration value="years"/>
-                    </xs:restriction>
-                </xs:simpleType>
-            </xs:attribute>
-            <xs:attribute name="type">
-                <xs:simpleType>
-                    <xs:restriction base="xs:token">
-                        <xs:enumeration value="global"/>
-                        <xs:enumeration value="user"/>
-                    </xs:restriction>
-                </xs:simpleType>
-            </xs:attribute>
+            <xs:group minOccurs="0" maxOccurs="unbounded" ref="anyElement"/>
         </xs:complexType>
     </xs:element>
-    <xs:element name="reaction">
+    <xs:element name="limit">
         <xs:complexType>
-            <xs:sequence>
-                <xs:element minOccurs="0" name="topic" type="xs:string"/>
-                <xs:element minOccurs="0" name="emotion">
-                    <xs:complexType>
-                        <xs:sequence>
-                            <xs:element ref="name"/>
-                            <xs:element ref="level"/>
-                        </xs:sequence>
-                    </xs:complexType>
-                </xs:element>
-            </xs:sequence>
+            <xs:simpleContent>
+                <xs:restriction base="xs:anyType">
+                    <xs:simpleType>
+                        <xs:union memberTypes="xs:integer xs:float"/>
+                    </xs:simpleType>
+                    <xs:attribute name="unit">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:token">
+                                <xs:enumeration value="seconds"/>
+                                <xs:enumeration value="minutes"/>
+                                <xs:enumeration value="hours"/>
+                                <xs:enumeration value="days"/>
+                                <xs:enumeration value="weeks"/>
+                                <xs:enumeration value="months"/>
+                                <xs:enumeration value="years"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
+                    <xs:attribute name="type">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:token">
+                                <xs:enumeration value="global"/>
+                                <xs:enumeration value="user"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
+                    <xs:attribute name="blocking" type="xs:boolean"/>
+                </xs:restriction>
+            </xs:simpleContent>
         </xs:complexType>
     </xs:element>
-    <xs:element name="name" type="xs:string"/>
-    <xs:element name="level" type="xs:integer"/>
+    <xs:element name="chance">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:restriction base="xs:anyType">
+                    <xs:simpleType>
+                        <xs:union memberTypes="xs:integer xs:float"/>
+                    </xs:simpleType>
+                    <xs:attribute name="blocking" type="xs:boolean"/>
+                </xs:restriction>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
     <!-- [Group] Emotions -->
     <!--
         Emotions are defined once in a single <emotions> element. Any subsequent use of this
@@ -199,6 +196,7 @@
         </xs:complexType>
     </xs:element>
     <!-- [Elements] Identity -->
+    <xs:element name="name" type="xs:string"/>
     <xs:element name="nickname" type="xs:string"/>
     <xs:element name="gender">
         <xs:simpleType>

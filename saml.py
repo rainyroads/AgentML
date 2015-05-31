@@ -11,6 +11,9 @@ from errors import SamlError, SamlSyntaxError, VarNotDefinedError, UserNotDefine
 
 class Saml:
     def __init__(self):
+        """
+        Initialize a new Saml instance
+        """
         # Debug logger
         self._log = logging.getLogger('saml')
         self._log.setLevel(logging.DEBUG)
@@ -28,23 +31,24 @@ class Saml:
         with open(self._schema_path) as file:
             self._schema = schema(file.read())
 
-        # State data
-        self.topic = None
-        self.mood = None
-
         # Define our base / system tags
         self.tags = {'random': Random, 'var': Var}
 
         # Containers
         self._global_vars   = {}
-        # self._user_vars     = {} TODO: TBD
         self._users         = {}
         self._triggers      = []
-        self._substitutions = {}
+        self._substitutions = {}  # TODO
 
+        # Load internal SAML files
         self.load_directory(os.path.join(self.script_path, 'intelligence'))
 
     def load_directory(self, dir_path):
+        """
+        Load all SAML files contained in a specified directory
+        :param dir_path: Path to the directory
+        :type  dir_path: str
+        """
         self._log.info('Loading all SAML files contained in: ' + dir_path)
 
         # Get a list of file paths
@@ -59,22 +63,17 @@ class Saml:
     def load_file(self, file_path):
         """
         Load a single SAML file
-        :param file_path: Path to the file to load
+        :param file_path: Path to the file
         :type  file_path: str
         """
         self._log.info('Loading file: ' + file_path)
         saml = etree.parse(file_path)
 
         # Validate the file for proper SAML syntax
-        valid = self._schema.validate(saml)
-        if not valid:
-            error = 'Invalid SAML syntax in ' + file_path
-            self._log.error(error)
-            raise SamlSyntaxError(error)
+        self._schema.assertValid(saml)
 
         # Get our root element and parse all elements inside of it
         root = etree.parse(file_path).getroot()
-        # defaults = {'group': None, 'topic': None, 'emotion': None}
         defaults = {}
 
         def parse_element(element):
@@ -84,21 +83,21 @@ class Saml:
                     self._log.info('Setting Trigger group: {group}'.format(group=child.get('name')))
                     defaults['group'] = child.get('name')
                     parse_element(child)
-                    return
+                    continue
 
                 # Set the topic
                 if child.tag == 'topic':
                     self._log.info('Setting Trigger topic: {topic}'.format(topic=child.get('name')))
                     defaults['topic'] = child.get('name')
                     parse_element(child)
-                    return
+                    continue
 
                 # Set the emotion
                 if child.tag == 'emotion':
                     self._log.info('Setting Trigger emotion: {emotion}'.format(emotion=child.get('name')))
                     defaults['emotion'] = child.get('name')
                     parse_element(child)
-                    return
+                    continue
 
                 # Parse a standard Trigger element
                 if child.tag == 'trigger':
@@ -111,7 +110,7 @@ class Saml:
                         self._log.debug('Resetting default Trigger attributes')
                         defaults.clear()
 
-        # Begin element iteration by parsing the initial root element
+        # Begin element iteration by parsing the root element
         parse_element(root)
 
     def get_reply(self, user, message):
@@ -127,7 +126,18 @@ class Saml:
         """
         user = self.get_user(user)
 
-        for trigger in self._triggers:
+        # Fetch triggers in our topic, and make sure we're not in an empty topic
+        triggers = [trigger for trigger in self._triggers if user.topic == trigger.topic]
+        if not triggers and user.topic is not None:
+            self._log.warn('User "{user}" was in an empty topic: {topic}'.format(user=user.id, topic=user.topic))
+            user.topic = None
+            triggers = [trigger for trigger in self._triggers if user.topic == trigger.topic]
+
+        # It's impossible to get anywhere if there are no empty topic triggers available to guide us
+        if not triggers:
+            raise SamlError('There are no empty topic triggers defined, unable to continue')
+
+        for trigger in triggers:
             match = trigger.match(user, message)
             if match:
                 return match
@@ -148,13 +158,10 @@ class Saml:
         """
         # Retrieve a user variable
         if user is not None:
-            if user not in self._user_vars:
+            if user not in self._users:
                 raise UserNotDefinedError
 
-            if name not in self._user_vars[user]:
-                raise VarNotDefinedError
-
-            return self._user_vars[user][name]
+            return self._users[user].get_var(name)
 
         # Retrieve a global variable
         if name not in self._global_vars:
@@ -168,7 +175,7 @@ class Saml:
         :param name: The name of the variable to set
         :type  name: str
 
-        :param value: The variable to set
+        :param value: The value of the variable to set
         :type  value: str
 
         :param user: If defining a user variable, the user identifier
@@ -178,10 +185,10 @@ class Saml:
         """
         # Set a user variable
         if user is not None:
-            if user not in self._user_vars:
+            if user not in self._users:
                 raise UserNotDefinedError
 
-            self._user_vars[user][name] = value  # TODO
+            self._users[user].set_var(name, value)
             return
 
         # Set a global variable
@@ -226,14 +233,16 @@ class Saml:
         # Add the starting text to the response list
         head = element.text if isinstance(element.text, str) else None
         if head:
-            self._log.debug('Appending heading text: {text}'.format(text=head))
+            if head.strip():
+                self._log.debug('Appending heading text: {text}'.format(text=head))
             response.append(head)
 
         # Internal method for appending an elements tail to the response list
         def append_tail(e):
             tail = e.tail if isinstance(e.tail, str) else None
             if tail:
-                self._log.debug('Appending trailing text: {text}'.format(text=tail))
+                if tail.strip():
+                    self._log.debug('Appending trailing text: {text}'.format(text=tail))
                 response.append(tail)
         
         # Parse the contained tags and add their associated string objects to the response list
@@ -286,7 +295,72 @@ class User:
         # User attributes
         self.id = identifier
         self.topic = None
-        self._limits = {}  # Dictionary of trigger id()'s as keys, limit expiration's in epoch as values
+        self._vars = {}
+        self._limits = {}  # Dictionary of trigger id()'s as keys, tuple of limit expiration's and blocking as values
+
+    def get_var(self, name):
+        """
+        Retrieve a variable assigned to this user
+        :param name: The name of the variable to retrieve
+        :type  name: str
+
+        :rtype: str
+
+        :raises VarNotDefinedError: The requested variable has not been defined
+        """
+        if name not in self._vars:
+            raise VarNotDefinedError
+
+        return self._vars[name]
+
+    def set_var(self, name, value):
+        """
+        Set a variable for this user
+        :param name: The name of the variable to set
+        :type  name: str
+
+        :param value: The value of the variable to set
+        :type  value: str
+        """
+        self._vars[name] = value
+
+    def set_limit(self, identifier, expires_at, blocking=False):
+        """
+        Set a new trigger or response limit
+        :param identifier: The id() of the Trigger or Response object
+        :type  identifier: int
+
+        :param expires_at: The limit expiration as a Unix timestamp
+        :type  expires_at: float
+
+        :param blocking: When True and a limit is triggered, no other Triggers will be attempted
+        :type  blocking: bool
+        """
+        self._limits[identifier] = (expires_at, blocking)
+
+    def clear_limit(self, identifier=None):
+        """
+        Remove a single limit or all defined limits
+        :param identifier: The identifier to clear limits for, or if no identifier is supplied, clears ALL limits
+        :type  identifier: int
+
+        :return: True if a limit was successfully found and removed, False if no limit could be matched for removal
+        :rtype : bool
+        """
+        # Remove a single limit
+        if identifier:
+            if identifier in self._limits:
+                del self._limits[identifier]
+                return True
+            else:
+                return False
+
+        # Remove all limits
+        if self._limits:
+            self._limits.clear()
+            return True
+        else:
+            return False
 
     def is_limited(self, trigger):
         """
@@ -320,15 +394,29 @@ class User:
 
 
 class Star:
+    """
+    Wildcard object
+    """
     def __init__(self, trigger, index=1, star_format='none'):
+        """
+        Initialize a new Star wildcard tag object
+        :param trigger: SAML Trigger instance
+        :type  trigger: parser.trigger.trigger.Trigger
+
+        :param index: The wildcard index to retrieve (Indexes start at 1, not 0)
+        :type  index: int
+
+        :param star_format: The formatting to apply to the text value. Can be any valid Python string method
+        :type  star_format: str
+        """
         self.trigger = trigger
         self.index = index
         self.format = star_format
-        self._log = logging.getLogger('saml.parser.trigger.star')
+        self._log = logging.getLogger('saml.star')
 
     def __str__(self):
         try:
-            star = str(self.trigger.stars[self.index - 1])  # TODO: Stars are reset after first request, this won't work
+            star = str(self.trigger.stars[self.index - 1])
         except IndexError:
             self._log.warn('No wildcard with the index {index} exists for this response'.format(index=self.index))
             return ''

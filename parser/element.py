@@ -4,9 +4,12 @@ from parser.common import normalize, attribute
 
 
 class Element:
+    """
+    Base Saml element class
+    """
     def __init__(self, saml, element, file_path):
         """
-        Base Saml Object class
+        Initialize a new Element instance
         :param saml: The parent SAML instance
         :type  saml: Saml
 
@@ -23,15 +26,21 @@ class Element:
         self._parse()
 
     def _parse(self):
+        """
+        Loop through all child elements and execute any available parse methods for them
+        """
         for child in self._element:
-            method_name = '_parse_' + child.tag
+            method_name = '_parse_{0}'.format(str(child.tag))  # TODO: This is a hack, skip comment objects here
 
             if hasattr(self, method_name):
                 parse = getattr(self, method_name)
                 parse(child)
 
 
-class TriggerResponseElement(Element):
+class RestrictableElement(Element):
+    """
+    Extended base element class for shared Trigger and Response parsers
+    """
     def __init__(self, saml, element, file_path):
         """
         Base Saml Object class
@@ -46,8 +55,8 @@ class TriggerResponseElement(Element):
         """
         self.user_limit = None
         self.global_limit = None
-        self.topic = None
         self.mood = None
+        self.chance = 100
         self._log = logging.getLogger('saml.parser.element')
         super().__init__(saml, element, file_path)
 
@@ -57,8 +66,7 @@ class TriggerResponseElement(Element):
         :param element: The XML Element object
         :type  element: etree._Element
         """
-        self._log.debug('Setting Response topic: {topic}'.format(topic=element.text))
-        self.topic = False if element.text is None else normalize(element.text)
+        self.topic = normalize(element.text) if element.text else None
 
     def _parse_limit(self, element):
         """
@@ -68,18 +76,15 @@ class TriggerResponseElement(Element):
         """
         # Is this a Global or User limit?
         limit_type = attribute(element, 'type', 'user')
-        if limit_type not in ['user', 'global']:
-            self._log.warn('Unrecognized limit type: {type}'.format(type=limit_type))
-            return
 
-        # If we're setting the limit using static units..
+        # If a time unit has been specified..
         unit_conversions = {
             'minutes': 60,
-            'hours': 3600,
-            'days': 86400,
-            'weeks': 604800,
-            'months': 2592000,
-            'years': 31536000
+            'hours':   3600,
+            'days':    86400,
+            'weeks':   604800,
+            'months':  2592000,
+            'years':   31536000
         }
         units = attribute(element, 'units')
         if units:
@@ -90,8 +95,8 @@ class TriggerResponseElement(Element):
             try:
                 limit = float(element.text)
             except (ValueError, TypeError):
-                self._log.warn('Limit must contain a valid float when using units (Invalid limit: "{limit}")'
-                               .format(limit=element.text))
+                self._log.warn('Limit must contain a valid integer or float (Invalid limit: "{limit}")'
+                               .format( limit=element.text))
                 return
 
             if limit_type == 'global':
@@ -101,6 +106,7 @@ class TriggerResponseElement(Element):
 
             return
 
+        # Save the limit as seconds by default
         try:
             limit = float(element.text)
         except (ValueError, TypeError):
@@ -119,8 +125,7 @@ class TriggerResponseElement(Element):
         :type  element: etree._Element
         """
         try:
-            chance = element.text.strip('%')
-            chance = float(chance)
+            chance = float(element.text)
         except (ValueError, TypeError, AttributeError):
             self._log.warn('Invalid Chance string: {chance}'.format(chance=element.text))
             return

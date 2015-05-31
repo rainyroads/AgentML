@@ -40,7 +40,7 @@ class Random(Tag):
                 continue
 
             # Otherwise, parse all the available tags
-            responses.append((tuple(self.trigger.saml.parse_tags(child)), weight))
+            responses.append((tuple(self.trigger.saml.parse_tags(child, self.trigger)), weight))
         self._responses = tuple(responses)
 
     def __str__(self):

@@ -43,43 +43,26 @@
         specified topic / emotion applied to all the contained triggers.
     -->
     <define name="triggerGroup">
-        <choice>
-            <oneOrMore>
+        <oneOrMore>
+            <choice>
                 <ref name="trigger"/>
-            </oneOrMore>
 
-            <element name="emotion">
-                <attribute name="name"/>
-                <choice>
-                    <oneOrMore>
-                        <ref name="trigger"/>
-                    </oneOrMore>
+                <element name="group">
+                    <attribute name="name"/>
+                    <ref name="triggerGroup"/>
+                </element>
 
-                    <element name="topic">
-                        <attribute name="name"/>
-                        <oneOrMore>
-                            <ref name="trigger"/>
-                        </oneOrMore>
-                    </element>
-                </choice>
-            </element>
+                <element name="emotion">
+                    <attribute name="name"/>
+                    <ref name="triggerGroup"/>
+                </element>
 
-            <element name="topic">
-                <attribute name="name"/>
-                <choice>
-                    <oneOrMore>
-                        <ref name="trigger"/>
-                    </oneOrMore>
-
-                    <element name="emotion">
-                        <attribute name="name"/>
-                        <oneOrMore>
-                            <ref name="trigger"/>
-                        </oneOrMore>
-                    </element>
-                </choice>
-            </element>
-        </choice>
+                <element name="topic">
+                    <attribute name="name"/>
+                    <ref name="triggerGroup"/>
+                </element>
+            </choice>
+        </oneOrMore>
     </define>
 
     <!-- [Element] Trigger -->
@@ -105,7 +88,7 @@
                 </optional>
 
                 <optional>
-                    <ref name="trigger.reaction"/>
+                    <ref name="trigger.chance"/>
                 </optional>
             </interleave>
         </element>
@@ -156,40 +139,50 @@
                 </attribute>
             </optional>
 
-            <zeroOrMore>
+            <interleave>
+                <element name="template">
+                    <oneOrMore>
+                        <choice>
+                            <text/>
+                            <ref name="anyElement"/>
+                        </choice>
+                    </oneOrMore>
+                </element>
+
                 <optional>
-                    <text/>
+                    <ref name="trigger.topic"/>
                 </optional>
 
-                <ref name="anyElement"/>
+                <optional>
+                    <ref name="trigger.emotion"/>
+                </optional>
 
                 <optional>
-                    <text/>
+                    <ref name="trigger.limit"/>
                 </optional>
-            </zeroOrMore>
 
-            <optional>
-                <ref name="trigger.topic"/>
-            </optional>
+                <optional>
+                    <ref name="trigger.chance"/>
+                </optional>
 
-            <optional>
-                <ref name="trigger.emotion"/>
-            </optional>
+                <text/>
+            </interleave>
+            <!--<zeroOrMore>-->
+                <!--<optional>-->
+                    <!--<text/>-->
+                <!--</optional>-->
 
-            <optional>
-                <ref name="trigger.limit"/>
-            </optional>
+                <!--<ref name="anyElement"/>-->
 
-            <optional>
-                <ref name="trigger.reaction"/>
-            </optional>
-
-            <text/>
+                <!--<optional>-->
+                    <!--<text/>-->
+                <!--</optional>-->
+            <!--</zeroOrMore>-->
         </element>
     </define>
 
     <define name="trigger.limit">
-        <element name="limit">
+        <element name="limit" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
             <optional>
                 <attribute name="unit">
                     <choice>
@@ -213,28 +206,31 @@
                 </attribute>
             </optional>
 
-            <text/>
+            <optional>
+                <attribute name="blocking">
+                    <data type="boolean"/>
+                </attribute>
+            </optional>
+
+            <choice>
+                <data type="integer"/>
+                <data type="float"/>
+            </choice>
         </element>
     </define>
 
-    <define name="trigger.reaction">
-        <element name="reaction">
+    <define name="trigger.chance">
+        <element name="chance" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
             <optional>
-                <element name="topic">
-                    <text/>
-                </element>
+                <attribute name="blocking">
+                    <data type="boolean"/>
+                </attribute>
             </optional>
 
-            <optional>
-                <element name="emotion" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
-                    <element name="name">
-                        <text/>
-                    </element>
-                    <element name="level">
-                        <data type="integer"/>
-                    </element>
-                </element>
-            </optional>
+            <choice>
+                <data type="integer"/>
+                <data type="float"/>
+            </choice>
         </element>
     </define>
 

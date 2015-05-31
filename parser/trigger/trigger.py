@@ -1,48 +1,55 @@
 import logging
+import random
 import re
 import sre_constants
-from parser import Element, weighted_choice, normalize, attribute, bool_attribute
+from parser import RestrictableElement, weighted_choice, normalize, attribute, bool_attribute
 from parser.trigger.response import Response
 from errors import SamlSyntaxError
 
 
-class Trigger(Element):
+class Trigger(RestrictableElement):
+    """
+    SAML Trigger object
+    """
     def __init__(self, saml, element, file_path, **kwargs):
-        # Default attributes
-        self.topic = kwargs['topic'] if 'topic' in kwargs else None
-        self.emotion = kwargs['emotion'] if 'emotion' in kwargs else None
+        """
+        Initialize a new Trigger instance
+        :param saml: The parent SAML instance
+        :type  saml: Saml
 
+        :param element: The XML Element object
+        :type  element: etree._Element
+
+        :param file_path: The absolute path to the SAML file
+        :type  file_path: str
+
+        :param kwargs: Default attributes
+        """
+        # Containers and default attributes
         self.pattern = kwargs['pattern'] if 'pattern' in kwargs else None
+        self.group = kwargs['group'] if 'group' in kwargs else None
+        self.topic = kwargs['topic'] if 'topic' in kwargs else None
         self._responses = kwargs['responses'] if 'responses' in kwargs else []
+        self.stars = ()  # NOTE: Stars / wildcards are reset when a Response classes __str__ magic method is executed
 
-        # Trigger attributes
-        self.normalize = bool_attribute(element, 'normalize')
-        self.substitute = bool_attribute(element, 'substitute')
-
-        # Global trigger limit
-        self._limit = 0
-        self._limit_blocking = True
-
-        # TODO: Trigger chance
-        self._chance = 100
-        self._chance_blocking = True
-
-        # Wildcards placeholder
-        self._stars = ()
-
-        self._log = logging.getLogger('saml.trigger')
+        # Parent __init__ must be initialized BEFORE default attributes are assigned, but AFTER the above containers
         super().__init__(saml, element, file_path)
+
+        # Trigger attributes and wildcard p
+        self.normalize = bool_attribute(element, 'normalize')
+
+        self._log = logging.getLogger('saml.parser.trigger')
 
     def match(self, user, message):
         """
-        Returns a response message if a match is found, otherwise returns None
+        Returns a response message if a match is found, otherwise None
         :param user: The requesting client
         :type  user: saml.User
 
-        :param message: The message to test
+        :param message: The message to match
         :type  message: str
 
-        :rtype: bool
+        :rtype: str or None
         """
         self._log.info('Attempting to match message against Pattern: {pattern}'
                        .format(pattern=self.pattern.pattern if hasattr(self.pattern, 'pattern') else self.pattern))
@@ -60,7 +67,7 @@ class Trigger(Element):
         # String match
         if isinstance(self.pattern, str) and message == self.pattern:
             self._log.info('String Pattern matched: {match}'.format(match=self.pattern))
-            return str(self.response(user) or '')
+            return str(self.response(user) or None)
 
         # Regular expression match
         if hasattr(self.pattern, 'match'):
@@ -68,52 +75,51 @@ class Trigger(Element):
             if match:
                 self._log.info('Regex Pattern matched: {match}'.format(match=self.pattern.pattern))
                 self.stars = match.groups()
-                return str(self.response(user) or '')
+                return str(self.response(user) or None)
 
+    # noinspection PyUnboundLocalVariable
     def response(self, user=None):
         """
         Return a random response for this trigger
-        :param user: The User to apply response reactions to
+        :param user: The user to apply response reactions to
         :type  user: saml.User
 
         :rtype: str
         """
         # If we have a User, only fetch responses that are not limited
         if user:
-            responses = [response for response in self._responses if not user.is_limited(response)]
+            responses = [response for response in self._responses if not user.is_limited(response[0])]
         else:
             responses = self._responses
 
-        # Fetch the response and apply any reactions
-        response = weighted_choice(responses)
+        # Fetch the response and, if a trigger chance is defined, execute it
+        while True:
+            response = weighted_choice(responses)
+            # No chance defined
+            if not response.chance:
+                break
+
+            # Chance succeeded
+            if response.chance >= random.uniform(0, 100):
+                self._log.info('Response had a {chance}% of being triggered and succeeded'
+                               .format(chance=response.chance))
+                break
+
+            # Chance failed
+            self._log.info('Response had a {chance}% of being triggered and failed, trying the next available '
+                           'response'.format(chance=response.chance))
+            responses = [new_response for new_response in responses if response is not new_response[0]]
+
+            # Do we have any responses left?
+            if not responses:
+                self._log.info('Chance check for all Responses in this Trigger failed, giving up')
+                return ''
+
         if user:
             response.apply_reactions(user)
 
         # Return the Response object
         return response
-
-    @property
-    def stars(self):
-        """
-        Pulls the wildcards for this trigger event
-
-        :rtype: tuple of str
-        """
-        self._log.debug('Retrieving and resetting Trigger wildcards')
-        stars = self._stars
-        self._stars = ()
-
-        return stars
-
-    @stars.setter
-    def stars(self, stars):
-        """
-        Define the wildcards for this trigger event
-        :param stars: Trigger wildcards
-        :type  stars: tuple of str
-        """
-        self._log.debug('Setting Trigger wildcards: {wildcards}'.format(wildcards=stars))
-        self._stars = stars
 
     @staticmethod
     def replace_wildcards(string, wildcard, regex):
@@ -139,11 +145,12 @@ class Trigger(Element):
 
     def _parse_topic(self, element):
         """
-        Parse a topic element
+        Parse and assign the topic for this trigger
         :param element: The XML Element object
         :type  element: etree._Element
         """
-        self.topic = normalize(element.text)
+        self._log.debug('Setting Trigger topic: {topic}'.format(topic=element.text))
+        super()._parse_topic(element)
 
     def _parse_emotion(self, element):
         """
@@ -155,7 +162,7 @@ class Trigger(Element):
 
     def _parse_pattern(self, element):
         """
-        Parse a pattern element
+        Parse the trigger pattern
         :param element: The XML Element object
         :type  element: etree._Element
         """
@@ -233,7 +240,7 @@ class Trigger(Element):
 
     def _parse_response(self, element):
         """
-        Parse a response element
+        Parse a trigger response
         :param element: The XML Element object
         :type  element: etree._Element
         """
@@ -252,46 +259,11 @@ class Trigger(Element):
             weight = 1
 
         # If the response has no tags, just store the string text
-        if not len(element):
-            self._responses.append((element.text, weight))
-        else:
-            self._responses.append((Response(self, element, self.file_path), weight))
-
-    def _parse_trigger(self, element):
-        """
-        Parse a trigger element
-        :param element: The XML Element object
-        :type  element: etree._Element
-        """
-        for child in element:
-            # Set the topic
-            if child.tag == 'topic':
-                self._parse_topic(child)
-                continue
-            # Set the emotion
-            elif child.tag == 'emotion':
-                self._parse_emotion(child)
-                continue
-            # Add a trigger
-            elif child.tag == 'pattern':
-                self.pattern = child.text
-                continue
-            # Add a response
-            elif child.tag == 'response':
-                # If the response has no tags, just store the string text
-                if len(child) == 1:
-                    self._responses.append(child.text)
-                else:
-                    self._responses.append(child)
-                continue
-            # Parse a reaction
-            elif child.tag == 'reaction':
-                self._parse_reaction(child)
-                continue
+        self._responses.append((Response(self, element, self.file_path), weight))
 
     def _parse_limit(self, element):
         """
-        Parse a limit element
+        Parse a user or global limit for the trigger
         :param element: The XML Element object
         :type  element: etree._Element
         """
@@ -345,7 +317,7 @@ class Trigger(Element):
 
     def _parse_chance(self, element):
         """
-        Parse a chance element
+        Parse the chance of this trigger being successfully called
         :param element: The XML Element object
         :type  element: etree._Element
         """
@@ -364,4 +336,4 @@ class Trigger(Element):
         self.chance = chance
 
     def __str__(self):
-        return self.response
+        return self.response()

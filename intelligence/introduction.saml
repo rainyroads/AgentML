@@ -30,6 +30,9 @@
         <pattern>(hello|hi|hiya|good evening|good morning)</pattern>
 
         <response>
+            <topic>introduction</topic>
+            <limit>15</limit>
+
             <template>
                 <random>
                     <item>Hi! What is your name?</item>
@@ -37,9 +40,6 @@
                     <item>Hiya! Who are you?</item>
                 </random>
             </template>
-
-            <topic>introduction</topic>
-            <limit>15</limit>
         </response>
     </trigger>
 
@@ -47,9 +47,26 @@
         <trigger>
             <pattern>(_)</pattern>
 
-            <response weight="3">Hello <star format="title"/>, it's nice to meet you!</response>
-            <response>Nice to meet you, <star format="title"/>!</response>
-            <response>Hi <star format="title"/>, my name is Yuki!</response>
+            <response>
+                <topic/>
+
+                <template>
+                    <random>
+                        <item weight="3">Hello <star format="title"/>, it's nice to meet you!</item>
+                        <item>Nice to meet you, <star format="title"/>!</item>
+                        <item>Hi <star format="title"/>, my name is Yuki!</item>
+                    </random>
+                </template>
+            </response>
         </trigger>
     </topic>
+
+    <trigger>
+        <pattern>chance</pattern>
+        <response>
+            <limit>3</limit>
+            <chance>40</chance>
+            <template>Success!</template>
+        </response>
+    </trigger>
 </saml>
