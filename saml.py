@@ -2,7 +2,7 @@ import os
 import time
 import logging
 from lxml import etree
-from parser import schema, attribute, int_attribute
+from parser import schema, normalize, attribute, int_attribute
 from parser.trigger import Trigger
 from parser.tags import Random, Var
 from errors import SamlError, SamlSyntaxError, VarNotDefinedError, UserNotDefinedError, NoTagParserError, \
@@ -138,7 +138,7 @@ class Saml:
             raise SamlError('There are no empty topic triggers defined, unable to continue')
 
         for trigger in triggers:
-            match = trigger.match(user, message)
+            match = trigger.match(user, Message(message))
             if match:
                 return match
 
@@ -279,6 +279,61 @@ class Saml:
             self._log.warn('Skipping pattern due to an error')
 
 
+class Message:
+    """
+    Message container object
+    """
+    NORMALIZED = 'normalized'
+    PRESERVE_CASE = 'preserve_case'
+    RAW = 'raw'
+
+    formats = [NORMALIZED, PRESERVE_CASE, RAW]
+
+    def __init__(self, message, message_format=NORMALIZED):
+        """
+        Initialize a new Message instance
+        :param message: The message being parsed
+        :type  message: str
+
+        :param message_format: The message format to return when the object is interpreted as a string
+        :type  message_format: str
+        """
+        self._log = logging.getLogger('saml.message')
+        self._format = message_format
+
+        # Parsed (and un-parsed) message containers
+        self._log.debug('Parsing raw message: {message}'.format(message=message))
+        self._messages = {
+            'normalized_message': normalize(message),
+            'preserve_case_message': normalize(message, preserve_case=True),
+            'raw_message': message
+        }
+
+    @property
+    def format(self):
+        """
+        Return the currently set message format
+        """
+        return self._format
+
+    @format.setter
+    def format(self, message_format):
+        """
+        Set the message format
+        :param message_format: The format to set
+        :type  message_format: str
+        """
+        if message_format not in self.formats:
+            self._log.error('Invalid Message format specified: {format}'.format(format=message_format))
+            return
+
+        self._log.debug('Setting message format to {format}'.format(format=message_format))
+        self._format = message_format
+
+    def __str__(self):
+        return self._messages['{format}_message'.format(format=self._format)]
+
+
 class User:
     """
     User session object
@@ -397,7 +452,7 @@ class Star:
     """
     Wildcard object
     """
-    def __init__(self, trigger, index=1, star_format='none'):
+    def __init__(self, trigger, index=1, star_format='normalized'):
         """
         Initialize a new Star wildcard tag object
         :param trigger: SAML Trigger instance
@@ -416,7 +471,11 @@ class Star:
 
     def __str__(self):
         try:
-            star = str(self.trigger.stars[self.index - 1])
+            if self.format in ['preserve_case', 'raw']:
+                self._log.debug('Formatting wildcard as {format}'.format(format=self.format))
+                star = str(self.trigger.stars[self.format][self.index - 1])
+            else:
+                star = str(self.trigger.stars['normalized'][self.index - 1])
         except IndexError:
             self._log.warn('No wildcard with the index {index} exists for this response'.format(index=self.index))
             return ''

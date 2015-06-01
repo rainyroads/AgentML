@@ -14,7 +14,9 @@
                         <value>title</value>
                         <value>upper</value>
                         <value>lower</value>
-                        <value>none</value>
+                        <value>normalized</value>
+                        <value>preserve_case</value>
+                        <value>raw</value>
                     </choice>
                 </attribute>
             </optional>

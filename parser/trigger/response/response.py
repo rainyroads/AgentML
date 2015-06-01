@@ -124,7 +124,11 @@ class Response(RestrictableElement):
         response = ''.join(map(str, self._response)).strip()
 
         self._log.debug('Resetting parent Trigger temporary containers')
-        self.trigger.stars = ()
+        self.stars = {
+            'normalized': (),
+            'preserve_case': (),
+            'raw': ()
+        }
         self.trigger.user = None
         return response
 

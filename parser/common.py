@@ -32,7 +32,7 @@ def weighted_choice(choices):
         most += weight
 
 
-def normalize(string, pattern=False):
+def normalize(string, pattern=False, preserve_case=False):
     """
     Normalize input for comparison with other input
     :param string: The string to normalize
@@ -41,6 +41,9 @@ def normalize(string, pattern=False):
     :param pattern: Allow wildcard symbols for triggers
     :type  pattern: bool
 
+    :param preserve_case: Normalize the message without casefolding
+    :type  preserve_case: bool
+
     :rtype: str
     """
     regex = re.compile(r'([^\s\w\(\)\[\]\|\*#])+') if pattern else re.compile(r'([^\s\w]|_)+')
@@ -48,7 +51,8 @@ def normalize(string, pattern=False):
     if not isinstance(string, str):
         return ''
 
-    return regex.sub('', string.strip().casefold())
+    string = string.strip() if preserve_case else string.strip().casefold()
+    return regex.sub('', string)
 
 
 def attribute(element, attribute, default=None):

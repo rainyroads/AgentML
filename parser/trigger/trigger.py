@@ -32,7 +32,11 @@ class Trigger(RestrictableElement):
         self._responses = kwargs['responses'] if 'responses' in kwargs else []
 
         # Temporary response data
-        self.stars = ()
+        self.stars = {
+            'normalized': (),
+            'preserve_case': (),
+            'raw': ()
+        }
         self.user = None
 
         # Parent __init__ must be initialized BEFORE default attributes are assigned, but AFTER the above containers
@@ -50,7 +54,7 @@ class Trigger(RestrictableElement):
         :type  user: saml.User
 
         :param message: The message to match
-        :type  message: str
+        :type  message: saml.Message
 
         :rtype: str or None
         """
@@ -64,21 +68,31 @@ class Trigger(RestrictableElement):
                             .format(u_topic=user.topic, t_topic=self.topic))
             return
 
-        if self.normalize:
-            message = normalize(message)
-            self._log.debug('Normalizing message: {message}'.format(message=message))
+        # if self.normalize:
+        #     message = normalize(message)
+        #     self._log.debug('Normalizing message: {message}'.format(message=message))
 
         # String match
-        if isinstance(self.pattern, str) and message == self.pattern:
+        if isinstance(self.pattern, str) and str(message) == self.pattern:
             self._log.info('String Pattern matched: {match}'.format(match=self.pattern))
             return str(self.response(user) or None)
 
         # Regular expression match
         if hasattr(self.pattern, 'match'):
-            match = self.pattern.match(message)
+            match = self.pattern.match(str(message))
             if match:
-                self._log.info('Regex Pattern matched: {match}'.format(match=self.pattern.pattern))
-                self.stars = match.groups()
+                self._log.info('Regex pattern matched: {match}'.format(match=self.pattern.pattern))
+
+                # Parse pattern wildcards
+                self.stars['normalized'] = match.groups()
+                for message_format in [message.PRESERVE_CASE, message.RAW]:
+                    message.format = message_format
+                    format_match = self.pattern.match(str(message))
+                    if format_match:
+                        self.stars[message_format] = format_match.groups()
+
+                self._log.debug('Assigning pattern wildcards: {stars}'.format(stars=str(self.stars)))
+
                 return str(self.response(user) or None)
 
     # noinspection PyUnboundLocalVariable
@@ -215,7 +229,12 @@ class Trigger(RestrictableElement):
         opt_choice = re.compile(r'\[([\w\s\|]+)\]\s?')
 
         if req_choice.search(self.pattern):
-            self._log.debug('Pattern contains required choices, will be compiled as a regex')
+            def sub_required(pattern):
+                patterns = pattern.group(1).split('|')
+                return r'({options})\b'.format(options='|'.join(patterns))
+
+            self.pattern = req_choice.sub(sub_required, self.pattern)
+            self._log.debug('Parsing Pattern required choices: ' + self.pattern)
             compile_as_regex = True
 
         if opt_choice.search(self.pattern):
@@ -229,7 +248,7 @@ class Trigger(RestrictableElement):
 
         if compile_as_regex:
             self._log.debug('Compiling Pattern as regex')
-            self.pattern = re.compile(self.pattern)
+            self.pattern = re.compile(self.pattern, re.IGNORECASE)
         else:
             # Replace any escaped wildcard symbols
             self._log.debug('Replacing any escaped sequences in Pattern')
