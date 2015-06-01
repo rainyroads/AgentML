@@ -1,8 +1,8 @@
 import os
 import logging
-from parser import schema
+from parser import schema, attribute
 from parser.tags import Tag
-from errors import SamlError
+from errors import VarNotDefinedError
 
 
 class Var(Tag):
@@ -19,13 +19,34 @@ class Var(Tag):
         self._log = logging.getLogger('saml.parser.tags.var')
 
         # Define our schema
-        with open(os.path.join(self.saml.script_path, 'schemas', 'tags', 'var.rng')) as file:
+        with open(os.path.join(self.trigger.saml.script_path, 'schemas', 'tags', 'var.rng')) as file:
             self.schema = schema(file.read())
 
+        # Is this a User or Global variable?
+        self.type = attribute(element, 'type', 'user')
+
     def __str__(self):
+        # Does the variable name have tags to parse?
+        if len(self._element):
+            var = ''.join(map(str, self.trigger.saml.parse_tags(self._element, self.trigger)))
+        else:
+            var = self._element.text
+
+        # Is there a default value defined?
+        default = attribute(self._element, 'default')
+
         try:
-            self._log.debug('Attempting to assign var: {var}'.format(var=self._element.text))
-            return self.saml.get_var(self._element.text)
-        except SamlError:
-            self._log.info('Attempted to assign an unset variable to Response: {var}'.format(var=self._element.text))
+            self._log.debug('Retrieving {type} variable {var}'.format(type=self.type, var=var))
+            if self.type == 'user':
+                return self.trigger.user.get_var(var)
+            else:
+                return self.trigger.saml.get_var(var)
+        except VarNotDefinedError:
+            # Do we have a default value?
+            if default:
+                self._log.info('{type} variable {var} not set, returning default: {default}'
+                               .format(type=self.type.capitalize(), var=var, default=default))
+
+            self._log.info('{type} variable {var} not set and no default value has been specified'
+                           .format(type=self.type.capitalize(), var=var))
             return ''

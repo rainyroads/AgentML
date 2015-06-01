@@ -26,6 +26,7 @@
 </saml>-->
 
 <saml version="0.1" xmlns="">
+    <!-- Hello, Yuki! -->
     <trigger>
         <pattern>(hello|hi|hiya|good evening|good morning)</pattern>
 
@@ -61,12 +62,55 @@
         </trigger>
     </topic>
 
+    <!-- Chance test -->
     <trigger>
         <pattern>chance</pattern>
+
         <response>
             <limit>3</limit>
             <chance>40</chance>
             <template>Success!</template>
+        </response>
+    </trigger>
+
+    <!-- Var tests -->
+    <trigger>
+        <pattern>get user var (_)</pattern>
+
+        <response>
+            <template><var><star/></var></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>get global var (_)</pattern>
+
+        <response>
+            <template><var type="global"><star/></var></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>set user var (_) to (*)</pattern>
+
+        <response>
+            <template>Setting user variable <star/> to <star index="2"/></template>
+            <var>
+                <name><star/></name>
+                <value><star index="2"/></value>
+            </var>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>set global var (_) to (*)</pattern>
+
+        <response>
+            <template>Setting global variable <star/> to <star index="2"/></template>
+            <var type="global">
+                <name><star/></name>
+                <value><star index="2"/></value>
+            </var>
         </response>
     </trigger>
 </saml>

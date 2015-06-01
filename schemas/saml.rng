@@ -165,7 +165,9 @@
                     <ref name="trigger.chance"/>
                 </optional>
 
-                <text/>
+                <optional>
+                    <ref name="trigger.var"/>
+                </optional>
             </interleave>
             <!--<zeroOrMore>-->
                 <!--<optional>-->
@@ -230,6 +232,45 @@
             <choice>
                 <data type="integer"/>
                 <data type="float"/>
+            </choice>
+        </element>
+    </define>
+
+    <define name="trigger.var">
+        <element name="var">
+            <optional>
+                <attribute name="type">
+                    <choice>
+                        <value>user</value>
+                        <value>global</value>
+                    </choice>
+                </attribute>
+            </optional>
+
+            <choice>
+                <ref name="trigger.var.attributeFormat"/>
+                <ref name="trigger.var.elementFormat"/>
+            </choice>
+        </element>
+    </define>
+
+    <define name="trigger.var.attributeFormat">
+        <attribute name="name"/>
+        <text/>
+    </define>
+
+    <define name="trigger.var.elementFormat">
+        <element name="name">
+            <choice>
+                <text/>
+                <ref name="anyElement"/>
+            </choice>
+        </element>
+
+        <element name="value">
+            <choice>
+                <text/>
+                <ref name="anyElement"/>
             </choice>
         </element>
     </define>

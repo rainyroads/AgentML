@@ -30,7 +30,10 @@ class Trigger(RestrictableElement):
         self.group = kwargs['group'] if 'group' in kwargs else None
         self.topic = kwargs['topic'] if 'topic' in kwargs else None
         self._responses = kwargs['responses'] if 'responses' in kwargs else []
-        self.stars = ()  # NOTE: Stars / wildcards are reset when a Response classes __str__ magic method is executed
+
+        # Temporary response data
+        self.stars = ()
+        self.user = None
 
         # Parent __init__ must be initialized BEFORE default attributes are assigned, but AFTER the above containers
         super().__init__(saml, element, file_path)
@@ -53,6 +56,7 @@ class Trigger(RestrictableElement):
         """
         self._log.info('Attempting to match message against Pattern: {pattern}'
                        .format(pattern=self.pattern.pattern if hasattr(self.pattern, 'pattern') else self.pattern))
+        self.user = user
 
         # Make sure the topic matches (if one is defined)
         if user.topic != self.topic:

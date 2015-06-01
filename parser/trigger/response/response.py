@@ -1,6 +1,7 @@
 import os
 import time
 import logging
+from collections import Iterable
 from parser import RestrictableElement
 from parser.common import schema, normalize, attribute
 
@@ -27,6 +28,7 @@ class Response(RestrictableElement):
         self.trigger = trigger
         self._response = ()
         self.topic = False
+        self.var = ()
 
         # Parent __init__ must be initialized BEFORE default attributes are assigned, but AFTER the above containers
         super().__init__(trigger.saml, element, file_path)
@@ -58,6 +60,19 @@ class Response(RestrictableElement):
             self._log.info('Enforcing User Response Limit of {num} seconds'.format(num=self.user_limit))
             user.set_limit(id(self), (time.time() + self.user_limit))
 
+        if self.var:
+            var_type, var_name, var_value = self.var
+            var_name  = ''.join(map(str, var_name)) if isinstance(var_name, Iterable) else var_name
+            var_value = ''.join(map(str, var_value)) if isinstance(var_value, Iterable) else var_value
+
+            # Set a user variable
+            if var_type == 'user':
+                self.trigger.user.set_var(var_name, var_value)
+
+            # Set a global variable
+            if var_type == 'global':
+                self.trigger.saml.set_var(var_name, var_value)
+
         # saml.mood = self.mood
 
     def _parse(self):
@@ -81,11 +96,35 @@ class Response(RestrictableElement):
 
         self._response = tuple(self.saml.parse_tags(template, self.trigger))
 
+    def _parse_var(self, element):
+        """
+        Parse a variable assignment
+        :param element: The XML Element object
+        :type  element: etree._Element
+        """
+        syntax = 'attribute' if element.get('name') else 'element'
+
+        var_type = attribute(element, 'type', 'user')
+        if syntax == 'attribute':
+            var_name  = attribute(element, 'name')
+
+            value_etree = element.find('value')
+            var_value   = self.saml.parse_tags(value_etree, self.trigger) if len(value_etree) else value_etree.text
+        else:
+            name_etree = element.find('name')
+            var_name   = self.saml.parse_tags(name_etree, self.trigger) if len(name_etree) else name_etree.text
+
+            value_etree = element.find('value')
+            var_value = self.saml.parse_tags(value_etree, self.trigger) if len(value_etree) else value_etree.text
+
+        self.var = (var_type, var_name, var_value)
+
     def __str__(self):
         self._log.debug('Converting Response object to string format')
         response = ''.join(map(str, self._response)).strip()
 
-        self._log.debug('Resetting parent Trigger\'s stars')
+        self._log.debug('Resetting parent Trigger temporary containers')
         self.trigger.stars = ()
+        self.trigger.user = None
         return response
 

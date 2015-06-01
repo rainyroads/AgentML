@@ -83,13 +83,14 @@
         </xs:complexType>
     </xs:element>
     <xs:element name="response">
-        <xs:complexType mixed="true">
+        <xs:complexType>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:element ref="template"/>
                 <xs:group ref="trigger.topic"/>
                 <xs:group ref="trigger.emotion"/>
                 <xs:element ref="limit"/>
                 <xs:element ref="chance"/>
+                <xs:group ref="trigger.var"/>
             </xs:choice>
             <xs:attribute name="weight" type="xs:integer"/>
         </xs:complexType>
@@ -144,6 +145,42 @@
             </xs:simpleContent>
         </xs:complexType>
     </xs:element>
+    <xs:group name="trigger.var">
+        <xs:sequence>
+            <xs:element name="var">
+                <xs:complexType mixed="true">
+                    <xs:group minOccurs="0" ref="trigger.var.elementFormat"/>
+                    <xs:attribute name="type">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:token">
+                                <xs:enumeration value="user"/>
+                                <xs:enumeration value="global"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
+                    <xs:attribute name="name"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:group>
+    <xs:attributeGroup name="trigger.var.attributeFormat">
+        <xs:attribute name="name" use="required"/>
+    </xs:attributeGroup>
+    <xs:group name="trigger.var.elementFormat">
+        <xs:sequence>
+            <xs:element name="name">
+                <xs:complexType mixed="true">
+                    <xs:group minOccurs="0" ref="anyElement"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element ref="value"/>
+        </xs:sequence>
+    </xs:group>
+    <xs:element name="value">
+        <xs:complexType mixed="true">
+            <xs:group minOccurs="0" ref="anyElement"/>
+        </xs:complexType>
+    </xs:element>
     <!-- [Group] Emotions -->
     <!--
         Emotions are defined once in a single <emotions> element. Any subsequent use of this
@@ -188,7 +225,7 @@
     <xs:element name="identity">
         <xs:complexType>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element ref="name"/>
+                <xs:group ref="identity.name"/>
                 <xs:element ref="nickname"/>
                 <xs:element ref="gender"/>
                 <xs:element ref="epoch"/>
@@ -196,7 +233,11 @@
         </xs:complexType>
     </xs:element>
     <!-- [Elements] Identity -->
-    <xs:element name="name" type="xs:string"/>
+    <xs:group name="identity.name">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string"/>
+        </xs:sequence>
+    </xs:group>
     <xs:element name="nickname" type="xs:string"/>
     <xs:element name="gender">
         <xs:simpleType>
@@ -216,13 +257,17 @@
     <xs:element name="init">
         <xs:complexType>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element ref="var"/>
+                <xs:group ref="init.var"/>
                 <xs:element ref="sub"/>
             </xs:choice>
         </xs:complexType>
     </xs:element>
     <!-- [Elements] Init -->
-    <xs:element name="var" type="xs:string"/>
+    <xs:group name="init.var">
+        <xs:sequence>
+            <xs:element name="var" type="xs:string"/>
+        </xs:sequence>
+    </xs:group>
     <xs:element name="sub">
         <xs:complexType>
             <xs:sequence>
