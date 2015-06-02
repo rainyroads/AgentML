@@ -107,9 +107,7 @@ class Response(RestrictableElement):
         var_type = attribute(element, 'type', 'user')
         if syntax == 'attribute':
             var_name  = attribute(element, 'name')
-
-            value_etree = element.find('value')
-            var_value   = self.saml.parse_tags(value_etree, self.trigger) if len(value_etree) else value_etree.text
+            var_value   = self.saml.parse_tags(element, self.trigger) if len(element) else element.text
         else:
             name_etree = element.find('name')
             var_name   = self.saml.parse_tags(name_etree, self.trigger) if len(name_etree) else name_etree.text

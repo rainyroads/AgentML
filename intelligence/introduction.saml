@@ -31,7 +31,7 @@
         <pattern>(hello|hi|hiya|good evening|good morning)</pattern>
 
         <response>
-            <topic>introduction</topic>
+            <topic>whats_your_name</topic>
             <limit>15</limit>
 
             <template>
@@ -44,7 +44,7 @@
         </response>
     </trigger>
 
-    <topic name="introduction">
+    <topic name="whats_your_name">
         <trigger>
             <pattern>(_)</pattern>
 
@@ -58,6 +58,8 @@
                         <item>Hi <star format="title"/>, my name is Yuki!</item>
                     </random>
                 </template>
+
+                <var name="name"><star format="title"/></var>
             </response>
         </trigger>
     </topic>

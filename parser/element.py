@@ -66,7 +66,7 @@ class RestrictableElement(Element):
         :param element: The XML Element object
         :type  element: etree._Element
         """
-        self.topic = normalize(element.text) if element.text else None
+        self.topic = element.text if element.text else None
 
     def _parse_limit(self, element):
         """

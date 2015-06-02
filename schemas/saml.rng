@@ -256,7 +256,10 @@
 
     <define name="trigger.var.attributeFormat">
         <attribute name="name"/>
-        <text/>
+        <choice>
+            <text/>
+            <ref name="anyElement"/>
+        </choice>
     </define>
 
     <define name="trigger.var.elementFormat">
