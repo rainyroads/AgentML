@@ -79,6 +79,7 @@ class RestrictableElement(Element):
 
         # If a time unit has been specified..
         unit_conversions = {
+            'seconds': 1,
             'minutes': 60,
             'hours':   3600,
             'days':    86400,
@@ -86,7 +87,7 @@ class RestrictableElement(Element):
             'months':  2592000,
             'years':   31536000
         }
-        units = attribute(element, 'units')
+        units = attribute(element, 'unit', 'seconds')
         if units:
             if units not in unit_conversions:
                 self._log.warn('Unrecognized time unit: {unit}'.format(unit=units))
@@ -105,18 +106,6 @@ class RestrictableElement(Element):
                 self.user_limit = limit * unit_conversions[units]
 
             return
-
-        # Save the limit as seconds by default
-        try:
-            limit = float(element.text)
-        except (ValueError, TypeError):
-            self._log.warn('Invalid time string: {string}'.format(string=element.text))
-            return
-
-        if limit_type == 'global':
-            self.global_limit = limit
-        elif limit_type == 'user':
-            self.user_limit = limit
 
     def _parse_chance(self, element):
         """
