@@ -4,7 +4,7 @@ import re
 import sre_constants
 from parser import RestrictableElement, weighted_choice, normalize, attribute, bool_attribute
 from parser.trigger.response import Response
-from errors import SamlSyntaxError
+from errors import SamlSyntaxError, LimitError, ChanceError
 
 
 class Trigger(RestrictableElement):
@@ -68,14 +68,10 @@ class Trigger(RestrictableElement):
                             .format(u_topic=user.topic, t_topic=self.topic))
             return
 
-        # if self.normalize:
-        #     message = normalize(message)
-        #     self._log.debug('Normalizing message: {message}'.format(message=message))
-
         # String match
         if isinstance(self.pattern, str) and str(message) == self.pattern:
             self._log.info('String Pattern matched: {match}'.format(match=self.pattern))
-            return str(self.response(user) or None)
+            return str(self.response(user))
 
         # Regular expression match
         if hasattr(self.pattern, 'match'):
@@ -93,7 +89,7 @@ class Trigger(RestrictableElement):
 
                 self._log.debug('Assigning pattern wildcards: {stars}'.format(stars=str(self.stars)))
 
-                return str(self.response(user) or None)
+                return str(self.response(user))
 
     # noinspection PyUnboundLocalVariable
     def response(self, user=None):
@@ -109,6 +105,10 @@ class Trigger(RestrictableElement):
             responses = [response for response in self._responses if not user.is_limited(response[0])]
         else:
             responses = self._responses
+
+        # If all responses are limited, return now
+        if not responses:
+            raise LimitError
 
         # Fetch the response and, if a trigger chance is defined, execute it
         while True:
@@ -131,7 +131,7 @@ class Trigger(RestrictableElement):
             # Do we have any responses left?
             if not responses:
                 self._log.info('Chance check for all Responses in this Trigger failed, giving up')
-                return ''
+                raise ChanceError
 
         if user:
             response.apply_reactions(user)

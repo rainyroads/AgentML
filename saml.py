@@ -138,7 +138,11 @@ class Saml:
             raise SamlError('There are no empty topic triggers defined, unable to continue')
 
         for trigger in triggers:
-            match = trigger.match(user, Message(message))
+            try:
+                match = trigger.match(user, Message(message))
+            except TriggerBlockingError:
+                return
+
             if match:
                 return match
 

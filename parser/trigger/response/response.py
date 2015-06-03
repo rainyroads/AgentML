@@ -129,4 +129,3 @@ class Response(RestrictableElement):
         }
         self.trigger.user = None
         return response
-
