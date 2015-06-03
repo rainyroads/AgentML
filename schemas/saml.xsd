@@ -149,7 +149,10 @@
         <xs:sequence>
             <xs:element name="var">
                 <xs:complexType mixed="true">
-                    <xs:group minOccurs="0" ref="trigger.var.elementFormat"/>
+                    <xs:choice>
+                        <xs:group ref="trigger.var.attributeFormat"/>
+                        <xs:group ref="trigger.var.elementFormat"/>
+                    </xs:choice>
                     <xs:attribute name="type">
                         <xs:simpleType>
                             <xs:restriction base="xs:token">
@@ -161,6 +164,11 @@
                     <xs:attribute name="name"/>
                 </xs:complexType>
             </xs:element>
+        </xs:sequence>
+    </xs:group>
+    <xs:group name="trigger.var.attributeFormat">
+        <xs:sequence>
+            <xs:group minOccurs="0" ref="anyElement"/>
         </xs:sequence>
     </xs:group>
     <xs:attributeGroup name="trigger.var.attributeFormat">
@@ -258,7 +266,7 @@
         <xs:complexType>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:group ref="init.var"/>
-                <xs:element ref="sub"/>
+                <xs:element ref="substitutions"/>
             </xs:choice>
         </xs:complexType>
     </xs:element>
@@ -268,14 +276,16 @@
             <xs:element name="var" type="xs:string"/>
         </xs:sequence>
     </xs:group>
-    <xs:element name="sub">
+    <xs:element name="substitutions">
         <xs:complexType>
             <xs:sequence>
-                <xs:element maxOccurs="unbounded" ref="old"/>
-                <xs:element ref="new"/>
+                <xs:element maxOccurs="unbounded" ref="sub"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
-    <xs:element name="old" type="xs:string"/>
-    <xs:element name="new" type="xs:string"/>
+    <xs:element name="sub">
+        <xs:complexType mixed="true">
+            <xs:attribute name="word" use="required"/>
+        </xs:complexType>
+    </xs:element>
 </xs:schema>

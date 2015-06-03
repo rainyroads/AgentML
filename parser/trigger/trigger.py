@@ -68,14 +68,16 @@ class Trigger(RestrictableElement):
                             .format(u_topic=user.topic, t_topic=self.topic))
             return
 
+        normalized_message = self.saml.parse_substitutions(str(message))
+
         # String match
-        if isinstance(self.pattern, str) and str(message) == self.pattern:
+        if isinstance(self.pattern, str) and normalized_message == self.pattern:
             self._log.info('String Pattern matched: {match}'.format(match=self.pattern))
             return str(self.response(user))
 
         # Regular expression match
         if hasattr(self.pattern, 'match'):
-            match = self.pattern.match(str(message))
+            match = self.pattern.match(normalized_message)
             if match:
                 self._log.info('Regex pattern matched: {match}'.format(match=self.pattern.pattern))
 
@@ -83,7 +85,7 @@ class Trigger(RestrictableElement):
                 self.stars['normalized'] = match.groups()
                 for message_format in [message.PRESERVE_CASE, message.RAW]:
                     message.format = message_format
-                    format_match = self.pattern.match(str(message))
+                    format_match = self.pattern.match(normalized_message)
                     if format_match:
                         self.stars[message_format] = format_match.groups()
 

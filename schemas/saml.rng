@@ -387,7 +387,7 @@
                 </zeroOrMore>
 
                 <zeroOrMore>
-                    <ref name="init.substitute"/>
+                    <ref name="init.substitutions"/>
                 </zeroOrMore>
             </interleave>
         </element>
@@ -400,17 +400,14 @@
         </element>
     </define>
 
-    <define name="init.substitute">
-        <element name="sub">
+    <define name="init.substitutions">
+        <element name="substitutions">
             <oneOrMore>
-                <element name="old">
+                <element name="sub">
+                    <attribute name="word"/>
                     <text/>
                 </element>
             </oneOrMore>
-
-            <element name="new">
-                <text/>
-            </element>
         </element>
     </define>
 </grammar>

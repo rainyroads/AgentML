@@ -1,8 +1,10 @@
 import os
+import re
 import time
 import logging
 from lxml import etree
 from parser import schema, normalize, attribute, int_attribute
+from parser.init import Init
 from parser.trigger import Trigger
 from parser.tags import Random, Var
 from errors import SamlError, SamlSyntaxError, VarNotDefinedError, UserNotDefinedError, NoTagParserError, \
@@ -38,7 +40,7 @@ class Saml:
         self._global_vars   = {}
         self._users         = {}
         self._triggers      = []
-        self._substitutions = {}  # TODO
+        self._substitutions = []
 
         # Load internal SAML files
         self.load_directory(os.path.join(self.script_path, 'intelligence'))
@@ -78,6 +80,10 @@ class Saml:
 
         def parse_element(element):
             for child in element:
+                # Initialization
+                if child.tag == 'init':
+                    Init(self, child, file_path)
+
                 # Set the group
                 if child.tag == 'group':
                     self._log.info('Setting Trigger group: {group}'.format(group=child.get('name')))
@@ -145,6 +151,39 @@ class Saml:
 
             if match:
                 return match
+
+    def set_substitution(self, word, substitution):
+        """
+        Add a word substitution
+        :param word: The word to replace
+        :type  word: str
+
+        :param substitution: The word's substitution
+        :type  substitution: str
+        """
+        word = re.escape(normalize(word))
+        substitution = normalize(substitution)
+
+        sub = (re.compile(r'\b{word}\b'.format(word=word)), substitution)
+
+        if sub not in self._substitutions:
+            self._log.info('Appending new word substitution: "{word}" => "{sub}"'.format(word=word, sub=substitution))
+            self._substitutions.append(sub)
+
+    def parse_substitutions(self, message):
+        """
+        Parse substitutions in a supplied message
+        :param message: The message to parse
+        :type  message: str
+
+        :return: Substituted message
+        :rtype : str
+        """
+        for word, substitution in self._substitutions:
+            message = word.sub(substitution, message)
+
+        self._log.info('Message substitutions processed: {message}'.format(message=message))
+        return message
 
     def get_var(self, name, user=None):
         """
