@@ -34,7 +34,7 @@ class Trigger(RestrictableElement):
         # Temporary response data
         self.stars = {
             'normalized': (),
-            'preserve_case': (),
+            'case_preserved': (),
             'raw': ()
         }
         self.user = None
@@ -68,24 +68,22 @@ class Trigger(RestrictableElement):
                             .format(u_topic=user.topic, t_topic=self.topic))
             return
 
-        normalized_message = self.saml.parse_substitutions(str(message))
-
         # String match
-        if isinstance(self.pattern, str) and normalized_message == self.pattern:
+        if isinstance(self.pattern, str) and str(message) == self.pattern:
             self._log.info('String Pattern matched: {match}'.format(match=self.pattern))
             return str(self.response(user))
 
         # Regular expression match
         if hasattr(self.pattern, 'match'):
-            match = self.pattern.match(normalized_message)
+            match = self.pattern.match(str(message))
             if match:
                 self._log.info('Regex pattern matched: {match}'.format(match=self.pattern.pattern))
 
                 # Parse pattern wildcards
                 self.stars['normalized'] = match.groups()
-                for message_format in [message.PRESERVE_CASE, message.RAW]:
+                for message_format in [message.CASE_PRESERVED, message.RAW]:
                     message.format = message_format
-                    format_match = self.pattern.match(normalized_message)
+                    format_match = self.pattern.match(str(message))
                     if format_match:
                         self.stars[message_format] = format_match.groups()
 
@@ -233,7 +231,7 @@ class Trigger(RestrictableElement):
         if req_choice.search(self.pattern):
             def sub_required(pattern):
                 patterns = pattern.group(1).split('|')
-                return r'({options})\b'.format(options='|'.join(patterns))
+                return r'(\b{options})\b'.format(options='|'.join(patterns))
 
             self.pattern = req_choice.sub(sub_required, self.pattern)
             self._log.debug('Parsing Pattern required choices: ' + self.pattern)
@@ -242,7 +240,7 @@ class Trigger(RestrictableElement):
         if opt_choice.search(self.pattern):
             def sub_optional(pattern):
                 patterns = pattern.group(1).split('|')
-                return r'(?:{options})?\s?'.format(options='|'.join(patterns))
+                return r'(?:\b(?:{options})\b)?\s?'.format(options='|'.join(patterns))
 
             self.pattern = opt_choice.sub(sub_optional, self.pattern)
             self._log.debug('Parsing Pattern optional choices: ' + self.pattern)

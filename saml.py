@@ -143,9 +143,10 @@ class Saml:
         if not triggers:
             raise SamlError('There are no empty topic triggers defined, unable to continue')
 
+        message = Message(self, message)
         for trigger in triggers:
             try:
-                match = trigger.match(user, Message(message))
+                match = trigger.match(user, message)
             except TriggerBlockingError:
                 return
 
@@ -161,29 +162,56 @@ class Saml:
         :param substitution: The word's substitution
         :type  substitution: str
         """
+        # Parse the word and its substitution
+        raw_word = re.escape(word)
+        raw_substitution = substitution
+
+        case_word = re.escape(normalize(word, preserve_case=True))
+        case_substitution = normalize(substitution, preserve_case=True)
+
         word = re.escape(normalize(word))
         substitution = normalize(substitution)
 
-        sub = (re.compile(r'\b{word}\b'.format(word=word)), substitution)
+        # Compile and group the regular expressions
+        raw_sub = (re.compile(r'\b{word}\b'.format(word=raw_word), re.IGNORECASE), raw_substitution)
+        case_sub = (re.compile(r'\b{word}\b'.format(word=case_word), re.IGNORECASE), case_substitution)
+        sub = (re.compile(r'\b{word}\b'.format(word=word), re.IGNORECASE), substitution)
 
-        if sub not in self._substitutions:
+        sub_group = (sub, case_sub, raw_sub)
+
+        # Make sure this substitution hasn't already been processed and add it to the substitutions list
+        if sub_group not in self._substitutions:
             self._log.info('Appending new word substitution: "{word}" => "{sub}"'.format(word=word, sub=substitution))
-            self._substitutions.append(sub)
+            self._substitutions.append(sub_group)
 
-    def parse_substitutions(self, message):
+    # noinspection PyUnboundLocalVariable
+    def parse_substitutions(self, messages):
         """
         Parse substitutions in a supplied message
-        :param message: The message to parse
-        :type  message: str
+        :param messages: A tuple messages being parsed (normalized, case preserved, raw)
+        :type  messages: tuple of (str, str, str)
 
-        :return: Substituted message
-        :rtype : str
+        :return: Substituted messages (normalized, case preserved, raw)
+        :rtype : tuple of (str, str, str)
         """
-        for word, substitution in self._substitutions:
-            message = word.sub(substitution, message)
+        # If no substitutions have been defined, just normalize the message
+        if not self._substitutions:
+            self._log.info('No substitutions to process')
+            return messages
+        
+        self._log.info('Processing message substitutions')
 
-        self._log.info('Message substitutions processed: {message}'.format(message=message))
-        return message
+        def substitute(sub_group, sub_message):
+            word, substitution = sub_group
+            return word.sub(substitution, sub_message)
+
+        normalized, preserve_case, raw = messages
+        for sub_normalized, sub_preserve_case, sub_raw in self._substitutions:
+            normalized = substitute(sub_normalized, normalized)
+            preserve_case = substitute(sub_preserve_case, preserve_case)
+            raw = substitute(sub_raw, raw)
+
+        return normalized, preserve_case, raw
 
     def get_var(self, name, user=None):
         """
@@ -327,14 +355,17 @@ class Message:
     Message container object
     """
     NORMALIZED = 'normalized'
-    PRESERVE_CASE = 'preserve_case'
+    CASE_PRESERVED = 'case_preserved'
     RAW = 'raw'
 
-    formats = [NORMALIZED, PRESERVE_CASE, RAW]
+    formats = [NORMALIZED, CASE_PRESERVED, RAW]
 
-    def __init__(self, message, message_format=NORMALIZED):
+    def __init__(self, saml, message, message_format=NORMALIZED):
         """
         Initialize a new Message instance
+        :param saml: The parent SAML instance
+        :type  saml: Saml
+
         :param message: The message being parsed
         :type  message: str
 
@@ -343,14 +374,19 @@ class Message:
         """
         self._log = logging.getLogger('saml.message')
         self._format = message_format
+        self.saml = saml
 
         # Parsed (and un-parsed) message containers
         self._log.debug('Parsing raw message: {message}'.format(message=message))
+        messages = self.saml.parse_substitutions((normalize(message), normalize(message, preserve_case=True), message))
         self._messages = {
-            'normalized_message': normalize(message),
-            'preserve_case_message': normalize(message, preserve_case=True),
-            'raw_message': message
+            'normalized_message': messages[0],
+            'case_preserved_message': messages[1],
+            'raw_message': messages[2]
         }
+        self._log.debug('Normalized message processed: {msg}'.format(msg=self._messages['normalized_message']))
+        self._log.debug('Case preserved message processed: {msg}'.format(msg=self._messages['case_preserved_message']))
+        self._log.debug('Raw message processed: {msg}'.format(msg=self._messages['raw_message']))
 
     @property
     def format(self):
@@ -372,6 +408,27 @@ class Message:
 
         self._log.debug('Setting message format to {format}'.format(format=message_format))
         self._format = message_format
+
+    @property
+    def normalized(self):
+        """
+        Return the normalized message
+        """
+        return self._messages['normalized_message']
+
+    @property
+    def case_preserved(self):
+        """
+        Return the case preserved normalized message
+        """
+        return self._messages['case_preserved_message']
+
+    @property
+    def raw(self):
+        """
+        Return the raw message
+        """
+        return self._messages['raw_message']
 
     def __str__(self):
         return self._messages['{format}_message'.format(format=self._format)]

@@ -2,10 +2,10 @@
 <saml version="0.1">
     <init>
         <substitutions>
-            <sub word="i'm">i am</sub>
-            <sub word="i'd">i would</sub>
-            <sub word="i've">i have</sub>
-            <sub word="i'll">i will</sub>
+            <sub word="I'm">I am</sub>
+            <sub word="I'd">I would</sub>
+            <sub word="I've">I have</sub>
+            <sub word="I'll">I will</sub>
             <sub word="don't">do not</sub>
             <sub word="isn't">is not</sub>
             <sub word="you'd">you would</sub>
@@ -53,7 +53,7 @@
             <sub word="ur">your</sub>
             <sub word="r">are</sub>
             <sub word="n">and</sub>
-            <sub word="im">i am</sub>
+            <sub word="im">I am</sub>
             <sub word="wat">what</sub>
             <sub word="wats">what is</sub>
             <sub word="ohh">oh</sub>
@@ -63,10 +63,10 @@
             <sub word="practise">practice</sub>
             <sub word="fav">favorite</sub>
             <sub word="fave">favorite</sub>
-            <sub word="yesi">yes i</sub>
+            <sub word="yesi">yes I</sub>
             <sub word="yetit">yet it</sub>
-            <sub word="iam">i am</sub>
-            <sub word="welli">well i</sub>
+            <sub word="iam">I am</sub>
+            <sub word="welli">well I</sub>
             <sub word="wellit">well it</sub>
             <sub word="amfine">am fine</sub>
             <sub word="aman">am an</sub>

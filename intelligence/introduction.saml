@@ -39,6 +39,7 @@
                     <item>Hi! What is your name?</item>
                     <item>Hello! What's your name?</item>
                     <item>Hiya! Who are you?</item>
+                    <item><star format="title"/>! Who is this?</item>
                 </random>
             </template>
         </response>
@@ -77,7 +78,7 @@
 
     <!-- Var tests -->
     <trigger>
-        <pattern>get user var (_)</pattern>
+        <pattern>get [the] user var (_)</pattern>
 
         <response>
             <template><var><star/></var></template>
@@ -85,7 +86,7 @@
     </trigger>
 
     <trigger>
-        <pattern>get global var (_)</pattern>
+        <pattern>get [the] global var (_)</pattern>
 
         <response>
             <template><var type="global"><star/></var></template>
@@ -93,7 +94,7 @@
     </trigger>
 
     <trigger>
-        <pattern>set user var (_) to (*)</pattern>
+        <pattern>set [the] user var (_) to (*)</pattern>
 
         <response>
             <template>Setting user variable <star/> to <star index="2"/></template>
@@ -105,7 +106,7 @@
     </trigger>
 
     <trigger>
-        <pattern>set global var (_) to (*)</pattern>
+        <pattern>set [the] global var (_) to (*)</pattern>
 
         <response>
             <template>Setting global variable <star/> to <star index="2"/></template>
