@@ -116,4 +116,33 @@
             </var>
         </response>
     </trigger>
+
+    <!-- Topic tests -->
+    <trigger>
+        <pattern>enter test topic</pattern>
+
+        <response>
+            <topic>test</topic>
+            <template>The topic has been set to test!</template>
+        </response>
+    </trigger>
+
+    <topic name="test">
+        <trigger>
+            <pattern>test</pattern>
+
+            <response>
+                <template>Success!</template>
+            </response>
+        </trigger>
+
+        <trigger>
+            <pattern>exit</pattern>
+
+            <response>
+                <topic/>
+                <template>Exiting test topic!</template>
+            </response>
+        </trigger>
+    </topic>
 </saml>

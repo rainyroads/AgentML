@@ -153,6 +153,15 @@ class Saml:
             if match:
                 return match
 
+        # If we're still here, no reply was matched. If we're in a topic, exit and retry
+        if user.topic:
+            self._log.info('No reply matched in the topic "{topic}", resetting topic to None and retrying'
+                           .format(topic=user.topic))
+            user.topic = None
+
+            # noinspection PyTypeChecker
+            return self.get_reply(user.id, message.raw)
+
     def set_substitution(self, word, substitution):
         """
         Add a word substitution
