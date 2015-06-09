@@ -80,7 +80,10 @@
                 <ref name="trigger.pattern"/>
 
                 <oneOrMore>
-                    <ref name="trigger.response"/>
+                    <choice>
+                        <ref name="trigger.response.condition"/>
+                        <ref name="trigger.response"/>
+                    </choice>
                 </oneOrMore>
 
                 <optional>
@@ -181,6 +184,87 @@
                 <!--</optional>-->
             <!--</zeroOrMore>-->
         </element>
+    </define>
+
+    <define name="trigger.response.condition">
+        <element name="condition" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <ref name="trigger.response.condition.if"/>
+
+            <zeroOrMore>
+                <ref name="trigger.response.condition.elif"/>
+            </zeroOrMore>
+
+            <optional>
+                <ref name="trigger.response.condition.else"/>
+            </optional>
+        </element>
+    </define>
+
+    <define name="trigger.response.condition.if">
+        <element name="if">
+            <attribute name="name"/>
+
+            <optional>
+                <ref name="trigger.response.condition.operators"/>
+            </optional>
+
+            <oneOrMore>
+                <ref name="trigger.response"/>
+            </oneOrMore>
+        </element>
+    </define>
+
+    <define name="trigger.response.condition.elif">
+        <element name="elif">
+            <attribute name="name"/>
+
+            <optional>
+                <ref name="trigger.response.condition.operators"/>
+            </optional>
+
+            <oneOrMore>
+                <ref name="trigger.response"/>
+            </oneOrMore>
+        </element>
+    </define>
+
+    <define name="trigger.response.condition.else">
+        <element name="else">
+            <oneOrMore>
+                <ref name="trigger.response"/>
+            </oneOrMore>
+        </element>
+    </define>
+
+    <define name="trigger.response.condition.operators">
+        <choice datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <attribute name="is"/>
+            <attribute name="is_not"/>
+            <attribute name="gt">
+                <choice>
+                    <data type="integer"/>
+                    <data type="float"/>
+                </choice>
+            </attribute>
+            <attribute name="gte">
+                <choice>
+                    <data type="integer"/>
+                    <data type="float"/>
+                </choice>
+            </attribute>
+            <attribute name="lt">
+                <choice>
+                    <data type="integer"/>
+                    <data type="float"/>
+                </choice>
+            </attribute>
+            <attribute name="lte">
+                <choice>
+                    <data type="integer"/>
+                    <data type="float"/>
+                </choice>
+            </attribute>
+        </choice>
     </define>
 
     <define name="trigger.limit">

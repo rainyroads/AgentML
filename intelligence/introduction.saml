@@ -117,6 +117,61 @@
         </response>
     </trigger>
 
+    <!-- Condition tests -->
+    <trigger>
+        <pattern>(cond|condition) test (1|one)</pattern>
+
+        <condition>
+            <if name="condition">
+                <response>
+                    <template>Success!</template>
+                </response>
+            </if>
+
+            <else>
+                <response>
+                    <template>Failure!</template>
+                </response>
+            </else>
+        </condition>
+    </trigger>
+
+    <trigger>
+        <pattern>(cond|condition) test (2|one)</pattern>
+
+        <condition>
+            <if name="condition" is="foo">
+                <response>
+                    <template>Success! Var is foo</template>
+                </response>
+            </if>
+
+            <elif name="condition" is="bar">
+                <response>
+                    <template>Success! Var is bar</template>
+                </response>
+            </elif>
+
+            <else>
+                <response>
+                    <template>Failure!</template>
+                </response>
+            </else>
+        </condition>
+    </trigger>
+
+    <trigger>
+        <pattern>(cond|condition) test (3|one)</pattern>
+
+        <condition>
+            <if name="condition" lte="10">
+                <response>
+                    <template>Success! Var is less than or equal to 10</template>
+                </response>
+            </if>
+        </condition>
+    </trigger>
+
     <!-- Topic tests -->
     <trigger>
         <pattern>enter test topic</pattern>

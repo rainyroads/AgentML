@@ -4,6 +4,7 @@ import re
 import sre_constants
 from parser import RestrictableElement, weighted_choice, normalize, attribute, bool_attribute
 from parser.trigger.response import Response
+from parser.trigger.condition import Condition
 from errors import SamlSyntaxError, LimitError, ChanceError
 
 
@@ -96,7 +97,7 @@ class Trigger(RestrictableElement):
         """
         Return a random response for this trigger
         :param user: The user to apply response reactions to
-        :type  user: saml.User
+        :type  user: saml.User or None
 
         :rtype: str
         """
@@ -105,6 +106,18 @@ class Trigger(RestrictableElement):
             responses = [response for response in self._responses if not user.is_limited(response[0])]
         else:
             responses = self._responses
+
+        # Evaluate any Conditions that have been set
+        _responses = []
+        for response in responses:
+            # If this is a standard Response, continue
+            if isinstance(response[0], Response):
+                _responses.append(response)
+
+            # If this is a Condition, evaluate it and append any returned results
+            if isinstance(response[0], Condition):
+                _responses.extend(response[0].evaluate(user))
+        responses = _responses
 
         # If all responses are limited, return now
         if not responses:
@@ -283,6 +296,15 @@ class Trigger(RestrictableElement):
 
         # If the response has no tags, just store the string text
         self._responses.append((Response(self, element, self.file_path), weight))
+
+    def _parse_condition(self, element):
+        """
+        Parse a trigger condition
+        :param element: The XML Element object
+        :type  element: etree._Element
+        """
+        self._log.info('Parsing new Condition')
+        self._responses.append((Condition(self, element, self.file_path), 1))
 
     def _parse_limit(self, element):
         """
