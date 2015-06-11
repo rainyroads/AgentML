@@ -1,0 +1,100 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+    <!-- SAML Condition Tag -->
+    <start>
+        <element name="condition">
+            <ref name="if"/>
+
+            <zeroOrMore>
+                <ref name="elif"/>
+            </zeroOrMore>
+
+            <optional>
+                <ref name="else"/>
+            </optional>
+        </element>
+    </start>
+    
+    <define name="if">
+        <element name="if">
+            <attribute name="name"/>
+
+            <optional>
+                <ref name="operators"/>
+            </optional>
+
+            <oneOrMore>
+                <ref name="anyElement"/>
+            </oneOrMore>
+        </element>
+    </define>
+
+    <define name="elif">
+        <element name="elif">
+            <attribute name="name"/>
+
+            <optional>
+                <ref name="operators"/>
+            </optional>
+
+            <oneOrMore>
+                <ref name="anyElement"/>
+            </oneOrMore>
+        </element>
+    </define>
+
+    <define name="else">
+        <element name="else">
+            <oneOrMore>
+                <ref name="anyElement"/>
+            </oneOrMore>
+        </element>
+    </define>
+
+    <define name="operators">
+        <choice datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <attribute name="is"/>
+            <attribute name="is_not"/>
+            <attribute name="gt">
+                <choice>
+                    <data type="integer"/>
+                    <data type="float"/>
+                </choice>
+            </attribute>
+            <attribute name="gte">
+                <choice>
+                    <data type="integer"/>
+                    <data type="float"/>
+                </choice>
+            </attribute>
+            <attribute name="lt">
+                <choice>
+                    <data type="integer"/>
+                    <data type="float"/>
+                </choice>
+            </attribute>
+            <attribute name="lte">
+                <choice>
+                    <data type="integer"/>
+                    <data type="float"/>
+                </choice>
+            </attribute>
+        </choice>
+    </define>
+    
+    <define name="anyElement">
+        <zeroOrMore>
+            <element>
+                <anyName/>
+                <zeroOrMore>
+                    <choice>
+                        <attribute>
+                            <anyName/>
+                        </attribute>
+                        <text/>
+                        <ref name="anyElement"/>
+                    </choice>
+                </zeroOrMore>
+            </element>
+        </zeroOrMore>
+    </define>
+</grammar>

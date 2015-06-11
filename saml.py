@@ -6,7 +6,7 @@ from lxml import etree
 from parser import schema, normalize, attribute, int_attribute
 from parser.init import Init
 from parser.trigger import Trigger
-from parser.tags import Random, Var
+from parser.tags import Condition, Random, Var
 from errors import SamlError, SamlSyntaxError, VarNotDefinedError, UserNotDefinedError, NoTagParserError, \
     TriggerBlockingError, LimitError
 
@@ -34,7 +34,7 @@ class Saml:
             self._schema = schema(file.read())
 
         # Define our base / system tags
-        self.tags = {'random': Random, 'var': Var}
+        self.tags = {'condition': Condition, 'random': Random, 'var': Var}
 
         # Containers
         self._global_vars   = {}

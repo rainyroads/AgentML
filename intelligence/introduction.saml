@@ -137,7 +137,7 @@
     </trigger>
 
     <trigger>
-        <pattern>(cond|condition) test (2|one)</pattern>
+        <pattern>(cond|condition) test (2|two)</pattern>
 
         <condition>
             <if name="condition" is="foo">
@@ -161,7 +161,7 @@
     </trigger>
 
     <trigger>
-        <pattern>(cond|condition) test (3|one)</pattern>
+        <pattern>(cond|condition) test (3|three)</pattern>
 
         <condition>
             <if name="condition" lte="10">
@@ -170,6 +170,24 @@
                 </response>
             </if>
         </condition>
+    </trigger>
+
+    <trigger>
+        <pattern>(cond|condition) test (4|four)</pattern>
+
+        <response>
+            <template>
+                <condition>
+                    <if name="condition">
+                        The value of the condition variable is "<var name="condition"/>"
+                    </if>
+
+                    <else>
+                        The condition variable has not been set!
+                    </else>
+                </condition>
+            </template>
+        </response>
     </trigger>
 
     <!-- Topic tests -->

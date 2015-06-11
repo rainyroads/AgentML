@@ -13,8 +13,8 @@ class Response(RestrictableElement):
     def __init__(self, trigger, element, file_path, **kwargs):
         """
         Initialize a new Response instance
-        :param saml: The parent SAML instance
-        :type  saml: Saml
+        :param trigger: The Trigger instance
+        :type  trigger: Trigger
 
         :param element: The XML Element object
         :type  element: etree._Element

@@ -30,7 +30,7 @@ class Var(Tag):
         if len(self._element):
             var = ''.join(map(str, self.trigger.saml.parse_tags(self._element, self.trigger)))
         else:
-            var = self._element.text
+            var = self._element.text or attribute(self._element, 'name')
 
         # Is there a default value defined?
         default = attribute(self._element, 'default')
