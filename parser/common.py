@@ -88,7 +88,7 @@ def bool_attribute(element, attribute, default=True):
     attribute_value = element.get(attribute)
 
     if attribute_value:
-        return True if (attribute_value == 'true') else False
+        return attribute_value == 'true'
 
     return default
 
