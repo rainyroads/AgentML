@@ -28,7 +28,7 @@ class Trigger(Element, Restrictable):
         """
         # Containers and default attributes
         self.pattern = kwargs['pattern'] if 'pattern' in kwargs else None
-        self.group = kwargs['group'] if 'group' in kwargs else None
+        self.groups = kwargs['groups'] if 'groups' in kwargs else None
         self.topic = kwargs['topic'] if 'topic' in kwargs else None
         self._responses = kwargs['responses'] if 'responses' in kwargs else []
 
@@ -173,6 +173,21 @@ class Trigger(Element, Restrictable):
             replaced = True
 
         return string, replaced
+
+    def _parse_group(self, element):
+        """
+        Parse and add a group requirement for this trigger
+        :param element: The XML Element object
+        :type  element: etree._Element
+        """
+        self._log.debug('Adding Trigger group: {group}'.format(group=element.text))
+        if isinstance(self.groups, set):
+            self.groups.add(element.text)
+        elif self.groups is None:
+            self.groups = {element.text}
+        else:
+            raise TypeError('Unrecognized group type, {type}: {groups}'
+                            .format(type=type(self.groups), groups=str(self.groups)))
 
     def _parse_topic(self, element):
         """

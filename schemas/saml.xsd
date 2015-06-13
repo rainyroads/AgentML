@@ -29,7 +29,12 @@
         <xs:sequence>
             <xs:choice maxOccurs="unbounded">
                 <xs:element ref="trigger"/>
-                <xs:element ref="group"/>
+                <xs:element name="group">
+                    <xs:complexType>
+                        <xs:group ref="triggerGroup"/>
+                        <xs:attribute name="name" use="required"/>
+                    </xs:complexType>
+                </xs:element>
                 <xs:element name="emotion">
                     <xs:complexType>
                         <xs:group ref="triggerGroup"/>
@@ -45,16 +50,11 @@
             </xs:choice>
         </xs:sequence>
     </xs:group>
-    <xs:element name="group">
-        <xs:complexType>
-            <xs:group ref="triggerGroup"/>
-            <xs:attribute name="name" use="required"/>
-        </xs:complexType>
-    </xs:element>
     <!-- [Element] Trigger -->
     <xs:element name="trigger">
         <xs:complexType>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:group ref="trigger.group"/>
                 <xs:group ref="trigger.topic"/>
                 <xs:group ref="trigger.emotion"/>
                 <xs:element ref="pattern"/>
@@ -68,6 +68,11 @@
         </xs:complexType>
     </xs:element>
     <!-- [Attributes] Trigger -->
+    <xs:group name="trigger.group">
+        <xs:sequence>
+            <xs:element name="group" type="xs:string"/>
+        </xs:sequence>
+    </xs:group>
     <xs:group name="trigger.topic">
         <xs:sequence>
             <xs:element name="topic" type="xs:string"/>

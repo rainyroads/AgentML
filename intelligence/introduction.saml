@@ -218,4 +218,40 @@
             </response>
         </trigger>
     </topic>
+
+    <!-- Group tests -->
+    <group name="public">
+        <trigger>
+            <pattern>public test</pattern>
+
+            <response>
+                <template>Success!</template>
+            </response>
+        </trigger>
+    </group>
+
+    <trigger>
+        <group>group1</group>
+        <group>group2</group>
+        <group>group3</group>
+
+        <pattern>multigroup test</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <group>group1</group>
+        <group>group2</group>
+        <topic>test</topic>
+
+        <pattern>topic group test</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
 </saml>

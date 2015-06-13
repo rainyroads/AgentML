@@ -70,6 +70,12 @@
         <element name="trigger">
             <interleave>
                 <optional>
+                    <zeroOrMore>
+                        <ref name="trigger.group"/>
+                    </zeroOrMore>
+                </optional>
+
+                <optional>
                     <ref name="trigger.topic"/>
                 </optional>
 
@@ -98,6 +104,12 @@
     </define>
 
     <!-- [Attributes] Trigger -->
+    <define name="trigger.group">
+        <element name="group">
+            <text/>
+        </element>
+    </define>
+
     <define name="trigger.topic">
         <element name="topic">
             <text/>

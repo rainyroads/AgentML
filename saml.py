@@ -7,6 +7,7 @@ from parser import schema, normalize, attribute, int_attribute
 from parser.init import Init
 from parser.trigger import Trigger
 from parser.tags import Condition, Random, Var
+from constants import AnyGroup
 from errors import SamlError, SamlSyntaxError, VarNotDefinedError, UserNotDefinedError, NoTagParserError, \
     TriggerBlockingError, LimitError
 
@@ -87,7 +88,7 @@ class Saml:
                 # Set the group
                 if child.tag == 'group':
                     self._log.info('Setting Trigger group: {group}'.format(group=child.get('name')))
-                    defaults['group'] = child.get('name')
+                    defaults['groups'] = {child.get('name')}
                     parse_element(child)
                     continue
 
@@ -119,7 +120,7 @@ class Saml:
         # Begin element iteration by parsing the root element
         parse_element(root)
 
-    def get_reply(self, user, message):
+    def get_reply(self, user, message, groups=None):
         """
         Attempt to retrieve a reply to the provided message
         :param user: The user / client. This can be a hostmask, IP address, database ID or any other unique identifier
@@ -128,12 +129,17 @@ class Saml:
         :param message: The message to retrieve a reply to
         :type  message: str
 
+        :param groups: The trigger groups to search, defaults to only matching non-grouped triggers
+        :type  groups: set or AnyGroup
+
         :rtype: str or None
         """
         user = self.get_user(user)
+        groups = groups or {None}
 
-        # Fetch triggers in our topic, and make sure we're not in an empty topic
+        # Fetch triggers in our topic and make sure we're not in an empty topic
         triggers = [trigger for trigger in self._triggers if user.topic == trigger.topic]
+
         if not triggers and user.topic is not None:
             self._log.warn('User "{user}" was in an empty topic: {topic}'.format(user=user.id, topic=user.topic))
             user.topic = None
@@ -142,6 +148,16 @@ class Saml:
         # It's impossible to get anywhere if there are no empty topic triggers available to guide us
         if not triggers:
             raise SamlError('There are no empty topic triggers defined, unable to continue')
+
+        # Fetch triggers in our group and make sure we're not in an empty topic
+        if groups is not AnyGroup:
+            triggers = [trigger for trigger in triggers if groups.issuperset(trigger.groups or {None})]
+
+        if not triggers:
+            self._log.info('The topic "{topic}" has triggers, but we are not in the required groups to match them. '
+                           'Resetting topic to None and retrying'.format(topic=user.topic, groups=str(groups)))
+            user.topic = None
+            triggers = [trigger for trigger in self._triggers if user.topic == trigger.topic]
 
         message = Message(self, message)
         for trigger in triggers:
