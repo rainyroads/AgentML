@@ -2,13 +2,13 @@ import logging
 import random
 import re
 import sre_constants
-from parser import RestrictableElement, weighted_choice, normalize, attribute, bool_attribute
+from parser import Element, Restrictable, weighted_choice, normalize, attribute, bool_attribute
 from parser.trigger.response import Response
 from parser.trigger.condition import Condition
 from errors import SamlSyntaxError, LimitError, ChanceError
 
 
-class Trigger(RestrictableElement):
+class Trigger(Element, Restrictable):
     """
     SAML Trigger object
     """
@@ -40,12 +40,12 @@ class Trigger(RestrictableElement):
         }
         self.user = None
 
-        # Parent __init__ must be initialized BEFORE default attributes are assigned, but AFTER the above containers
-        super().__init__(saml, element, file_path)
+        # Parent __init__'s must be initialized BEFORE default attributes are assigned, but AFTER the above containers
+        Restrictable.__init__(self)
+        Element.__init__(self, saml, element, file_path)
 
         # Trigger attributes and wildcard p
         self.normalize = bool_attribute(element, 'normalize')
-
         self._log = logging.getLogger('saml.parser.trigger')
 
     def match(self, user, message):

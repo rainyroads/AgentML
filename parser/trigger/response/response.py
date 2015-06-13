@@ -2,11 +2,11 @@ import os
 import time
 import logging
 from collections import Iterable
-from parser import RestrictableElement
+from parser import Element, Restrictable
 from parser.common import schema, normalize, attribute
 
 
-class Response(RestrictableElement):
+class Response(Element, Restrictable):
     """
     SAML Response object
     """
@@ -30,8 +30,9 @@ class Response(RestrictableElement):
         self.topic = False
         self.var = ()
 
-        # Parent __init__ must be initialized BEFORE default attributes are assigned, but AFTER the above containers
-        super().__init__(trigger.saml, element, file_path)
+        # Parent __init__'s must be initialized BEFORE default attributes are assigned, but AFTER the above containers
+        Restrictable.__init__(self)
+        Element.__init__(self, trigger.saml, element, file_path)
 
         # Default attributes
         self.emotion = kwargs['emotion'] if 'emotion' in kwargs else None

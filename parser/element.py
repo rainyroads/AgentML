@@ -22,6 +22,7 @@ class Element:
         self.saml = saml
         self._element = element
         self.file_path = file_path
+        self._log = logging.getLogger('saml.parser.element')
 
         self._parse()
 
@@ -37,28 +38,20 @@ class Element:
                 parse(child)
 
 
-class RestrictableElement(Element):
+class Restrictable:
     """
-    Extended base element class for shared Trigger and Response parsers
+    Restrictable element boilerplate parsers
     """
-    def __init__(self, saml, element, file_path):
+    def __init__(self):
         """
-        Base Saml Object class
-        :param saml: The parent SAML instance
-        :type  saml: Saml
-
-        :param element: The XML Element object
-        :type  element: etree._Element
-
-        :param file_path: The absolute path to the SAML file
-        :type  file_path: str
+        Initialize a new Restrictable Element instance
         """
         self.user_limit = None
         self.global_limit = None
         self.mood = None
         self.chance = 100
+
         self._log = logging.getLogger('saml.parser.element')
-        super().__init__(saml, element, file_path)
 
     def _parse_topic(self, element):
         """
