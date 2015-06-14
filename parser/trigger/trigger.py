@@ -331,60 +331,6 @@ class Trigger(Element, Restrictable):
         self._log.info('Parsing new Condition')
         self._responses.append((Condition(self, element, self.file_path), 1))
 
-    def _parse_limit(self, element):
-        """
-        Parse a user or global limit for the trigger
-        :param element: The XML Element object
-        :type  element: etree._Element
-        """
-        self._limit_blocking = bool_attribute(element, 'blocking')
-
-        # Is this a Global or User limit?
-        limit_type = attribute(element, 'type', 'user')
-        if limit_type not in ['user', 'global']:
-            self._log.warn('Unrecognized limit type: {type}'.format(type=limit_type))
-            return
-
-        # If we're setting the limit using static units..
-        unit_conversions = {
-            'minutes': 60,
-            'hours': 3600,
-            'days': 86400,
-            'weeks': 604800,
-            'months': 2592000,
-            'years': 31536000
-        }
-        units = attribute(element, 'units')
-        if units:
-            if units not in unit_conversions:
-                self._log.warn('Unrecognized time unit: {unit}'.format(unit=units))
-                return
-
-            try:
-                limit = float(element.text)
-            except (ValueError, TypeError):
-                self._log.warn('Limit must contain a valid float when using units (Invalid limit: "{limit}")'
-                               .format(limit=element.text))
-                return
-
-            if limit_type == 'global':
-                self.global_limit = limit * unit_conversions[units]
-            elif limit_type == 'user':
-                self.user_limit = limit * unit_conversions[units]
-
-            return
-
-        try:
-            limit = float(element.text)
-        except (ValueError, TypeError):
-            self._log.warn('Invalid time string: {string}'.format(string=element.text))
-            return
-
-        if limit_type == 'global':
-            self.global_limit = limit
-        elif limit_type == 'user':
-            self.user_limit = limit
-
     def _parse_chance(self, element):
         """
         Parse the chance of this trigger being successfully called

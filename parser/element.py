@@ -70,7 +70,7 @@ class Restrictable:
         # Is this a Global or User limit?
         limit_type = attribute(element, 'type', 'user')
 
-        # If a time unit has been specified..
+        # Time unit conversions
         unit_conversions = {
             'seconds': 1,
             'minutes': 60,
@@ -81,24 +81,23 @@ class Restrictable:
             'years':   31536000
         }
         units = attribute(element, 'unit', 'seconds')
-        if units:
-            if units not in unit_conversions:
-                self._log.warn('Unrecognized time unit: {unit}'.format(unit=units))
-                return
-
-            try:
-                limit = float(element.text)
-            except (ValueError, TypeError):
-                self._log.warn('Limit must contain a valid integer or float (Invalid limit: "{limit}")'
-                               .format( limit=element.text))
-                return
-
-            if limit_type == 'global':
-                self.global_limit = limit * unit_conversions[units]
-            elif limit_type == 'user':
-                self.user_limit = limit * unit_conversions[units]
-
+        if units not in unit_conversions:
+            self._log.warn('Unrecognized time unit: {unit}'.format(unit=units))
             return
+
+        try:
+            limit = float(element.text)
+        except (ValueError, TypeError):
+            self._log.warn('Limit must contain a valid integer or float (Invalid limit: "{limit}")'
+                           .format(limit=element.text))
+            return
+
+        if limit_type == 'global':
+            self.global_limit = limit * unit_conversions[units]
+        elif limit_type == 'user':
+            self.user_limit = limit * unit_conversions[units]
+
+        return
 
     def _parse_chance(self, element):
         """
