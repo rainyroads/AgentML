@@ -254,4 +254,47 @@
         </response>
     </trigger>
 
+    <!-- Priority tests -->
+    <trigger>
+        <pattern>priority test</pattern>
+
+        <response>
+            <template>Failure!</template>
+        </response>
+    </trigger>
+
+    <trigger priority="1">
+        <pattern>priority test</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>response priority test</pattern>
+
+        <response priority="3">
+            <limit>10</limit>
+            <template>One</template>
+        </response>
+
+        <response priority="2">
+            <limit>10</limit>
+            <template>Two</template>
+        </response>
+
+        <response priority="1">
+            <limit>10</limit>
+            <template>Three</template>
+        </response>
+
+        <response priority="-1">
+            <template>If you saw One, Two, Three before this message, this was a success! (Or you got lucky)</template>
+        </response>
+
+        <response priority="-1">
+            <template>If you saw One, Two, Three before this message, this was a triumph! (Or you got lucky)</template>
+        </response>
+    </trigger>
 </saml>

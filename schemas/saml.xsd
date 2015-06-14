@@ -65,6 +65,7 @@
                 <xs:element ref="limit"/>
                 <xs:element ref="chance"/>
             </xs:choice>
+            <xs:attribute name="priority" type="xs:integer"/>
         </xs:complexType>
     </xs:element>
     <!-- [Attributes] Trigger -->
@@ -100,6 +101,7 @@
                 <xs:element ref="chance"/>
                 <xs:group ref="trigger.var"/>
             </xs:choice>
+            <xs:attribute name="priority" type="xs:integer"/>
             <xs:attribute name="weight" type="xs:integer"/>
         </xs:complexType>
     </xs:element>

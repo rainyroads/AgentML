@@ -2,7 +2,7 @@ import logging
 import random
 import re
 import sre_constants
-from parser import Element, Restrictable, weighted_choice, normalize, attribute, bool_attribute
+from parser import Element, Restrictable, weighted_choice, normalize, attribute, int_attribute, bool_attribute
 from parser.trigger.response import Response
 from parser.trigger.condition import Condition
 from errors import SamlSyntaxError, LimitError, ChanceError
@@ -27,6 +27,7 @@ class Trigger(Element, Restrictable):
         :param kwargs: Default attributes
         """
         # Containers and default attributes
+        self.priority = int_attribute(element, 'priority')
         self.pattern = kwargs['pattern'] if 'pattern' in kwargs else None
         self.groups = kwargs['groups'] if 'groups' in kwargs else None
         self.topic = kwargs['topic'] if 'topic' in kwargs else None
@@ -173,6 +174,15 @@ class Trigger(Element, Restrictable):
             replaced = True
 
         return string, replaced
+
+    def _parse_priority(self, element):
+        """
+        Parse and assign the priority for this trigger
+        :param element: The XML Element object
+        :type  element: etree._Element
+        """
+        self._log.debug('Setting Trigger priority: {priority}'.format(priority=element.text))
+        self.priority = int(element.text)
 
     def _parse_group(self, element):
         """

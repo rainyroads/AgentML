@@ -67,7 +67,13 @@
 
     <!-- [Element] Trigger -->
     <define name="trigger">
-        <element name="trigger">
+        <element name="trigger" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="priority">
+                    <data type="integer"/>
+                </attribute>
+            </optional>
+
             <interleave>
                 <optional>
                     <zeroOrMore>
@@ -148,6 +154,12 @@
 
     <define name="trigger.response">
         <element name="response" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="priority">
+                    <data type="integer"/>
+                </attribute>
+            </optional>
+
             <optional>
                 <attribute name="weight">
                     <data type="integer"/>

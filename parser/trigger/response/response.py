@@ -3,7 +3,7 @@ import time
 import logging
 from collections import Iterable
 from parser import Element, Restrictable
-from parser.common import schema, normalize, attribute
+from parser.common import schema, normalize, attribute, int_attribute
 
 
 class Response(Element, Restrictable):
@@ -25,6 +25,7 @@ class Response(Element, Restrictable):
         :param kwargs: Default attributes
         """
         # Containers and default attributes
+        self.priority = int_attribute(element, 'priority')
         self.trigger = trigger
         self._response = ()
         self.topic = False
@@ -96,6 +97,15 @@ class Response(Element, Restrictable):
             return
 
         self._response = tuple(self.saml.parse_tags(template, self.trigger))
+
+    def _parse_priority(self, element):
+        """
+        Parse and assign the priority for this response
+        :param element: The XML Element object
+        :type  element: etree._Element
+        """
+        self._log.debug('Setting Trigger priority: {priority}'.format(priority=element.text))
+        self.priority = int(element.text)
 
     def _parse_var(self, element):
         """
