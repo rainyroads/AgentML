@@ -40,8 +40,12 @@ class Saml:
         # Containers
         self._global_vars   = {}
         self._users         = {}
-        self._triggers      = []
+        self._triggers      = {}
         self._substitutions = []
+
+        # Triggers must be sorted before replies are retrieved
+        self.sorted = False
+        self._sorted_triggers = []
 
         # Load internal SAML files
         self.load_directory(os.path.join(self.script_path, 'intelligence'))
@@ -109,7 +113,7 @@ class Saml:
                 # Parse a standard Trigger element
                 if child.tag == 'trigger':
                     try:
-                        self._triggers.append(Trigger(self, child, file_path, **defaults))
+                        self.add_trigger(Trigger(self, child, file_path, **defaults))
                     except SamlError:
                         self._log.warn('Skipping Trigger due to an error', exc_info=True)
                     finally:
@@ -119,6 +123,32 @@ class Saml:
 
         # Begin element iteration by parsing the root element
         parse_element(root)
+
+    def sort(self):
+        """
+        Sort triggers and their associated responses
+        """
+        # Sort triggers by word and character length first
+        for priority, triggers in self._triggers.items():
+            self._log.debug('Sorting priority {priority} triggers'.format(priority=priority))
+
+            # Get and sort our atomic and wildcard patterns
+            atomics = [trigger for trigger in triggers if trigger.pattern_is_atomic]
+            wildcards = [trigger for trigger in triggers if not trigger.pattern_is_atomic]
+
+            atomics = sorted(atomics, key=lambda trigger: (trigger.pattern_words, trigger.pattern_len), reverse=True)
+            wildcards = sorted(wildcards, key=lambda trigger: (trigger.pattern_words, trigger.pattern_len),
+                               reverse=True)
+
+            # Replace our sorted triggers
+            self._triggers[priority] = atomics + wildcards
+
+        # Finally, sort triggers by priority
+        self._sorted_triggers = []
+
+        for triggers in [self._triggers[priority] for priority in sorted(self._triggers.keys(), reverse=True)]:
+            for trigger in triggers:
+                self._sorted_triggers.append(trigger)
 
     def get_reply(self, user, message, groups=None):
         """
@@ -134,11 +164,15 @@ class Saml:
 
         :rtype: str or None
         """
+        # Make sure triggers have been sorted since the most recent trigger was added
+        if not self.sorted:
+            self.sort()
+
         user = self.get_user(user)
         groups = groups or {None}
 
         # Fetch triggers in our topic and make sure we're not in an empty topic
-        triggers = [trigger for trigger in self._triggers if user.topic == trigger.topic]
+        triggers = [trigger for trigger in self._sorted_triggers if user.topic == trigger.topic]
 
         if not triggers and user.topic is not None:
             self._log.warn('User "{user}" was in an empty topic: {topic}'.format(user=user.id, topic=user.topic))
@@ -177,6 +211,23 @@ class Saml:
 
             # noinspection PyTypeChecker
             return self.get_reply(user.id, message.raw)
+
+    def add_trigger(self, trigger):
+        """
+        Add a new trigger
+        :param trigger: The Trigger object
+        :type  trigger: Trigger
+        """
+        # Make sure triggers are re-sorted before a new reply can be requested
+        self.sorted = False
+
+        # If no trigger with this priority level has been defined yet, create a new list
+        if trigger.priority not in self._triggers:
+            self._triggers[trigger.priority] = [trigger]
+            return
+
+        # Otherwise, add this trigger to an existing priority list
+        self._triggers[trigger.priority].append(trigger)
 
     def set_substitution(self, word, substitution):
         """

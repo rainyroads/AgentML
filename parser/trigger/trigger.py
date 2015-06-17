@@ -28,10 +28,17 @@ class Trigger(Element, Restrictable):
         """
         # Containers and default attributes
         self.priority = int_attribute(element, 'priority')
+        self.normalize = bool_attribute(element, 'normalize')
+
         self.pattern = kwargs['pattern'] if 'pattern' in kwargs else None
         self.groups = kwargs['groups'] if 'groups' in kwargs else None
         self.topic = kwargs['topic'] if 'topic' in kwargs else None
         self._responses = kwargs['responses'] if 'responses' in kwargs else []
+
+        # Pattern metadata
+        self.pattern_is_atomic = False
+        self.pattern_words = 0
+        self.pattern_len = 0
 
         # Temporary response data
         self.stars = {
@@ -45,8 +52,6 @@ class Trigger(Element, Restrictable):
         Restrictable.__init__(self)
         Element.__init__(self, saml, element, file_path)
 
-        # Trigger attributes and wildcard p
-        self.normalize = bool_attribute(element, 'normalize')
         self._log = logging.getLogger('saml.parser.trigger')
 
     def match(self, user, message):
@@ -175,6 +180,24 @@ class Trigger(Element, Restrictable):
 
         return string, replaced
 
+    @staticmethod
+    def count_words(pattern):
+        """
+        Count the number of words in a pattern as well as the total length of those words
+        :param pattern: The pattern to parse
+        :type  pattern: str
+
+        :return: The word count first, then the total length of all words
+        :rtype : tuple of (int, int)
+        """
+        word_pattern = re.compile(r'(\b(?<![\(\)\[\]\|])\w\w*\b(?![\(\)\[\]\|]))', re.IGNORECASE)
+
+        words = word_pattern.findall(pattern)
+        word_count = len(words)
+        word_len = sum(len(word) for word in words)
+
+        return word_count, word_len
+
     def _parse_priority(self, element):
         """
         Parse and assign the priority for this trigger
@@ -224,6 +247,10 @@ class Trigger(Element, Restrictable):
         """
         # If this is a raw regular expression, compile it and immediately return
         self._log.info('Parsing Trigger Pattern: ' + element.text)
+        self.pattern_words, self.pattern_len = self.count_words(element.text)
+        self._log.debug('Pattern contains {wc} words with a total length of {cc}'
+                        .format(wc=self.pattern_words, cc=self.pattern_len))
+
         regex = bool_attribute(self._element, 'regex', False)
         if regex:
             self._log.info('Attempting to compile trigger as a raw regex')
@@ -288,6 +315,9 @@ class Trigger(Element, Restrictable):
             self._log.debug('Compiling Pattern as regex')
             self.pattern = re.compile(self.pattern, re.IGNORECASE)
         else:
+            self._log.debug('Pattern is atomic')
+            self.pattern_is_atomic = True
+
             # Replace any escaped wildcard symbols
             self._log.debug('Replacing any escaped sequences in Pattern')
             self.pattern = self.pattern.replace('\*', '*')
