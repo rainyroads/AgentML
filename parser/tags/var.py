@@ -25,7 +25,10 @@ class Var(Tag):
         # Is this a User or Global variable?
         self.type = attribute(element, 'type', 'user')
 
-    def __str__(self):
+    def value(self):
+        """
+        Return the current value of a variable
+        """
         # Does the variable name have tags to parse?
         if len(self._element):
             var = ''.join(map(str, self.trigger.saml.parse_tags(self._element, self.trigger)))

@@ -36,5 +36,8 @@ class Condition(Tag, BaseCondition):
         """
         return self.saml.parse_tags(element, self.trigger)
 
-    def __str__(self):
+    def value(self):
+        """
+        Return the current evaluation of a condition statement
+        """
         return ''.join(map(str, self.evaluate(self.trigger.user)))

@@ -43,8 +43,10 @@ class Random(Tag):
             responses.append((tuple(self.trigger.saml.parse_tags(child, self.trigger)), weight))
         self._responses = tuple(responses)
 
-    def __str__(self):
-        # Fetch a random weighted choice
+    def value(self):
+        """
+        Fetch a random weighted choice
+        """
         choice = weighted_choice(self._responses)
 
         # If the choice is a tuple, join the elements into a single mapped string

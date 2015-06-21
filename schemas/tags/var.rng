@@ -17,7 +17,33 @@
                 </attribute>
             </optional>
 
-            <text/>
+            <choice>
+                <attribute name="name"/>
+
+                <oneOrMore>
+                    <choice>
+                        <text/>
+                        <ref name="anyElement"/>
+                    </choice>
+                </oneOrMore>
+            </choice>
         </element>
     </start>
+
+    <define name="anyElement">
+        <zeroOrMore>
+            <element>
+                <anyName/>
+                <zeroOrMore>
+                    <choice>
+                        <attribute>
+                            <anyName/>
+                        </attribute>
+                        <text/>
+                        <ref name="anyElement"/>
+                    </choice>
+                </zeroOrMore>
+            </element>
+        </zeroOrMore>
+    </define>
 </grammar>

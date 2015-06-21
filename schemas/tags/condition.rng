@@ -23,7 +23,7 @@
             </optional>
 
             <oneOrMore>
-                <ref name="anyElement"/>
+                <ref name="any"/>
             </oneOrMore>
         </element>
     </define>
@@ -37,7 +37,7 @@
             </optional>
 
             <oneOrMore>
-                <ref name="anyElement"/>
+                <ref name="any"/>
             </oneOrMore>
         </element>
     </define>
@@ -45,7 +45,7 @@
     <define name="else">
         <element name="else">
             <oneOrMore>
-                <ref name="anyElement"/>
+                <ref name="any"/>
             </oneOrMore>
         </element>
     </define>
@@ -81,6 +81,15 @@
         </choice>
     </define>
     
+    <define name="any">
+        <oneOrMore>
+            <choice>
+                <text/>
+                <ref name="anyElement"/>
+            </choice>
+        </oneOrMore>
+    </define>
+    
     <define name="anyElement">
         <zeroOrMore>
             <element>
@@ -91,7 +100,7 @@
                             <anyName/>
                         </attribute>
                         <text/>
-                        <ref name="anyElement"/>
+                        <ref name="any"/>
                     </choice>
                 </zeroOrMore>
             </element>
