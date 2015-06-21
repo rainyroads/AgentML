@@ -1,9 +1,8 @@
 import logging
-import random
 import re
 import sre_constants
-from common import weighted_choice, normalize, int_attribute, bool_attribute, bool_element
-from errors import SamlSyntaxError, LimitError, ChanceError
+from common import normalize, int_attribute, bool_attribute, bool_element
+from errors import SamlSyntaxError, ParserBlockingError
 from parser import Element, Restrictable
 from parser.trigger.response import Response, ResponseContainer
 from parser.trigger.condition import Condition
@@ -77,10 +76,19 @@ class Trigger(Element, Restrictable):
                             .format(u_topic=user.topic, t_topic=self.topic))
             return
 
+        def get_response():
+            response = self._responses.random(user)
+            if not response and self.blocking:
+                self._log.info('Trigger was matched, but there are no available responses and the trigger is blocking '
+                               'any further attempts. Giving up')
+                raise ParserBlockingError
+
+            return str(response or '')
+
         # String match
         if isinstance(self.pattern, str) and str(message) == self.pattern:
             self._log.info('String Pattern matched: {match}'.format(match=self.pattern))
-            return str(self._responses.random(user))
+            return get_response()
 
         # Regular expression match
         if hasattr(self.pattern, 'match'):
@@ -97,62 +105,7 @@ class Trigger(Element, Restrictable):
                         self.stars[message_format] = format_match.groups()
 
                 self._log.debug('Assigning pattern wildcards: {stars}'.format(stars=str(self.stars)))
-
-                response = self._responses.random(user)
-
-    # noinspection PyUnboundLocalVariable
-    def _attempt_responses(self, responses, user=None):
-        """
-        Return a random response for this trigger
-        :param user: The user to apply response reactions to
-        :type  user: saml.User or None
-
-        :param responses: A list of responses to attempt
-        :type  responses: list
-
-        :rtype: str
-
-        :raises LimitError: All responses have an active limit enforced for the supplied user
-        :raises ChanceError: All responses failed a chance test
-        """
-        # If we have a User, only fetch responses that are not limited
-        if user:
-            responses = [response for response in responses if not user.is_limited(response[0])]
-        else:
-            responses = self._responses
-
-        # If all responses are limited, return now
-        if not responses:
-            raise LimitError
-
-        # Fetch the response and, if a trigger chance is defined, execute it
-        while True:
-            response = weighted_choice(responses)
-            # No chance defined
-            if not response.chance:
-                break
-
-            # Chance succeeded
-            if response.chance >= random.uniform(0, 100):
-                self._log.info('Response had a {chance}% of being triggered and succeeded'
-                               .format(chance=response.chance))
-                break
-
-            # Chance failed
-            self._log.info('Response had a {chance}% of being triggered and failed, trying the next available '
-                           'response'.format(chance=response.chance))
-            responses = [new_response for new_response in responses if response is not new_response[0]]
-
-            # Do we have any responses left?
-            if not responses:
-                self._log.info('Chance check for all Responses in this Trigger failed, giving up')
-                raise ChanceError
-
-        if user:
-            response.apply_reactions(user)
-
-        # Return the Response object
-        return response
+                return get_response()
 
     def _add_response(self, response, weight=1):
         """
@@ -170,42 +123,6 @@ class Trigger(Element, Restrictable):
 
         # Otherwise, add this trigger to an existing priority list
         self._responses[response.priority].append((response, weight))
-
-    def _get_response(self, user=None):
-        """
-        Fetch a random response
-        :param user: The user to apply response reactions to
-        :type  user: saml.User or None
-
-        :rtype str:
-
-        :raises LimitError: All responses have an active limit enforced for the supplied user
-        :raises ChanceError: All responses failed a chance test
-        """
-        end = len(self._responses) - 1
-
-        for index, responses in enumerate([self._responses[p] for p in sorted(self._responses.keys(), reverse=True)]):
-            try:
-                # Evaluate any Conditions that have been set
-                _responses = []
-                for response in responses:
-                    # If this is a standard Response, continue
-                    if isinstance(response[0], Response):
-                        _responses.append(response)
-
-                    # If this is a Condition, evaluate it and append any returned results
-                    if isinstance(response[0], Condition):
-                        _responses.extend(response[0].evaluate(user))
-                responses = _responses
-
-                return self._attempt_responses(responses, user)
-            except (LimitError, ChanceError):
-                # Was this our last priority group?
-                if index == end:
-                    raise
-
-                # If not, continue onto the next instead of throwing an exception
-                continue
 
     @staticmethod
     def replace_wildcards(string, wildcard, regex):

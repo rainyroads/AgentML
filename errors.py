@@ -23,18 +23,17 @@ class NoTagParserError(SamlError):
 
 
 ###############################
-# Trigger Blocking Errors
+# Parser Blocking Errors
 ###############################
-# These are errors that are used to halt iteration over Triggers. One example of this include a global or user limit
-# being triggered. When one of these errors is raised, Trigger matching is aborted and a None response will be returned
+# These are errors that are used to halt iteration over Triggers or Responses
 
-class TriggerBlockingError(SamlError):
+class ParserBlockingError(SamlError):
     pass
 
 
-class LimitError(TriggerBlockingError):
+class LimitError(ParserBlockingError):
     pass
 
 
-class ChanceError(TriggerBlockingError):
+class ChanceError(ParserBlockingError):
     pass

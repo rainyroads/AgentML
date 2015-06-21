@@ -301,4 +301,43 @@
             </if>
         </condition>
     </trigger>
+
+    <!-- Blocking tests -->
+    <trigger priority="1">
+        <pattern>blocking test</pattern>
+
+        <limit>15</limit>
+
+        <response>
+            <template>First!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>blocking test</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>response blocking test</pattern>
+
+        <blocking>false</blocking>
+
+        <response>
+            <limit>15</limit>
+
+            <template>First!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>response blocking test</pattern>
+
+        <response>
+            <template>Success</template>
+        </response>
+    </trigger>
 </saml>

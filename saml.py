@@ -9,7 +9,7 @@ from parser.trigger import Trigger
 from parser.tags import Condition, Random, Var
 from constants import AnyGroup
 from errors import SamlError, SamlSyntaxError, VarNotDefinedError, UserNotDefinedError, NoTagParserError, \
-    TriggerBlockingError, LimitError
+    ParserBlockingError, LimitError
 
 
 class Saml:
@@ -197,11 +197,13 @@ class Saml:
         for trigger in triggers:
             try:
                 match = trigger.match(user, message)
-            except TriggerBlockingError:
+            except ParserBlockingError:
                 return
 
             if match:
                 return match
+            else:
+                self._log.info('Trigger was matched, but there are no available responses')
 
         # If we're still here, no reply was matched. If we're in a topic, exit and retry
         if user.topic:

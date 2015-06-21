@@ -57,6 +57,7 @@
                 <xs:group ref="trigger.group"/>
                 <xs:group ref="trigger.topic"/>
                 <xs:group ref="trigger.emotion"/>
+                <xs:element ref="blocking"/>
                 <xs:element ref="pattern"/>
                 <xs:choice>
                     <xs:element ref="condition"/>
@@ -84,6 +85,7 @@
             <xs:element name="emotion" type="xs:string"/>
         </xs:sequence>
     </xs:group>
+    <xs:element name="blocking" type="xs:boolean"/>
     <xs:element name="pattern">
         <xs:complexType mixed="true">
             <xs:attribute name="regex" type="xs:boolean"/>

@@ -89,6 +89,10 @@
                     <ref name="trigger.emotion"/>
                 </optional>
 
+                <optional>
+                    <ref name="trigger.blocking"/>
+                </optional>
+
                 <ref name="trigger.pattern"/>
 
                 <oneOrMore>
@@ -125,6 +129,12 @@
     <define name="trigger.emotion">
         <element name="emotion">
             <text/>
+        </element>
+    </define>
+
+    <define name="trigger.blocking">
+        <element name="blocking" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <data type="boolean"/>
         </element>
     </define>
 
