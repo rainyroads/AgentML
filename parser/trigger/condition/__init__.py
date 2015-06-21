@@ -24,9 +24,11 @@ class BaseCondition(metaclass=ABCMeta):
         self._element = element
 
         # Containers and default attributes
-        self._comparisons = []
-        self._else = NotImplemented
-        self.type = kwargs['type'] if 'type' in kwargs else 'user_var'
+        self.statements = []
+        self._else = None
+
+        self.type = kwargs['type'] if 'type' in kwargs else attribute(self._element, 'type', 'user_var')
+        self._log = logging.getLogger('saml.parser.trigger.condition')
 
     def evaluate(self, user):
         """
@@ -34,62 +36,15 @@ class BaseCondition(metaclass=ABCMeta):
         :param user: The active user object
         :type  user: saml.User or None
 
-        :return: A list of (response, weight) tuples, or an empty tuple if the evaluation fails
-        :rtype : list of tuple or list
+        :return: True if the condition evaluates successfully, otherwise False
+        :rtype : bool
         """
-        for comparison in self._comparisons:
-            key_type, key, operator, value, items = comparison
-            self._log.debug('Evaluating conditional statement: {key} {operator} {value}'
-                            .format(key=key, operator=operator, value=value))
+        for statement in self.statements:
+            evaluated = statement.evaluate(self.saml, user)
+            if evaluated:
+                return evaluated
 
-            # Get the value of our key type
-            key_value = None
-            try:
-                if key_type == 'user_var':
-                    key_value = user.get_var(key)
-                elif key_type == 'global_var':
-                    key_value = self.saml.get_var(key)
-                elif key_type == 'topic':
-                    key_value = user.topic
-                elif key_type == 'user':
-                    key_value = user.id
-            except VarNotDefinedError:
-                key_value = None
-
-            # Atomic comparisons
-            if operator is NotImplemented and key_value:
-                return items
-
-            if (operator == 'is') and (key_value == value):
-                return items
-
-            if (operator == 'is_not') and (key_value != value):
-                return items
-
-            # All remaining operators are numeric based, so key_value must contain a valid integer or float
-            try:
-                key_value = float(key_value)
-                value = float(value)
-            except (ValueError, TypeError):
-                continue
-
-            # Numeric comparisons
-            if (operator == 'gt') and (key_value > value):
-                return items
-
-            if (operator == 'gte') and (key_value >= value):
-                return items
-
-            if (operator == 'lt') and (key_value < value):
-                return items
-
-            if (operator == 'lte') and (key_value <= value):
-                return items
-
-        if self._else is not NotImplemented:
-            return self._else
-
-        return ()
+        return self._else or False
 
     @abstractmethod
     def get_contents(self, element):
@@ -126,9 +81,9 @@ class BaseCondition(metaclass=ABCMeta):
         name = attribute(element, 'name')
 
         # Get the comparison operator and its value (if implemented)
-        operator = NotImplemented
-        value = NotImplemented
-        for o in ['is', 'is_not', 'gt', 'gte', 'lt', 'lte']:
+        operator = None
+        value = None
+        for o in ConditionStatement.operators:
             if o in element.attrib:
                 operator = o
                 value = element.attrib[operator]
@@ -136,7 +91,7 @@ class BaseCondition(metaclass=ABCMeta):
 
         # Get the contents of the element in tuple form and append our if statement
         contents = tuple(self.get_contents(element))
-        self._comparisons.append((self.type, name, operator, value, contents))
+        self.statements.append(ConditionStatement(self.type, operator, contents, value, name))
 
     def _parse_elif(self, element):
         """
@@ -185,5 +140,109 @@ class Condition(Element, BaseCondition):
         :return: A list of responses
         :rtype : list of Response
         """
-        return [(Response(self.trigger, child, self.file_path), int_attribute(child, 'weight', 1))
-                for child in element if child.tag == 'response']
+        return [Response(self.trigger, child, self.file_path) for child in element if child.tag == 'response']
+
+class ConditionStatement:
+    # Condition types
+    USER_VAR = 'user_var'
+    GLOBAL_VAR = 'global_var'
+    TOPIC = 'topic'
+    USER = 'user'
+
+    types = [USER_VAR, GLOBAL_VAR, TOPIC, USER]
+
+    # Condition operators
+    IS = 'is'
+    IS_NOT = 'is_not'
+    GREATER_THAN = 'gt'
+    GREATER_THAN_OR_EQUAL = 'gte'
+    LESS_THAN = 'lt'
+    LESS_THAN_OR_EQUAL = 'lte'
+
+    operators = [IS, IS_NOT, GREATER_THAN, GREATER_THAN_OR_EQUAL, LESS_THAN, LESS_THAN_OR_EQUAL]
+
+    def __init__(self, cond_type, operator, contents, value=None, name=None):
+        """
+        Initialize a new Condition Statement object
+        :param cond_type: The type of the condition statement
+        :type  cond_type: str
+
+        :param operator: The operator of the condition statement
+        :type  operator: str
+
+        :param contents: The contents of the condition statement
+        :type  contents: tuple
+
+        :param value: The value of the condition statement
+        :type  value: str, int, float or None
+
+        :param name: The name of the variable if the condition type is USER_VAR or GLOBAL_VAR
+        :type  name: str
+        """
+        self.type = cond_type
+        self.operator = operator
+        self.contents = contents
+        self.value = value
+        self.name = name
+        self._log = logging.getLogger('saml.parser.trigger.condition.statement')
+
+    def evaluate(self, saml, user=None):
+        """
+        Evaluate the conditional statement and return its contents if a successful evaluation takes place
+        :param user: The active user object
+        :type  user: saml.User or None
+        
+        :param saml: The active SAML instance
+        :type  saml: Saml
+
+        :return: Condition contents if the condition evaluates successfully, otherwise False
+        :rtype : tuple or bool
+        """
+        self._log.debug('Evaluating conditional statement: {statement}'
+                        .format(statement=' '.join(filter(None, [self.type, self.name, self.operator, self.value]))))
+
+        # Get the value of our key type
+        key_value = None
+        try:
+            if self.type == self.USER_VAR:
+                key_value = user.get_var(self.name)
+            elif self.type == self.GLOBAL_VAR:
+                key_value = saml.get_var(self.name)
+            elif self.type == self.TOPIC:
+                key_value = user.topic
+            elif self.type == self.USER:
+                key_value = user.id
+        except VarNotDefinedError:
+            key_value = None
+
+        # Atomic comparisons
+        if self.operator is NotImplemented and key_value:
+            return self.contents
+
+        if (self.operator == self.IS) and (key_value == self.value):
+            return self.contents
+
+        if (self.operator == self.IS_NOT) and (key_value != self.value):
+            return self.contents
+
+        # All remaining self.operators are numeric based, so key_value must contain a valid integer or float
+        try:
+            key_value = float(key_value)
+            value = float(self.value)
+        except (ValueError, TypeError):
+            return False
+
+        # Numeric comparisons
+        if (self.operator == self.GREATER_THAN) and (key_value > value):
+            return self.contents
+
+        if (self.operator == self.GREATER_THAN_OR_EQUAL) and (key_value >= value):
+            return self.contents
+
+        if (self.operator == self.LESS_THAN) and (key_value < value):
+            return self.contents
+
+        if (self.operator == self.LESS_THAN_OR_EQUAL) and (key_value <= value):
+            return self.contents
+
+        return False

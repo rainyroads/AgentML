@@ -117,6 +117,16 @@
                 <xs:element minOccurs="0" maxOccurs="unbounded" ref="elif"/>
                 <xs:element minOccurs="0" ref="else"/>
             </xs:sequence>
+            <xs:attribute name="type">
+                <xs:simpleType>
+                    <xs:restriction base="xs:token">
+                        <xs:enumeration value="user_var"/>
+                        <xs:enumeration value="global_var"/>
+                        <xs:enumeration value="user"/>
+                        <xs:enumeration value="topic"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
     <xs:element name="if">

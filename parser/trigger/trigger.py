@@ -3,7 +3,7 @@ import random
 import re
 import sre_constants
 from parser import Element, Restrictable, weighted_choice, normalize, attribute, int_attribute, bool_attribute
-from parser.trigger.response import Response
+from parser.trigger.response import Response, ResponseContainer
 from parser.trigger.condition import Condition
 from errors import SamlSyntaxError, LimitError, ChanceError
 
@@ -33,7 +33,7 @@ class Trigger(Element, Restrictable):
         self.pattern = kwargs['pattern'] if 'pattern' in kwargs else None
         self.groups = kwargs['groups'] if 'groups' in kwargs else None
         self.topic = kwargs['topic'] if 'topic' in kwargs else None
-        self._responses = kwargs['responses'] if 'responses' in kwargs else []
+        self._responses = kwargs['responses'] if 'responses' in kwargs else ResponseContainer()
 
         # Pattern metadata
         self.pattern_is_atomic = False
@@ -78,7 +78,7 @@ class Trigger(Element, Restrictable):
         # String match
         if isinstance(self.pattern, str) and str(message) == self.pattern:
             self._log.info('String Pattern matched: {match}'.format(match=self.pattern))
-            return str(self.response(user))
+            return str(self._responses.random(user))
 
         # Regular expression match
         if hasattr(self.pattern, 'match'):
@@ -96,34 +96,28 @@ class Trigger(Element, Restrictable):
 
                 self._log.debug('Assigning pattern wildcards: {stars}'.format(stars=str(self.stars)))
 
-                return str(self.response(user))
+                return str(self._responses.random(user))
 
     # noinspection PyUnboundLocalVariable
-    def response(self, user=None):
+    def _attempt_responses(self, responses, user=None):
         """
         Return a random response for this trigger
         :param user: The user to apply response reactions to
         :type  user: saml.User or None
 
+        :param responses: A list of responses to attempt
+        :type  responses: list
+
         :rtype: str
+
+        :raises LimitError: All responses have an active limit enforced for the supplied user
+        :raises ChanceError: All responses failed a chance test
         """
         # If we have a User, only fetch responses that are not limited
         if user:
-            responses = [response for response in self._responses if not user.is_limited(response[0])]
+            responses = [response for response in responses if not user.is_limited(response[0])]
         else:
             responses = self._responses
-
-        # Evaluate any Conditions that have been set
-        _responses = []
-        for response in responses:
-            # If this is a standard Response, continue
-            if isinstance(response[0], Response):
-                _responses.append(response)
-
-            # If this is a Condition, evaluate it and append any returned results
-            if isinstance(response[0], Condition):
-                _responses.extend(response[0].evaluate(user))
-        responses = _responses
 
         # If all responses are limited, return now
         if not responses:
@@ -157,6 +151,59 @@ class Trigger(Element, Restrictable):
 
         # Return the Response object
         return response
+
+    def _add_response(self, response, weight=1):
+        """
+        Add a new trigger
+        :param response: The Response object
+        :type  response: Response or Condition
+
+        :param weight: The weight of the response
+        :type  weight: int
+        """
+        # If no response with this priority level has been defined yet, create a new list
+        if response.priority not in self._responses:
+            self._responses[response.priority] = [(response, weight)]
+            return
+
+        # Otherwise, add this trigger to an existing priority list
+        self._responses[response.priority].append((response, weight))
+
+    def _get_response(self, user=None):
+        """
+        Fetch a random response
+        :param user: The user to apply response reactions to
+        :type  user: saml.User or None
+
+        :rtype str:
+
+        :raises LimitError: All responses have an active limit enforced for the supplied user
+        :raises ChanceError: All responses failed a chance test
+        """
+        end = len(self._responses) - 1
+
+        for index, responses in enumerate([self._responses[p] for p in sorted(self._responses.keys(), reverse=True)]):
+            try:
+                # Evaluate any Conditions that have been set
+                _responses = []
+                for response in responses:
+                    # If this is a standard Response, continue
+                    if isinstance(response[0], Response):
+                        _responses.append(response)
+
+                    # If this is a Condition, evaluate it and append any returned results
+                    if isinstance(response[0], Condition):
+                        _responses.extend(response[0].evaluate(user))
+                responses = _responses
+
+                return self._attempt_responses(responses, user)
+            except (LimitError, ChanceError):
+                # Was this our last priority group?
+                if index == end:
+                    raise
+
+                # If not, continue onto the next instead of throwing an exception
+                continue
 
     @staticmethod
     def replace_wildcards(string, wildcard, regex):
@@ -349,8 +396,7 @@ class Trigger(Element, Restrictable):
             self._log.warn('Received non-integer value for weight attribute: {weight}'.format(element.get('weight')))
             weight = 1
 
-        # If the response has no tags, just store the string text
-        self._responses.append((Response(self, element, self.file_path), weight))
+        self._responses.add(Response(self, element, self.file_path, weight=weight))
 
     def _parse_condition(self, element):
         """
@@ -359,7 +405,10 @@ class Trigger(Element, Restrictable):
         :type  element: etree._Element
         """
         self._log.info('Parsing new Condition')
-        self._responses.append((Condition(self, element, self.file_path), 1))
+        condition = Condition(self, element, self.file_path)
+        for statement in condition.statements:
+            for response in statement.contents:
+                self._responses.add(response, condition)
 
     def _parse_chance(self, element):
         """
@@ -382,4 +431,4 @@ class Trigger(Element, Restrictable):
         self.chance = chance
 
     def __str__(self):
-        return self.response()
+        return self._get_response()
