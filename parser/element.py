@@ -1,6 +1,6 @@
 import logging
 from lxml import etree
-from parser.common import normalize, attribute
+from parser.common import attribute, bool_attribute
 
 
 class Element:
@@ -50,6 +50,9 @@ class Restrictable:
         self.global_limit = None
         self.mood = None
         self.chance = 100
+        self.ulimit_blocking = True
+        self.glimit_blocking = True
+        self.chance_blocking = True
 
         self._log = logging.getLogger('saml.parser.element')
 
@@ -94,8 +97,10 @@ class Restrictable:
 
         if limit_type == 'global':
             self.global_limit = limit * unit_conversions[units]
+            self.glimit_blocking = bool_attribute(element, 'blocking', self.glimit_blocking)
         elif limit_type == 'user':
             self.user_limit = limit * unit_conversions[units]
+            self.ulimit_blocking = bool_attribute(element, 'blocking', self.ulimit_blocking)
 
         return
 
@@ -117,3 +122,4 @@ class Restrictable:
             return
 
         self.chance = chance
+        self.chance_blocking = bool_attribute(element, 'blocking', self.chance_blocking)

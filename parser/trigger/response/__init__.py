@@ -39,6 +39,9 @@ class Response(Element, Restrictable):
         # Default attributes
         self.emotion = kwargs['emotion'] if 'emotion' in kwargs else None
         self.weight = kwargs['weight'] if 'weight' in kwargs else int_attribute(self._element, 'weight', 1)
+        self.ulimit_blocking = False
+        self.glimit_blocking = False
+        self.chance_blocking = False
 
         with open(os.path.join(self.trigger.saml.script_path, 'schemas', 'tags', 'star.rng')) as file:
             self.schema = schema(file.read())

@@ -1,6 +1,7 @@
 import logging
 import random
 from collections import OrderedDict
+from errors import LimitError, ChanceError
 from parser.common import weighted_choice
 
 
@@ -103,6 +104,11 @@ class ResponseContainer:
 
                 # Does the user have a limit for this response enforced?
                 if user and user.is_limited(response):
+                    if response.ulimit_blocking:
+                        self._log.debug('An active blocking limit for this response is being enforced against the user '
+                                        '{uid}, no response will be returned'.format(uid=user.id))
+                        raise LimitError
+
                     self._log.debug('An active limit for this response is being enforced against the user {uid}, '
                                     'skipping'.format(uid=user.id))
                     continue
@@ -133,12 +139,17 @@ class ResponseContainer:
 
                 # Chance succeeded
                 if response.chance >= random.uniform(0, 100):
-                    self._log.info('Response had a {chance}% of being selected and succeeded selection'
+                    self._log.info('Response had a {chance}% chance of being selected and succeeded selection'
                                    .format(chance=response.chance))
                     successful_response = response
                     break
                 else:
-                    self._log.info('Response had a {chance}% of being selected but failed selection'
+                    if response.chance_blocking:
+                        self._log.info('Response had a blocking {chance}% chance of being selected but failed selection'
+                                       ', no response will be returned'.format(chance=response.chance))
+                        raise ChanceError
+
+                    self._log.info('Response had a {chance}% chance of being selected but failed selection'
                                    .format(chance=response.chance))
                     response_pool = [r for r in response_pool if r is not response]
                     continue
