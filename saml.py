@@ -558,8 +558,8 @@ class User:
     def set_limit(self, identifier, expires_at, blocking=False):
         """
         Set a new trigger or response limit
-        :param identifier: The id() of the Trigger or Response object
-        :type  identifier: int
+        :param identifier: The Trigger or Response object
+        :type  identifier: parser.trigger.Trigger or parser.trigger.response.Response
 
         :param expires_at: The limit expiration as a Unix timestamp
         :type  expires_at: float
@@ -593,34 +593,31 @@ class User:
         else:
             return False
 
-    def is_limited(self, trigger):
+    def is_limited(self, identifier):
         """
-        Test whether or not there is an active User limit for the specified Trigger instance
-        :param trigger: The Trigger to test for a limit
-        :type  trigger: parser.trigger.trigger.Trigger
+        Test whether or not there is an active User limit for the specified Trigger or Response instance
+        :param identifier: The Trigger or Response object
+        :type  identifier: parser.trigger.Trigger or parser.trigger.response.Response
 
         :return: True if there is a limit enforced, otherwise False
         :rtype : bool
         """
-        # Get the object ID of the Trigger instance
-        trigger_id = id(trigger)
-
         # If there is a limit for this Trigger assigned, make sure it hasn't expired
-        if trigger_id in self._limits:
-            limit, blocking = self._limits[trigger_id]
+        if identifier in self._limits:
+            limit, blocking = self._limits[identifier]
             if time.time() < limit:
                 # Limit exists and is active, return True
                 self._log.debug('User "{uid}" has a limit enforced for Object {oid}'
-                                .format(uid=self.id, oid=trigger_id))
+                                .format(uid=self.id, oid=id(identifier)))
                 if blocking:
                     raise LimitError
                 return True
             else:
                 # Limit has expired, remove it
-                del self._limits[trigger_id]
+                del self._limits[identifier]
 
         # We're still here, so there are no active limits. Return False
-        self._log.debug('User "{uid}" has no limit enforced for Object {oid}'.format(uid=self.id, oid=trigger_id))
+        self._log.debug('User "{uid}" has no limit enforced for Object {oid}'.format(uid=self.id, oid=id(identifier)))
         return False
 
 
