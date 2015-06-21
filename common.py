@@ -116,3 +116,64 @@ def int_attribute(element, attribute, default=0):
             return default
 
     return default
+
+
+def element(element, name, default=None):
+    """
+    Returns the value of an element, or a default if it's not defined
+    :param element: The XML Element object
+    :type  element: etree._Element
+
+    :param name: The name of the element to evaluate
+    :type  name: str
+
+    :param default: The default value to return if the element is not defined
+    """
+    element_value = element.find(name)
+
+    return element_value if element_value is not None else default
+
+
+def bool_element(element, name, default=True):
+    """
+    Returns the bool value of an element, or a default if it's not defined
+    :param element: The XML Element object
+    :type  element: etree._Element
+
+    :param name: The name of the element to evaluate
+    :type  name: str
+
+    :param default: The default value to return if the element is not defined
+    :type  default: bool
+    """
+    element_value = element.find(name)
+
+    if element_value:
+        return element_value == 'true'
+
+    return default
+
+
+def int_element(element, name, default=0):
+    """
+    Returns the int value of an element, or a default if it's not defined
+    :param element: The XML Element object
+    :type  element: etree._Element
+
+    :param name: The name of the element to evaluate
+    :type  name: str
+
+    :param default: The default value to return if the element is not defined
+    :type  default: int
+
+    :rtype: int
+    """
+    element_value = element.find(name)
+
+    if element_value:
+        try:
+            return int(element_value)
+        except (TypeError, ValueError):
+            return default
+
+    return default
