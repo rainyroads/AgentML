@@ -1,6 +1,7 @@
 import logging
 from abc import ABCMeta, abstractmethod
-from parser import Element, attribute, int_attribute
+from common import attribute, int_attribute
+from parser import Element
 from parser.trigger.response import Response
 from errors import VarNotDefinedError
 

@@ -1,5 +1,6 @@
 from lxml import etree
-from parser import Element, normalize, attribute
+from common import attribute
+from parser import Element
 
 
 class Init(Element):

@@ -1,8 +1,8 @@
 import logging
 import random
 from collections import OrderedDict
+from common import weighted_choice
 from errors import LimitError, ChanceError
-from parser.common import weighted_choice
 
 
 class ResponseContainer:

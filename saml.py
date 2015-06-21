@@ -3,7 +3,7 @@ import re
 import time
 import logging
 from lxml import etree
-from parser import schema, normalize, attribute, int_attribute
+from common import schema, normalize, attribute, int_attribute
 from parser.init import Init
 from parser.trigger import Trigger
 from parser.tags import Condition, Random, Var

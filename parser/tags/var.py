@@ -1,6 +1,6 @@
 import os
 import logging
-from parser import schema, attribute
+from common import schema, attribute
 from parser.tags import Tag
 from errors import VarNotDefinedError
 

@@ -1,6 +1,6 @@
 import logging
 from lxml import etree
-from parser.common import attribute, bool_attribute
+from common import attribute, bool_attribute
 
 
 class Element:

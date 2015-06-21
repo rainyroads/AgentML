@@ -2,8 +2,8 @@ import os
 import time
 import logging
 from collections import Iterable
+from common import schema, attribute, int_attribute
 from parser import Element, Restrictable
-from parser.common import schema, attribute, int_attribute
 from .container import ResponseContainer
 
 

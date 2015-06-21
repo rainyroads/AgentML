@@ -1,6 +1,6 @@
 import os
 import logging
-from parser import schema
+from common import schema
 from parser.tags import Tag
 from parser.trigger.condition import BaseCondition
 

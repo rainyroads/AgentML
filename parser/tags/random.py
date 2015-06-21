@@ -1,6 +1,6 @@
 import os
 import logging
-from parser import schema, int_attribute, weighted_choice
+from common import schema, int_attribute, weighted_choice
 from parser.tags import Tag
 
 

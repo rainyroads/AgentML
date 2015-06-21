@@ -2,10 +2,11 @@ import logging
 import random
 import re
 import sre_constants
-from parser import Element, Restrictable, weighted_choice, normalize, attribute, int_attribute, bool_attribute
+from common import weighted_choice, normalize, int_attribute, bool_attribute, bool_element
+from errors import SamlSyntaxError, LimitError, ChanceError
+from parser import Element, Restrictable
 from parser.trigger.response import Response, ResponseContainer
 from parser.trigger.condition import Condition
-from errors import SamlSyntaxError, LimitError, ChanceError
 
 
 class Trigger(Element, Restrictable):
@@ -29,6 +30,7 @@ class Trigger(Element, Restrictable):
         # Containers and default attributes
         self.priority = int_attribute(element, 'priority')
         self.normalize = bool_attribute(element, 'normalize')
+        self.blocking = bool_element(element, 'blocking')
 
         self.pattern = kwargs['pattern'] if 'pattern' in kwargs else None
         self.groups = kwargs['groups'] if 'groups' in kwargs else None
@@ -96,7 +98,7 @@ class Trigger(Element, Restrictable):
 
                 self._log.debug('Assigning pattern wildcards: {stars}'.format(stars=str(self.stars)))
 
-                return str(self._responses.random(user))
+                response = self._responses.random(user)
 
     # noinspection PyUnboundLocalVariable
     def _attempt_responses(self, responses, user=None):
