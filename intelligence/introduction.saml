@@ -293,8 +293,8 @@
             <template>If you saw One, Two, Three before this message, this was a success! (Or you got lucky)</template>
         </response>
 
-        <condition type="user">
-            <if name="" is="chell">
+        <condition>
+            <if type="user" is="chell">
                 <response priority="0">
                     <template>If you saw One, Two, Three before this message, this was a triumph! (Or you got lucky)</template>
                 </response>

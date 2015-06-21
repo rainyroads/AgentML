@@ -237,7 +237,13 @@
 
     <define name="trigger.response.condition.if">
         <element name="if">
-            <attribute name="name"/>
+            <optional>
+                <attribute name="name"/>
+            </optional>
+
+            <optional>
+                <attribute name="type"/>
+            </optional>
 
             <optional>
                 <ref name="trigger.response.condition.operators"/>
@@ -251,7 +257,13 @@
 
     <define name="trigger.response.condition.elif">
         <element name="elif">
-            <attribute name="name"/>
+            <optional>
+                <attribute name="name"/>
+            </optional>
+
+            <optional>
+                <attribute name="type"/>
+            </optional>
 
             <optional>
                 <ref name="trigger.response.condition.operators"/>

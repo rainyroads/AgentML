@@ -79,6 +79,7 @@ class BaseCondition(metaclass=ABCMeta):
         """
         # Get the key
         name = attribute(element, 'name')
+        cond_type = attribute(element, 'type', self.type)
 
         # Get the comparison operator and its value (if implemented)
         operator = None
@@ -91,7 +92,7 @@ class BaseCondition(metaclass=ABCMeta):
 
         # Get the contents of the element in tuple form and append our if statement
         contents = tuple(self.get_contents(element))
-        self.statements.append(ConditionStatement(self.type, operator, contents, value, name))
+        self.statements.append(ConditionStatement(cond_type, operator, contents, value, name))
 
     def _parse_elif(self, element):
         """
