@@ -131,7 +131,7 @@ def element(element, name, default=None):
     """
     element_value = element.find(name)
 
-    return element_value if element_value is not None else default
+    return element_value.text if element_value is not None else default
 
 
 def bool_element(element, name, default=True):
@@ -148,8 +148,8 @@ def bool_element(element, name, default=True):
     """
     element_value = element.find(name)
 
-    if element_value:
-        return element_value == 'true'
+    if element_value is not None:
+        return element_value.text == 'true'
 
     return default
 
@@ -170,9 +170,9 @@ def int_element(element, name, default=0):
     """
     element_value = element.find(name)
 
-    if element_value:
+    if element_value is not None:
         try:
-            return int(element_value)
+            return int(element_value.text)
         except (TypeError, ValueError):
             return default
 
