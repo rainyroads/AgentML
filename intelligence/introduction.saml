@@ -27,8 +27,22 @@
 
 <saml version="0.1" xmlns="">
     <!-- Hello, Yuki! -->
-    <trigger>
+    <trigger priority="5">
         <pattern>(hello|hi|hiya|good evening|good morning)</pattern>
+
+        <condition type="user_var">
+            <if name="name">
+                <response priority="1">
+                    <template>
+                        <random>
+                            <item>Hi <var name="name"/>!</item>
+                            <item>Hello again, <var name="name"/>!</item>
+                            <item>Hello <var name="name"/>.</item>
+                        </random>
+                    </template>
+                </response>
+            </if>
+        </condition>
 
         <response>
             <topic>whats_your_name</topic>

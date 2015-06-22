@@ -155,10 +155,6 @@ class Trigger(Element, Restrictable):
         :type  user: saml.User
         """
         # User attributes
-        if self.topic is not False:
-            self._log.info('Setting User Topic to: {topic}'.format(topic=self.topic))
-            user.topic = self.topic
-
         if self.global_limit:
             self._log.info('Enforcing Global Trigger Limit of {num} seconds'.format(num=self.global_limit))
             pass  # TODO
