@@ -92,8 +92,16 @@ class Trigger(Element, Restrictable):
                                 'skipping'.format(uid=user.id))
                 return ''
 
-            # TODO: Is there a global limit for this response enforced?
-            pass
+            # Is there a global limit for this response enforced?
+            if self.saml.is_limited(self):
+                if self.glimit_blocking:
+                    self._log.debug('An active blocking limit for this trigger is being enforced globally, no trigger '
+                                    'will be matched'.format(uid=user.id))
+                    raise LimitError
+
+                self._log.debug('An active limit for this response is being enforced against the user {uid}, '
+                                'skipping'.format(uid=user.id))
+                return ''
 
             # Chance testing
             if self.chance is not None and self.chance != 100:
@@ -157,11 +165,11 @@ class Trigger(Element, Restrictable):
         # User attributes
         if self.global_limit:
             self._log.info('Enforcing Global Trigger Limit of {num} seconds'.format(num=self.global_limit))
-            pass  # TODO
+            self.saml.set_limit(self, (time() + self.global_limit), self.glimit_blocking)
 
         if self.user_limit:
             self._log.info('Enforcing User Trigger Limit of {num} seconds'.format(num=self.user_limit))
-            user.set_limit(self, (time() + self.user_limit))
+            user.set_limit(self, (time() + self.user_limit), self.ulimit_blocking)
 
         if self.var[0]:
             var_type, var_name, var_value = self.var

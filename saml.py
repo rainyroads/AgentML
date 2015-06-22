@@ -1,15 +1,14 @@
 import os
 import re
-import time
 import logging
+from time import time
 from lxml import etree
 from common import schema, normalize, attribute, int_attribute
 from parser.init import Init
 from parser.trigger import Trigger
 from parser.tags import Condition, Random, Var
 from constants import AnyGroup
-from errors import SamlError, SamlSyntaxError, VarNotDefinedError, UserNotDefinedError, NoTagParserError, \
-    ParserBlockingError, LimitError
+from errors import SamlError, VarNotDefinedError, UserNotDefinedError, NoTagParserError, ParserBlockingError, LimitError
 
 
 class Saml:
@@ -39,6 +38,7 @@ class Saml:
 
         # Containers
         self._global_vars   = {}
+        self._limits        = {}
         self._users         = {}
         self._triggers      = {}
         self._substitutions = []
@@ -341,6 +341,71 @@ class Saml:
         # Set a global variable
         self._global_vars[name] = value
 
+    def set_limit(self, identifier, expires_at, blocking=False):
+        """
+        Set a new global trigger or response limit
+        :param identifier: The Trigger or Response object
+        :type  identifier: parser.trigger.Trigger or parser.trigger.response.Response
+
+        :param expires_at: The limit expiration as a Unix timestamp
+        :type  expires_at: float
+
+        :param blocking: When True and a limit is triggered, no other Trigger or Response's will be attempted
+        :type  blocking: bool
+        """
+        self._limits[identifier] = (expires_at, blocking)
+
+    def clear_limit(self, identifier=None):
+        """
+        Remove a single limit or all defined limits
+        :param identifier: The identifier to clear limits for, or if no identifier is supplied, clears ALL limits
+        :type  identifier: int
+
+        :return: True if a limit was successfully found and removed, False if no limit could be matched for removal
+        :rtype : bool
+        """
+        # Remove a single limit
+        if identifier:
+            if identifier in self._limits:
+                del self._limits[identifier]
+                return True
+            else:
+                return False
+
+        # Remove all limits
+        if self._limits:
+            self._limits.clear()
+            return True
+        else:
+            return False
+
+    def is_limited(self, identifier):
+        """
+        Test whether or not there is an active global limit for the specified Trigger or Response instance
+        :param identifier: The Trigger or Response object
+        :type  identifier: parser.trigger.Trigger or parser.trigger.response.Response
+
+        :return: True if there is a limit enforced, otherwise False
+        :rtype : bool
+        """
+        # If there is a limit for this Trigger assigned, make sure it hasn't expired
+        if identifier in self._limits:
+            limit, blocking = self._limits[identifier]
+            if time() < limit:
+                # Limit exists and is active, return True
+                self._log.debug('Global limit enforced for Object {oid}'
+                                .format(oid=id(identifier)))
+                if blocking:
+                    raise LimitError
+                return True
+            else:
+                # Limit has expired, remove it
+                del self._limits[identifier]
+
+        # We're still here, so there are no active limits. Return False
+        self._log.debug('No global limit enforced for Object {oid}'.format(oid=id(identifier)))
+        return False
+
     def get_user(self, identifier):
         # Does this user already exist?
         if identifier in self._users:
@@ -527,7 +592,7 @@ class User:
         self.id = identifier
         self.topic = None
         self._vars = {}
-        self._limits = {}  # Dictionary of trigger id()'s as keys, tuple of limit expiration's and blocking as values
+        self._limits = {}  # Dictionary of objects as keys, tuple of limit expiration's and blocking as values
 
     def get_var(self, name):
         """
@@ -564,7 +629,7 @@ class User:
         :param expires_at: The limit expiration as a Unix timestamp
         :type  expires_at: float
 
-        :param blocking: When True and a limit is triggered, no other Triggers will be attempted
+        :param blocking: When True and a limit is triggered, no other Trigger or Response's will be attempted
         :type  blocking: bool
         """
         self._limits[identifier] = (expires_at, blocking)
@@ -605,7 +670,7 @@ class User:
         # If there is a limit for this Trigger assigned, make sure it hasn't expired
         if identifier in self._limits:
             limit, blocking = self._limits[identifier]
-            if time.time() < limit:
+            if time() < limit:
                 # Limit exists and is active, return True
                 self._log.debug('User "{uid}" has a limit enforced for Object {oid}'
                                 .format(uid=self.id, oid=id(identifier)))

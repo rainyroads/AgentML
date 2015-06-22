@@ -79,6 +79,27 @@
         </trigger>
     </topic>
 
+    <!-- Limit test -->
+    <trigger>
+        <pattern>global limit test</pattern>
+
+        <limit type="global">30</limit>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>user limit test</pattern>
+
+        <limit>30</limit>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
     <!-- Chance test -->
     <trigger>
         <pattern>response chance</pattern>

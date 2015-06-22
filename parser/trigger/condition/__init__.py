@@ -1,6 +1,6 @@
 import logging
 from abc import ABCMeta, abstractmethod
-from common import attribute, int_attribute
+from common import attribute
 from parser import Element
 from parser.trigger.response import Response
 from errors import VarNotDefinedError
@@ -143,6 +143,7 @@ class Condition(Element, BaseCondition):
         :rtype : list of Response
         """
         return [Response(self.trigger, child, self.file_path) for child in element if child.tag == 'response']
+
 
 class ConditionStatement:
     # Condition types
