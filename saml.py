@@ -201,9 +201,7 @@ class Saml:
                 return
 
             if match:
-                return match
-            else:
-                self._log.info('Trigger was matched, but there are no available responses')
+                return str(match)
 
         # If we're still here, no reply was matched. If we're in a topic, exit and retry
         if user.topic:

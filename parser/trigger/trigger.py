@@ -1,8 +1,11 @@
 import logging
 import re
 import sre_constants
+import random
+from time import time
+from collections import Iterable
 from common import normalize, int_attribute, bool_attribute, bool_element
-from errors import SamlSyntaxError, ParserBlockingError
+from errors import SamlSyntaxError, ParserBlockingError, LimitError, ChanceError
 from parser import Element, Restrictable
 from parser.trigger.response import Response, ResponseContainer
 from parser.trigger.condition import Condition
@@ -35,6 +38,7 @@ class Trigger(Element, Restrictable):
         self.groups = kwargs['groups'] if 'groups' in kwargs else None
         self.topic = kwargs['topic'] if 'topic' in kwargs else None
         self._responses = kwargs['responses'] if 'responses' in kwargs else ResponseContainer()
+        self.var = (None, None, None)
 
         # Pattern metadata
         self.pattern_is_atomic = False
@@ -77,13 +81,50 @@ class Trigger(Element, Restrictable):
             return
 
         def get_response():
-            response = self._responses.random(user)
-            if not response and self.blocking:
+            # Does the user have a limit for this response enforced?
+            if user.is_limited(self):
+                if self.ulimit_blocking:
+                    self._log.debug('An active blocking limit for this trigger is being enforced against the user '
+                                    '{uid}, no trigger will be matched'.format(uid=user.id))
+                    raise LimitError
+
+                self._log.debug('An active limit for this response is being enforced against the user {uid}, '
+                                'skipping'.format(uid=user.id))
+                return ''
+
+            # TODO: Is there a global limit for this response enforced?
+            pass
+
+            # Chance testing
+            if self.chance is not None and self.chance != 100:
+                # Chance succeeded
+                if self.chance >= random.uniform(0, 100):
+                    self._log.info('Trigger had a {chance}% chance of being selected and succeeded selection'
+                                   .format(chance=self.chance))
+                # Chance failed
+                else:
+                    if self.chance_blocking:
+                        self._log.info('Trigger had a blocking {chance}% chance of being selected but failed selection'
+                                       ', no trigger will be matched'.format(chance=self.chance))
+                        raise ChanceError
+
+                    self._log.info('Response had a {chance}% chance of being selected but failed selection'
+                                   .format(chance=self.chance))
+                    return ''
+
+            random_response = self._responses.random(user)
+            if not random_response and self.blocking:
                 self._log.info('Trigger was matched, but there are no available responses and the trigger is blocking '
                                'any further attempts. Giving up')
                 raise ParserBlockingError
 
-            return str(response or '')
+            if random_response:
+                self.apply_reactions(user)
+            else:
+                self._log.info('Trigger was matched, but there are no available responses')
+                random_response = ''
+
+            return random_response
 
         # String match
         if isinstance(self.pattern, str) and str(message) == self.pattern:
@@ -106,6 +147,40 @@ class Trigger(Element, Restrictable):
 
                 self._log.debug('Assigning pattern wildcards: {stars}'.format(stars=str(self.stars)))
                 return get_response()
+
+    def apply_reactions(self, user):
+        """
+        Set active topics and limits after a response has been triggered
+        :param user: The user triggering the response
+        :type  user: saml.User
+        """
+        # User attributes
+        if self.topic is not False:
+            self._log.info('Setting User Topic to: {topic}'.format(topic=self.topic))
+            user.topic = self.topic
+
+        if self.global_limit:
+            self._log.info('Enforcing Global Trigger Limit of {num} seconds'.format(num=self.global_limit))
+            pass  # TODO
+
+        if self.user_limit:
+            self._log.info('Enforcing User Trigger Limit of {num} seconds'.format(num=self.user_limit))
+            user.set_limit(self, (time() + self.user_limit))
+
+        if self.var[0]:
+            var_type, var_name, var_value = self.var
+            var_name  = ''.join(map(str, var_name)) if isinstance(var_name, Iterable) else var_name
+            var_value = ''.join(map(str, var_value)) if isinstance(var_value, Iterable) else var_value
+
+            # Set a user variable
+            if var_type == 'user':
+                self.user.set_var(var_name, var_value)
+
+            # Set a global variable
+            if var_type == 'global':
+                self.saml.set_var(var_name, var_value)
+
+        # saml.mood = self.mood
 
     def _add_response(self, response, weight=1):
         """

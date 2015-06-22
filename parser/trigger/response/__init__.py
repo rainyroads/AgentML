@@ -67,7 +67,7 @@ class Response(Element, Restrictable):
             self._log.info('Enforcing User Response Limit of {num} seconds'.format(num=self.user_limit))
             user.set_limit(self, (time.time() + self.user_limit))
 
-        if self.var:
+        if self.var[0]:
             var_type, var_name, var_value = self.var
             var_name  = ''.join(map(str, var_name)) if isinstance(var_name, Iterable) else var_name
             var_value = ''.join(map(str, var_value)) if isinstance(var_value, Iterable) else var_value

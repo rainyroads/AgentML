@@ -67,11 +67,22 @@
 
     <!-- Chance test -->
     <trigger>
-        <pattern>chance</pattern>
+        <pattern>response chance</pattern>
 
         <response>
             <limit>3</limit>
             <chance>40</chance>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>trigger chance</pattern>
+
+        <limit>3</limit>
+        <chance>60</chance>
+
+        <response>
             <template>Success!</template>
         </response>
     </trigger>
@@ -306,7 +317,7 @@
     <trigger priority="1">
         <pattern>blocking test</pattern>
 
-        <limit>15</limit>
+        <limit blocking="false">15</limit>
 
         <response>
             <template>First!</template>

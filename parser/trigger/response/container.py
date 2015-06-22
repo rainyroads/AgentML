@@ -143,6 +143,7 @@ class ResponseContainer:
                                    .format(chance=response.chance))
                     successful_response = response
                     break
+                # Chance failed
                 else:
                     if response.chance_blocking:
                         self._log.info('Response had a blocking {chance}% chance of being selected but failed selection'
