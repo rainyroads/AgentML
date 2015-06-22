@@ -218,7 +218,7 @@ class ConditionStatement:
             key_value = None
 
         # Atomic comparisons
-        if self.operator is NotImplemented and key_value:
+        if self.operator is None and key_value:
             return self.contents
 
         if (self.operator == self.IS) and (key_value == self.value):
