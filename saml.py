@@ -6,7 +6,7 @@ from lxml import etree
 from common import schema, normalize, attribute, int_attribute
 from parser.init import Init
 from parser.trigger import Trigger
-from parser.tags import Condition, Random, Var
+from parser.tags import Condition, Random, Var, Tag
 from constants import AnyGroup
 from errors import SamlError, VarNotDefinedError, UserNotDefinedError, NoTagParserError, ParserBlockingError, LimitError
 
@@ -34,7 +34,7 @@ class Saml:
             self._schema = schema(file.read())
 
         # Define our base / system tags
-        self.tags = {'condition': Condition, 'random': Random, 'var': Var}
+        self._tags = {'condition': Condition, 'random': Random, 'var': Var}
 
         # Containers
         self._global_vars   = {}
@@ -415,21 +415,26 @@ class Saml:
         self._users[identifier] = User(identifier)
         return self._users[identifier]
 
-    def get_tag(self, element):
+    def set_tag(self, name, tag_class):
         """
-        Retrieve an instantiated Tag object
-        :param element: The tag XML element
-        :type  element: etree._Element
+        Define a new tag parser method
+        :param name: The name of the tag
+        :type  name: str
 
-        :rtype: parser.tags.Tag
-
-        :raise NoTagParserError: No parser for this tag has been defined
+        :param tag_class: The Tag class, this must be a subclass of base parser.tags.Tag
+        :type  tag_class: Tag
         """
-        if element.tag not in self.tags:
-            raise NoTagParserError
+        # Has this tag already been defined?
+        if name in self._tags:
+            self._log.warn('Overwriting an existing Tag class: {tag}'.format(tag=name))
 
-    def set_tag(self):
-        pass  # TODO
+        # Make sure the tag class adhered to the base Tag interface
+        if not issubclass(tag_class, Tag):
+            self._log.error('Tag class must implement the base Tag interface, please review the documentation on '
+                            'defining custom tags. (Refusing to set the tag "{tag}")'.format(tag=name))
+            return
+
+        self._tags[name] = tag_class
 
     def parse_tags(self, element, trigger):
         """
@@ -470,12 +475,12 @@ class Saml:
                 continue
 
             # Make sure a parser for this tag exists
-            if child.tag not in self.tags:
+            if child.tag not in self._tags:
                 self._log.warn('No parsers available for Tag "{tag}", skipping'.format(tag=child.tag))
                 continue
 
             # Append the tag object to the response string
-            tag = self.tags[child.tag]
+            tag = self._tags[child.tag]
             self._log.debug('Appending {tag} Tag object'.format(tag=child.tag.capitalize()))
             response.append(tag(trigger, child))
 

@@ -19,6 +19,18 @@ class Tag(metaclass=ABCMeta):
         self._element = element
         self._schema = None
         self._log = logging.getLogger('saml.parser.tags')
+        self._parse()
+
+    def _parse(self):
+        """
+        Loop through all child elements and execute any available parse methods for them
+        """
+        for child in self._element:
+            method_name = '_parse_{0}'.format(str(child.tag))  # TODO: This is a hack, skip comment objects here
+
+            if hasattr(self, method_name):
+                parse = getattr(self, method_name)
+                parse(child)
 
     @property
     def schema(self):

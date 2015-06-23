@@ -23,8 +23,6 @@ class Condition(Tag, BaseCondition):
         with open(os.path.join(self.trigger.saml.script_path, 'schemas', 'tags', 'condition.rng')) as file:
             self.schema = schema(file.read())
 
-        self._parse()
-
     def get_contents(self, element):
         """
         Retrieve the contents of an element

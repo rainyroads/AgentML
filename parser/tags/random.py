@@ -14,15 +14,14 @@ class Random(Tag):
         :param element: The XML Element object
         :type  element: etree._Element
         """
+        self._responses = ()
         super().__init__(trigger, element)
-        self._log = logging.getLogger('saml.parser.tags.random')
 
         # Define our schema
         with open(os.path.join(self.trigger.saml.script_path, 'schemas', 'tags', 'random.rng')) as file:
             self.schema = schema(file.read())
 
-        self._responses = ()
-        self._parse()
+        self._log = logging.getLogger('saml.parser.tags.random')
 
     def _parse(self):
         """
