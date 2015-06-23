@@ -61,7 +61,8 @@ class Saml:
         # Get a list of file paths
         saml_files = []
         for root, dirs, files in os.walk(dir_path):
-            saml_files += ['{root}/{file}'.format(root=root, file=file) for file in files if file.endswith('.saml')]
+            saml_files += ['{root}/{file}'.format(root=root, file=file)
+                           for file in sorted(files) if file.endswith('.saml')]
 
         # Loop through the files and load each one individually
         for file in saml_files:
