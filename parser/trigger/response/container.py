@@ -99,8 +99,17 @@ class ResponseContainer:
                             continue
 
                         # Pass
-                        self._log.debug('Condition evaluated successfully, response will be processed')
+                        self._log.debug('Condition evaluated successfully, checking if we\'re in the right condition '
+                                        'statement')
                         passed_conditions[condition] = evaluated
+
+                        if response in passed_conditions[condition]:
+                            self._log.debug('Response is in the successfully evaluated condition statement, continuing')
+                        else:
+                            # This error is kinda ambiguous, but it basically means the condition evaluated true,
+                            # but this specific response was in a different if / elif / else statement
+                            self._log.debug('Response was in the wrong condition statement, skipping')
+                            continue
 
                 # Does the user have a limit for this response enforced?
                 if user and user.is_limited(response):
@@ -113,8 +122,16 @@ class ResponseContainer:
                                     'skipping'.format(uid=user.id))
                     continue
 
-                # TODO: Is there a global limit for this response enforced?
-                pass
+                # Is there a global limit for this response enforced?
+                if response.saml.is_limited(response):
+                    if response.glimit_blocking:
+                        self._log.debug('An active blocking limit for this response is being enforced globally, no '
+                                        'response will be returned')
+                        raise LimitError
+
+                    self._log.debug('An active limit for this response is being enforced against the user {uid}, '
+                                    'skipping'.format(uid=user.id))
+                    return ''
 
                 self._log.debug('Adding new response to the random pool with a weight of {weight}'
                                 .format(weight=response.weight))

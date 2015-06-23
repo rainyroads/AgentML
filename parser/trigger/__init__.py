@@ -96,7 +96,7 @@ class Trigger(Element, Restrictable):
             if self.saml.is_limited(self):
                 if self.glimit_blocking:
                     self._log.debug('An active blocking limit for this trigger is being enforced globally, no trigger '
-                                    'will be matched'.format(uid=user.id))
+                                    'will be matched')
                     raise LimitError
 
                 self._log.debug('An active limit for this response is being enforced against the user {uid}, '

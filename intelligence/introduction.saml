@@ -79,7 +79,7 @@
         </trigger>
     </topic>
 
-    <!-- Limit test -->
+    <!-- Trigger limit tests -->
     <trigger>
         <pattern>global limit test</pattern>
 
@@ -94,6 +94,35 @@
         <pattern>user limit test</pattern>
 
         <limit>30</limit>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <!-- Response limit tests -->
+    <trigger>
+        <pattern>global response limit test</pattern>
+
+        <response priority="1">
+            <template>First!</template>
+
+            <limit type="global">30</limit>
+        </response>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>user response limit test</pattern>
+
+        <response priority="1">
+            <template>First!</template>
+
+            <limit>30</limit>
+        </response>
 
         <response>
             <template>Success!</template>

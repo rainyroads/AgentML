@@ -1,6 +1,6 @@
 import os
-import time
 import logging
+from time import time
 from collections import Iterable
 from common import schema, attribute, int_attribute
 from parser import Element, Restrictable
@@ -61,11 +61,11 @@ class Response(Element, Restrictable):
 
         if self.global_limit:
             self._log.info('Enforcing Global Response Limit of {num} seconds'.format(num=self.global_limit))
-            pass  # TODO
+            self.saml.set_limit(self, (time() + self.global_limit), self.glimit_blocking)
 
         if self.user_limit:
             self._log.info('Enforcing User Response Limit of {num} seconds'.format(num=self.user_limit))
-            user.set_limit(self, (time.time() + self.user_limit))
+            user.set_limit(self, (time() + self.user_limit))
 
         if self.var[0]:
             var_type, var_name, var_value = self.var
