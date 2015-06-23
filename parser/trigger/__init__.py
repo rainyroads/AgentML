@@ -427,6 +427,3 @@ class Trigger(Element, Restrictable):
             return
 
         self.chance = chance
-
-    def __str__(self):
-        return self._get_response()

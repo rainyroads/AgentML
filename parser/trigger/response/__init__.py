@@ -31,6 +31,11 @@ class Response(Element, Restrictable):
         self._response = ()
         self.topic = False
         self.var = (None, None, None)
+        self.stars = {
+            'normalized': (),
+            'case_preserved': (),
+            'raw': ()
+        }
 
         # Parent __init__'s must be initialized BEFORE default attributes are assigned, but AFTER the above containers
         Restrictable.__init__(self)
@@ -47,6 +52,24 @@ class Response(Element, Restrictable):
             self.schema = schema(file.read())
 
         self._log = logging.getLogger('saml.parser.trigger.response')
+
+    def get(self):
+        """
+        Parse a response into string format and clear out its temporary containers
+        :return: The parsed response message
+        :rtype : str
+        """
+        self._log.debug('Converting Response object to string format')
+        response = ''.join(map(str, self._response)).strip()
+
+        self._log.debug('Resetting parent Trigger temporary containers')
+        self.stars = {
+            'normalized': (),
+            'case_preserved': (),
+            'raw': ()
+        }
+        self.trigger.user = None
+        return response
 
     def apply_reactions(self, user):
         """
@@ -134,14 +157,4 @@ class Response(Element, Restrictable):
         self.var = (var_type, var_name, var_value)
 
     def __str__(self):
-        self._log.debug('Converting Response object to string format')
-        response = ''.join(map(str, self._response)).strip()
-
-        self._log.debug('Resetting parent Trigger temporary containers')
-        self.stars = {
-            'normalized': (),
-            'case_preserved': (),
-            'raw': ()
-        }
-        self.trigger.user = None
-        return response
+        return self.get()
