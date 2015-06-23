@@ -12,13 +12,16 @@ from errors import SamlError, VarNotDefinedError, UserNotDefinedError, NoTagPars
 
 
 class Saml:
-    def __init__(self):
+    def __init__(self, log_level=logging.INFO):
         """
         Initialize a new Saml instance
+
+        :param log_level: The debug logging level, defaults to logging.INFO during alpha
+        :type  log_level: int
         """
         # Debug logger
         self._log = logging.getLogger('saml')
-        self._log.setLevel(logging.DEBUG)
+        self._log.setLevel(log_level)
         log_formatter = logging.Formatter("[%(asctime)s] %(levelname)s.%(name)s: %(message)s")
         console_logger = logging.StreamHandler()
         console_logger.setLevel(logging.DEBUG)
@@ -150,6 +153,8 @@ class Saml:
         for triggers in [self._triggers[priority] for priority in sorted(self._triggers.keys(), reverse=True)]:
             for trigger in triggers:
                 self._sorted_triggers.append(trigger)
+
+        self.sorted = True
 
     def get_reply(self, user, message, groups=None):
         """
