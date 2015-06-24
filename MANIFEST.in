@@ -1,0 +1,5 @@
+include setup.py
+recursive-include saml *.py
+recursive-include saml/schemas *.rng
+recursive-include saml/schemas *.xsd
+recursive-include saml/intelligence *.saml

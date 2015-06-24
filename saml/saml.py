@@ -3,12 +3,12 @@ import re
 import logging
 from time import time
 from lxml import etree
-from common import schema, normalize, attribute, int_attribute
-from parser.init import Init
-from parser.trigger import Trigger
-from parser.tags import Condition, Random, Var, Tag
-from constants import AnyGroup
-from errors import SamlError, VarNotDefinedError, UserNotDefinedError, NoTagParserError, ParserBlockingError, LimitError
+from saml.common import schema, normalize, attribute, int_attribute
+from saml.parser.init import Init
+from saml.parser.trigger import Trigger
+from saml.parser.tags import Condition, Random, Var, Tag
+from saml.constants import AnyGroup
+from saml.errors import SamlError, VarNotDefinedError, UserNotDefinedError, ParserBlockingError, LimitError
 
 
 class Saml:
