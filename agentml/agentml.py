@@ -720,7 +720,7 @@ class Star:
 
     def __str__(self):
         try:
-            if self.format in ['preserve_case', 'raw']:
+            if self.format in ['case_preserved', 'raw']:
                 self._log.debug('Formatting wildcard as {format}'.format(format=self.format))
                 star = str(self.trigger.stars[self.format][self.index - 1])
             else:
@@ -729,7 +729,7 @@ class Star:
             self._log.warn('No wildcard with the index {index} exists for this response'.format(index=self.index))
             return ''
 
-        if self.format in ['title', 'upper', 'lower']:
+        if self.format in ['title', 'capitalize', 'upper', 'lower']:
             self._log.debug('Formatting wildcard as {format}'.format(format=self.format))
             star = getattr(star, self.format)()
 
