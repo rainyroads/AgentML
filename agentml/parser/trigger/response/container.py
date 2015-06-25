@@ -148,6 +148,10 @@ class ResponseContainer:
                 # Retrieve a random weighted response
                 response = weighted_choice(response_pool)
 
+                # Are we out of responses to try?
+                if not response:
+                    break
+
                 # Is there a chance we need to evaluate?
                 if response.chance is None or response.chance == 100:
                     successful_response = response
@@ -168,7 +172,7 @@ class ResponseContainer:
 
                     self._log.info('Response had a {chance}% chance of being selected but failed selection'
                                    .format(chance=response.chance))
-                    response_pool = [r for r in response_pool if r is not response]
+                    response_pool = [r for r in response_pool if r[0] is not response]
                     continue
 
             # If we have no successful response defined, that means a chance condition for all the responses failed and
