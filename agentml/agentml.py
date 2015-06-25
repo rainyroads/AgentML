@@ -183,7 +183,7 @@ class AgentML:
         if not triggers and user.topic is not None:
             self._log.warn('User "{user}" was in an empty topic: {topic}'.format(user=user.id, topic=user.topic))
             user.topic = None
-            triggers = [trigger for trigger in self._triggers if user.topic == trigger.topic]
+            triggers = [trigger for trigger in self._sorted_triggers if user.topic == trigger.topic]
 
         # It's impossible to get anywhere if there are no empty topic triggers available to guide us
         if not triggers:
@@ -194,10 +194,14 @@ class AgentML:
             triggers = [trigger for trigger in triggers if groups.issuperset(trigger.groups or {None})]
 
         if not triggers:
+            if not user.topic:
+                self._log.info('There are no topicless triggers matching the specific groups available, giving up')
+                return
+
             self._log.info('The topic "{topic}" has triggers, but we are not in the required groups to match them. '
                            'Resetting topic to None and retrying'.format(topic=user.topic, groups=str(groups)))
             user.topic = None
-            triggers = [trigger for trigger in self._triggers if user.topic == trigger.topic]
+            triggers = [trigger for trigger in self._sorted_triggers if user.topic == trigger.topic]
 
         message = Message(self, message)
         for trigger in triggers:
