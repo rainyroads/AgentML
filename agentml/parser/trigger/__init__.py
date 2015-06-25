@@ -336,7 +336,7 @@ class Trigger(Element, Restrictable):
 
         # Required and optional choices
         req_choice = re.compile(r'\(([\w\s\|]+)\)')
-        opt_choice = re.compile(r'\[([\w\s\|]+)\]\s?')
+        opt_choice = re.compile(r'\s?\[([\w\s\|]+)\]\s?')
 
         if req_choice.search(self.pattern):
             def sub_required(pattern):
@@ -350,7 +350,7 @@ class Trigger(Element, Restrictable):
         if opt_choice.search(self.pattern):
             def sub_optional(pattern):
                 patterns = pattern.group(1).split('|')
-                return r'(?:\b(?:{options})\b)?\s?'.format(options='|'.join(patterns))
+                return r'\s?(?:\b(?:{options})\b)?\s?'.format(options='|'.join(patterns))
 
             self.pattern = opt_choice.sub(sub_optional, self.pattern)
             self._log.debug('Parsing Pattern optional choices: ' + self.pattern)
@@ -358,7 +358,7 @@ class Trigger(Element, Restrictable):
 
         if compile_as_regex:
             self._log.debug('Compiling Pattern as regex')
-            self.pattern = re.compile(self.pattern, re.IGNORECASE)
+            self.pattern = re.compile('^{pattern}$'.format(pattern=self.pattern), re.IGNORECASE)
         else:
             self._log.debug('Pattern is atomic')
             self.pattern_is_atomic = True
