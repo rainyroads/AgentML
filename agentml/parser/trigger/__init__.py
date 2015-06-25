@@ -326,8 +326,8 @@ class Trigger(Element, Restrictable):
             (wildcard,          r'(?:.+)'),
             (capt_wild_numeric, r'(\d+)'),
             (wild_numeric,      r'(?:\d+)'),
-            (capt_wild_alpha,   r'(\w+)'),
-            (wild_alpha,        r'(?:\w+)'),
+            (capt_wild_alpha,   r'([a-zA-Z]+)'),
+            (wild_alpha,        r'(?:[a-zA-Z]+)'),
         ]
 
         for wildcard, replacement in wildcard_replacements:
