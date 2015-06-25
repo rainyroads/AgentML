@@ -129,9 +129,8 @@ class ResponseContainer:
                                         'response will be returned')
                         raise LimitError
 
-                    self._log.debug('An active limit for this response is being enforced against the user {uid}, '
-                                    'skipping'.format(uid=user.id))
-                    return ''
+                    self._log.debug('An active limit for this response is being enforced globally, skipping')
+                    continue
 
                 self._log.debug('Adding new response to the random pool with a weight of {weight}'
                                 .format(weight=response.weight))
