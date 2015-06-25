@@ -1,7 +1,8 @@
-<!DOCTYPE saml SYSTEM "agentml.rng">
+<!DOCTYPE agentml SYSTEM "agentml.rng">
 <agentml version="0.1">
     <init>
         <substitutions>
+            <sub word="atom">atomic</sub>
             <sub word="I'm">I am</sub>
             <sub word="I'd">I would</sub>
             <sub word="I've">I have</sub>

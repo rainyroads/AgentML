@@ -1,8 +1,8 @@
-<!DOCTYPE saml SYSTEM "agentml.rng">
+<!DOCTYPE agentml SYSTEM "agentml.rng">
 
 <agentml version="0.1" xmlns="">
     <!-- Hello, Yuki! -->
-    <trigger priority="5">
+    <trigger>
         <pattern>(hello|hi|hiya|good evening|good morning)</pattern>
 
         <condition type="user_var">
@@ -54,11 +54,125 @@
         </trigger>
     </topic>
 
+    <!-- Basic response tests -->
+    <trigger>
+        <pattern>atomic test</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>optional [foo|bar] test 1</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>[foo] optional test 2</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>[foo] optional test 3 [bar]</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>required (foo|bar) test</pattern>
+
+        <response>
+            <template><star/></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>wildcard test (*)</pattern>
+
+        <response>
+            <template><star/></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>alpha wildcard test (_)</pattern>
+
+        <response>
+            <template><star/></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>numeric wildcard test (#)</pattern>
+
+        <response>
+            <template><star/></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>discarded * wildcard test (*)</pattern>
+
+        <response>
+            <template><star/></template>
+        </response>
+    </trigger>
+
+    <!-- Star formatting tests -->
+    <trigger>
+        <pattern>capitalize format (*)</pattern>
+
+        <response>
+            <template><star format="capitalize"/></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>title format (*)</pattern>
+
+        <response>
+            <template><star format="title"/></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>upper format (*)</pattern>
+
+        <response>
+            <template><star format="upper"/></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>case preserved format (*)</pattern>
+
+        <response>
+            <template><star format="case_preserved"/></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>raw format (*)</pattern>
+
+        <response>
+            <template><star format="raw"/></template>
+        </response>
+    </trigger>
+
     <!-- Trigger limit tests -->
     <trigger>
         <pattern>global limit test</pattern>
 
-        <limit type="global">30</limit>
+        <limit type="global">1</limit>
 
         <response>
             <template>Success!</template>
@@ -68,7 +182,7 @@
     <trigger>
         <pattern>user limit test</pattern>
 
-        <limit>30</limit>
+        <limit>1</limit>
 
         <response>
             <template>Success!</template>
@@ -82,7 +196,7 @@
         <response priority="1">
             <template>First!</template>
 
-            <limit type="global">30</limit>
+            <limit type="global">1</limit>
         </response>
 
         <response>
@@ -96,7 +210,7 @@
         <response priority="1">
             <template>First!</template>
 
-            <limit>30</limit>
+            <limit>1</limit>
         </response>
 
         <response>
@@ -109,7 +223,6 @@
         <pattern>response chance</pattern>
 
         <response>
-            <limit>3</limit>
             <chance>40</chance>
             <template>Success!</template>
         </response>
@@ -118,7 +231,6 @@
     <trigger>
         <pattern>trigger chance</pattern>
 
-        <limit>3</limit>
         <chance>60</chance>
 
         <response>
@@ -128,7 +240,7 @@
 
     <!-- Var tests -->
     <trigger>
-        <pattern>get [the] user var (_)</pattern>
+        <pattern>get user var (_)</pattern>
 
         <response>
             <template><var><star/></var></template>
@@ -136,7 +248,7 @@
     </trigger>
 
     <trigger>
-        <pattern>get [the] global var (_)</pattern>
+        <pattern>get global var (_)</pattern>
 
         <response>
             <template><var type="global"><star/></var></template>
@@ -144,25 +256,25 @@
     </trigger>
 
     <trigger>
-        <pattern>set [the] user var (_) to (*)</pattern>
+        <pattern>set user var (_) to (*)</pattern>
 
         <response>
-            <template>Setting user variable <star/> to <star index="2"/></template>
+            <template>Setting user variable <star/> to <star index="2" format="raw"/></template>
             <var>
                 <name><star/></name>
-                <value><star index="2"/></value>
+                <value><star index="2" format="raw"/></value>
             </var>
         </response>
     </trigger>
 
     <trigger>
-        <pattern>set [the] global var (_) to (*)</pattern>
+        <pattern>set global var (_) to (*)</pattern>
 
         <response>
-            <template>Setting global variable <star/> to <star index="2"/></template>
+            <template>Setting global variable <star/> to <star index="2" format="raw"/></template>
             <var type="global">
                 <name><star/></name>
-                <value><star index="2"/></value>
+                <value><star index="2" format="raw"/></value>
             </var>
         </response>
     </trigger>
@@ -246,13 +358,13 @@
 
         <response>
             <topic>test</topic>
-            <template>The topic has been set to test!</template>
+            <template>Success!</template>
         </response>
     </trigger>
 
     <topic name="test">
         <trigger>
-            <pattern>test</pattern>
+            <pattern>test topic test</pattern>
 
             <response>
                 <template>Success!</template>
@@ -260,11 +372,11 @@
         </trigger>
 
         <trigger>
-            <pattern>exit</pattern>
+            <pattern>exit test topic</pattern>
 
             <response>
                 <topic/>
-                <template>Exiting test topic!</template>
+                <template>Success!</template>
             </response>
         </trigger>
     </topic>
@@ -272,7 +384,7 @@
     <!-- Group tests -->
     <group name="public">
         <trigger>
-            <pattern>public test</pattern>
+            <pattern>public group test</pattern>
 
             <response>
                 <template>Success!</template>
@@ -297,7 +409,7 @@
         <group>group2</group>
         <topic>test</topic>
 
-        <pattern>topic group test</pattern>
+        <pattern>test topic group test</pattern>
 
         <response>
             <template>Success!</template>
@@ -340,13 +452,13 @@
         </response>
 
         <response priority="-1">
-            <template>If you saw One, Two, Three before this message, this was a success! (Or you got lucky)</template>
+            <template>If you saw One, Two, Three before this message, this was a success!</template>
         </response>
 
         <condition>
             <if type="user" is="chell">
                 <response priority="0">
-                    <template>If you saw One, Two, Three before this message, this was a triumph! (Or you got lucky)</template>
+                    <template>If you saw One, Two, Three before this message, this was a triumph!</template>
                 </response>
             </if>
         </condition>
@@ -387,7 +499,7 @@
         <pattern>response blocking test</pattern>
 
         <response>
-            <template>Success</template>
+            <template>Success!</template>
         </response>
     </trigger>
 </agentml>
