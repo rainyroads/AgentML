@@ -1,4 +1,4 @@
-<saml version="0.1">
+<agentml version="0.1">
     <emotions>
         <primary name="love">
             <secondary name="affection">
@@ -186,4 +186,4 @@
             </secondary>
         </primary>
     </emotions>
-</saml>
+</agentml>

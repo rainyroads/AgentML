@@ -1,24 +1,24 @@
-class SamlError(Exception):
+class AgentMLError(Exception):
     pass
 
 
-class SamlSyntaxError(SamlError):
+class AgentMLSyntaxError(AgentMLError):
     pass
 
 
-class UserNotDefinedError(SamlError):
+class UserNotDefinedError(AgentMLError):
     pass
 
 
-class VarNotDefinedError(SamlError):
+class VarNotDefinedError(AgentMLError):
     pass
 
 
-class InvalidVarTypeError(SamlError):
+class InvalidVarTypeError(AgentMLError):
     pass
 
 
-class NoTagParserError(SamlError):
+class NoTagParserError(AgentMLError):
     pass
 
 
@@ -27,7 +27,7 @@ class NoTagParserError(SamlError):
 ###############################
 # These are errors that are used to halt iteration over Triggers or Responses
 
-class ParserBlockingError(SamlError):
+class ParserBlockingError(AgentMLError):
     pass
 
 

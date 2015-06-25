@@ -1,5 +1,5 @@
-<!DOCTYPE saml SYSTEM "saml.rng">
-<saml version="0.1">
+<!DOCTYPE saml SYSTEM "agentml.rng">
+<agentml version="0.1">
     <init>
         <substitutions>
             <sub word="I'm">I am</sub>
@@ -84,4 +84,4 @@
             <sub word="you're">you are</sub>
         </substitutions>
     </init>
-</saml>
+</agentml>

@@ -1,9 +1,8 @@
 import logging
 import random
 from collections import OrderedDict
-
-from saml.common import weighted_choice
-from saml.errors import LimitError, ChanceError
+from agentml.common import weighted_choice
+from agentml.errors import LimitError, ChanceError
 
 
 class ResponseContainer:
@@ -18,7 +17,7 @@ class ResponseContainer:
         self._responses = OrderedDict()
         self._conditionals = {}  # keys contain response id()'s, values contain Condition objects
         self.sorted = False  # Priority levels need to be sorted after parsing before they can be iterated
-        self._log = logging.getLogger('saml.parser.trigger.response.container')
+        self._log = logging.getLogger('agentml.parser.trigger.response.container')
 
     def _sort(self):
         """
@@ -54,7 +53,7 @@ class ResponseContainer:
         """
         Retrieve a random Response
         :param user: The user to test for active limitations and to apply response actions on
-        :type  user: saml.User or None
+        :type  user: agentml.User or None
 
         :return: A randomly selected Response object
         :rtype : parser.trigger.response.Response
@@ -124,7 +123,7 @@ class ResponseContainer:
                     continue
 
                 # Is there a global limit for this response enforced?
-                if response.saml.is_limited(response):
+                if response.agentml.is_limited(response):
                     if response.glimit_blocking:
                         self._log.debug('An active blocking limit for this response is being enforced globally, no '
                                         'response will be returned')

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
-    <!-- Software Agent Markup Language, v0.1 -->
-    <xs:element name="saml">
+    <!-- Software Agent Markup Language, v0.2a1 -->
+    <xs:element name="agentml">
         <xs:complexType>
             <xs:choice maxOccurs="unbounded">
                 <xs:group ref="triggerGroup"/>

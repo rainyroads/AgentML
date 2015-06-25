@@ -4,27 +4,27 @@ import sre_constants
 import random
 from time import time
 from collections import Iterable
-from saml.parser import Element, Restrictable
-from saml.common import normalize, int_attribute, bool_attribute, bool_element
-from saml.errors import SamlSyntaxError, ParserBlockingError, LimitError, ChanceError
-from saml.parser.trigger.response import Response, ResponseContainer
-from saml.parser.trigger.condition import Condition
+from agentml.parser import Element, Restrictable
+from agentml.common import normalize, int_attribute, bool_attribute, bool_element
+from agentml.errors import AgentMLSyntaxError, ParserBlockingError, LimitError, ChanceError
+from agentml.parser.trigger.response import Response, ResponseContainer
+from agentml.parser.trigger.condition import Condition
 
 
 class Trigger(Element, Restrictable):
     """
-    SAML Trigger object
+    AgentML Trigger object
     """
-    def __init__(self, saml, element, file_path, **kwargs):
+    def __init__(self, agentml, element, file_path, **kwargs):
         """
         Initialize a new Trigger instance
-        :param saml: The parent SAML instance
-        :type  saml: Saml
+        :param agentml: The parent AgentML instance
+        :type  agentml: AgentML
 
         :param element: The XML Element object
         :type  element: etree._Element
 
-        :param file_path: The absolute path to the SAML file
+        :param file_path: The absolute path to the AgentML file
         :type  file_path: str
 
         :param kwargs: Default attributes
@@ -55,18 +55,18 @@ class Trigger(Element, Restrictable):
 
         # Parent __init__'s must be initialized BEFORE default attributes are assigned, but AFTER the above containers
         Restrictable.__init__(self)
-        Element.__init__(self, saml, element, file_path)
+        Element.__init__(self, agentml, element, file_path)
 
-        self._log = logging.getLogger('saml.parser.trigger')
+        self._log = logging.getLogger('agentml.parser.trigger')
 
     def match(self, user, message):
         """
         Returns a response message if a match is found, otherwise None
         :param user: The requesting client
-        :type  user: saml.User
+        :type  user: agentml.User
 
         :param message: The message to match
-        :type  message: saml.Message
+        :type  message: agentml.Message
 
         :rtype: str or None
         """
@@ -93,7 +93,7 @@ class Trigger(Element, Restrictable):
                 return ''
 
             # Is there a global limit for this response enforced?
-            if self.saml.is_limited(self):
+            if self.agentml.is_limited(self):
                 if self.glimit_blocking:
                     self._log.debug('An active blocking limit for this trigger is being enforced globally, no trigger '
                                     'will be matched')
@@ -160,12 +160,12 @@ class Trigger(Element, Restrictable):
         """
         Set active topics and limits after a response has been triggered
         :param user: The user triggering the response
-        :type  user: saml.User
+        :type  user: agentml.User
         """
         # User attributes
         if self.global_limit:
             self._log.info('Enforcing Global Trigger Limit of {num} seconds'.format(num=self.global_limit))
-            self.saml.set_limit(self, (time() + self.global_limit), self.glimit_blocking)
+            self.agentml.set_limit(self, (time() + self.global_limit), self.glimit_blocking)
 
         if self.user_limit:
             self._log.info('Enforcing User Trigger Limit of {num} seconds'.format(num=self.user_limit))
@@ -182,9 +182,9 @@ class Trigger(Element, Restrictable):
 
             # Set a global variable
             if var_type == 'global':
-                self.saml.set_var(var_name, var_value)
+                self.agentml.set_var(var_name, var_value)
 
-        # saml.mood = self.mood
+        # agentml.mood = self.mood
 
     def _add_response(self, response, weight=1):
         """
@@ -220,7 +220,7 @@ class Trigger(Element, Restrictable):
 
         if match:
             string = wildcard.sub(regex, string)
-            logging.getLogger('saml.trigger').debug('Parsing Pattern wildcards: {pattern}'.format(pattern=string))
+            logging.getLogger('agentml.trigger').debug('Parsing Pattern wildcards: {pattern}'.format(pattern=string))
             replaced = True
 
         return string, replaced
@@ -304,7 +304,7 @@ class Trigger(Element, Restrictable):
             except sre_constants.error:
                 self._log.warn('Attempted to compile an invalid regular expression in {path} ; {regex}'
                                .format(path=self.file_path, regex=element.text))
-                raise SamlSyntaxError
+                raise AgentMLSyntaxError
             return
 
         self.pattern = normalize(element.text, True)

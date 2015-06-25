@@ -1,7 +1,7 @@
 <grammar xmlns="http://relaxng.org/ns/structure/1.0">
-    <!-- Software Agent Markup Language, v0.1 -->
+    <!-- Software Agent Markup Language, v0.2a1 -->
     <start>
-        <element name="saml" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+        <element name="agentml" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
             <attribute name="version">
                 <data type="float"/>
             </attribute>

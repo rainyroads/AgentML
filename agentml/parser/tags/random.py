@@ -1,8 +1,7 @@
 import os
 import logging
-
-from saml.common import schema, int_attribute, weighted_choice
-from saml.parser.tags import Tag
+from agentml.common import schema, int_attribute, weighted_choice
+from agentml.parser.tags import Tag
 
 
 class Random(Tag):
@@ -19,10 +18,10 @@ class Random(Tag):
         super().__init__(trigger, element)
 
         # Define our schema
-        with open(os.path.join(self.trigger.saml.script_path, 'schemas', 'tags', 'random.rng')) as file:
+        with open(os.path.join(self.trigger.agentml.script_path, 'schemas', 'tags', 'random.rng')) as file:
             self.schema = schema(file.read())
 
-        self._log = logging.getLogger('saml.parser.tags.random')
+        self._log = logging.getLogger('agentml.parser.tags.random')
 
     def _parse(self):
         """
@@ -40,7 +39,7 @@ class Random(Tag):
                 continue
 
             # Otherwise, parse all the available tags
-            responses.append((tuple(self.trigger.saml.parse_tags(child, self.trigger)), weight))
+            responses.append((tuple(self.trigger.agentml.parse_tags(child, self.trigger)), weight))
         self._responses = tuple(responses)
 
     def value(self):

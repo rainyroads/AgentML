@@ -3,24 +3,24 @@ import re
 import logging
 from time import time
 from lxml import etree
-from saml.common import schema, normalize, attribute, int_attribute
-from saml.parser.init import Init
-from saml.parser.trigger import Trigger
-from saml.parser.tags import Condition, Random, Var, Tag
-from saml.constants import AnyGroup
-from saml.errors import SamlError, VarNotDefinedError, UserNotDefinedError, ParserBlockingError, LimitError
+from agentml.common import schema, normalize, attribute, int_attribute
+from agentml.parser.init import Init
+from agentml.parser.trigger import Trigger
+from agentml.parser.tags import Condition, Random, Var, Tag
+from agentml.constants import AnyGroup
+from agentml.errors import AgentMLError, VarNotDefinedError, UserNotDefinedError, ParserBlockingError, LimitError
 
 
-class Saml:
+class AgentML:
     def __init__(self, log_level=logging.INFO):
         """
-        Initialize a new Saml instance
+        Initialize a new AgentML instance
 
         :param log_level: The debug logging level, defaults to logging.INFO during alpha
         :type  log_level: int
         """
         # Debug logger
-        self._log = logging.getLogger('saml')
+        self._log = logging.getLogger('agentml')
         self._log.setLevel(log_level)
         log_formatter = logging.Formatter("[%(asctime)s] %(levelname)s.%(name)s: %(message)s")
         console_logger = logging.StreamHandler()
@@ -30,7 +30,7 @@ class Saml:
 
         # Paths
         self.script_path = os.path.dirname(os.path.realpath(__file__))
-        self._schema_path = os.path.join(self.script_path, 'schemas', 'saml.rng')
+        self._schema_path = os.path.join(self.script_path, 'schemas', 'agentml.rng')
 
         # Schema validator
         with open(self._schema_path) as file:
@@ -50,38 +50,38 @@ class Saml:
         self.sorted = False
         self._sorted_triggers = []
 
-        # Load internal SAML files
+        # Load internal AgentML files
         self.load_directory(os.path.join(self.script_path, 'intelligence'))
 
     def load_directory(self, dir_path):
         """
-        Load all SAML files contained in a specified directory
+        Load all AgentML files contained in a specified directory
         :param dir_path: Path to the directory
         :type  dir_path: str
         """
-        self._log.info('Loading all SAML files contained in: ' + dir_path)
+        self._log.info('Loading all AgentML files contained in: ' + dir_path)
 
         # Get a list of file paths
-        saml_files = []
+        aml_files = []
         for root, dirs, files in os.walk(dir_path):
-            saml_files += ['{root}/{file}'.format(root=root, file=file)
-                           for file in sorted(files) if file.endswith('.saml')]
+            aml_files += ['{root}/{file}'.format(root=root, file=file)
+                          for file in sorted(files) if file.endswith('.aml')]
 
         # Loop through the files and load each one individually
-        for file in saml_files:
+        for file in aml_files:
             self.load_file(file)
 
     def load_file(self, file_path):
         """
-        Load a single SAML file
+        Load a single AgentML file
         :param file_path: Path to the file
         :type  file_path: str
         """
         self._log.info('Loading file: ' + file_path)
-        saml = etree.parse(file_path)
+        agentml = etree.parse(file_path)
 
-        # Validate the file for proper SAML syntax
-        self._schema.assertValid(saml)
+        # Validate the file for proper AgentML syntax
+        self._schema.assertValid(agentml)
 
         # Get our root element and parse all elements inside of it
         root = etree.parse(file_path).getroot()
@@ -118,7 +118,7 @@ class Saml:
                 if child.tag == 'trigger':
                     try:
                         self.add_trigger(Trigger(self, child, file_path, **defaults))
-                    except SamlError:
+                    except AgentMLError:
                         self._log.warn('Skipping Trigger due to an error', exc_info=True)
                     finally:
                         # Reset the dictionary of default attributes for the next trigger iteration
@@ -187,7 +187,7 @@ class Saml:
 
         # It's impossible to get anywhere if there are no empty topic triggers available to guide us
         if not triggers:
-            raise SamlError('There are no empty topic triggers defined, unable to continue')
+            raise AgentMLError('There are no empty topic triggers defined, unable to continue')
 
         # Fetch triggers in our group and make sure we're not in an empty topic
         if groups is not AnyGroup:
@@ -498,7 +498,7 @@ class Saml:
     def _parse_trigger(self, element, file_path):
         try:
             self._triggers[element.find('pattern').text] = Trigger(self, element, file_path)
-        except SamlError:
+        except AgentMLError:
             self._log.warn('Skipping pattern due to an error')
 
 
@@ -512,11 +512,11 @@ class Message:
 
     formats = [NORMALIZED, CASE_PRESERVED, RAW]
 
-    def __init__(self, saml, message, message_format=NORMALIZED):
+    def __init__(self, aml, message, message_format=NORMALIZED):
         """
         Initialize a new Message instance
-        :param saml: The parent SAML instance
-        :type  saml: Saml
+        :param aml: The parent AgentML instance
+        :type  aml: AgentML
 
         :param message: The message being parsed
         :type  message: str
@@ -524,13 +524,13 @@ class Message:
         :param message_format: The message format to return when the object is interpreted as a string
         :type  message_format: str
         """
-        self._log = logging.getLogger('saml.message')
+        self._log = logging.getLogger('agentml.message')
         self._format = message_format
-        self.saml = saml
+        self.aml = aml
 
         # Parsed (and un-parsed) message containers
         self._log.debug('Parsing raw message: {message}'.format(message=message))
-        messages = self.saml.parse_substitutions((normalize(message), normalize(message, preserve_case=True), message))
+        messages = self.aml.parse_substitutions((normalize(message), normalize(message, preserve_case=True), message))
         self._messages = {
             'normalized_message': messages[0],
             'case_preserved_message': messages[1],
@@ -596,7 +596,7 @@ class User:
         :param identifier: The unique identifier for the User. Examples include IRC hostmasks, IP addresses, and DB ID's
         :type  identifier: str
         """
-        self._log = logging.getLogger('saml.user')
+        self._log = logging.getLogger('agentml.user')
         self._log.info('Creating new user: {id}'.format(id=identifier))
 
         # User attributes
@@ -704,7 +704,7 @@ class Star:
     def __init__(self, trigger, index=1, star_format='normalized'):
         """
         Initialize a new Star wildcard tag object
-        :param trigger: SAML Trigger instance
+        :param trigger: AgentML Trigger instance
         :type  trigger: parser.trigger.trigger.Trigger
 
         :param index: The wildcard index to retrieve (Indexes start at 1, not 0)
@@ -716,7 +716,7 @@ class Star:
         self.trigger = trigger
         self.index = index
         self.format = star_format
-        self._log = logging.getLogger('saml.star')
+        self._log = logging.getLogger('agentml.star')
 
     def __str__(self):
         try:

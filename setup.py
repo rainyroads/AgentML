@@ -9,7 +9,7 @@ from setuptools import setup, find_packages
 # To use a consistent encoding
 # from codecs import open
 from os import path
-from saml import __version__
+from agentml import __version__
 
 here = path.abspath(path.dirname(__file__))
 
@@ -18,7 +18,7 @@ here = path.abspath(path.dirname(__file__))
 #     long_description = f.read()
 
 setup(
-    name='SAML',
+    name='AgentML',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
@@ -29,7 +29,7 @@ setup(
     # long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/FujiMakoto/SAML',
+    url='https://github.com/FujiMakoto/AgentML',
 
     # Author details
     author='Makoto Fujimoto',
@@ -77,7 +77,7 @@ setup(
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
     package_data={
-        'saml': ['intelligence/*.saml', 'schemas/*.rng', 'schemas/*.xsd', 'schemas/tags/*.rng'],
+        'agentml': ['intelligence/*.aml', 'schemas/*.rng', 'schemas/*.xsd', 'schemas/tags/*.rng'],
     },
 
     # Although 'package_data' is the preferred approach, in some case you may

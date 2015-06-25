@@ -18,7 +18,7 @@ class Tag(metaclass=ABCMeta):
         self.trigger = trigger
         self._element = element
         self._schema = None
-        self._log = logging.getLogger('saml.parser.tags')
+        self._log = logging.getLogger('agentml.parser.tags')
         self._parse()
 
     def _parse(self):

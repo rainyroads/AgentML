@@ -1,31 +1,6 @@
-<!DOCTYPE saml SYSTEM "saml.rng">
-<!--
-<saml version="0.1">
-    <trigger>
-        <topic>introduction</topic>
-        <pattern>hi nano</pattern>
+<!DOCTYPE saml SYSTEM "agentml.rng">
 
-        <response>Hello!</response>
-        <response weight="2">Hi, how are you?</response>
-    </trigger>
-
-    <trigger>
-        <pattern>my name is (*)</pattern>
-        <response>Hello there, <star format="title"/>!</response>
-    </trigger>
-
-    <trigger>
-        <pattern>what is your favorite color</pattern>
-        <response>My favorite color is <random><i>red</i><i>blue</i><i>green</i></random></response>
-    </trigger>
-
-    <trigger>
-        <pattern>my favorite color is [definitely|absolutely|without a doubt] (red|blue|green)</pattern>
-        <response>Really? Your favorite color is <star index="1"/></response>
-    </trigger>
-</saml>-->
-
-<saml version="0.1" xmlns="">
+<agentml version="0.1" xmlns="">
     <!-- Hello, Yuki! -->
     <trigger priority="5">
         <pattern>(hello|hi|hiya|good evening|good morning)</pattern>
@@ -415,4 +390,4 @@
             <template>Success</template>
         </response>
     </trigger>
-</saml>
+</agentml>

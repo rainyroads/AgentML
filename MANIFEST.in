@@ -1,5 +1,5 @@
 include setup.py
-recursive-include saml *.py
-recursive-include saml/schemas *.rng
-recursive-include saml/schemas *.xsd
-recursive-include saml/intelligence *.saml
+recursive-include agentml *.py
+recursive-include agentml/schemas *.rng
+recursive-include agentml/schemas *.xsd
+recursive-include agentml/intelligence *.aml

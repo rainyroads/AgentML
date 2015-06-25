@@ -1,30 +1,28 @@
 import logging
-
 from lxml import etree
-
-from saml.common import attribute, bool_attribute
+from agentml.common import attribute, bool_attribute
 
 
 class Element:
     """
-    Base Saml element class
+    Base AgentML element class
     """
-    def __init__(self, saml, element, file_path):
+    def __init__(self, agentml, element, file_path):
         """
         Initialize a new Element instance
-        :param saml: The parent SAML instance
-        :type  saml: Saml
+        :param agentml: The parent AgentML instance
+        :type  agentml: AgentML
 
         :param element: The XML Element object
         :type  element: etree._Element
 
-        :param file_path: The absolute path to the SAML file
+        :param file_path: The absolute path to the AgentML file
         :type  file_path: str
         """
-        self.saml = saml
+        self.agentml = agentml
         self._element = element
         self.file_path = file_path
-        self._log = logging.getLogger('saml.parser.element')
+        self._log = logging.getLogger('agentml.parser.element')
 
         self._parse()
 
@@ -56,7 +54,7 @@ class Restrictable:
         self.glimit_blocking = True
         self.chance_blocking = True
 
-        self._log = logging.getLogger('saml.parser.element')
+        self._log = logging.getLogger('agentml.parser.element')
 
     def _parse_topic(self, element):
         """

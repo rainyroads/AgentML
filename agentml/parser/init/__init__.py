@@ -1,17 +1,17 @@
 from lxml import etree
-from saml.common import attribute
-from saml.parser import Element
+from agentml.common import attribute
+from agentml.parser import Element
 
 
 class Init(Element):
     """
-    SAML Initialization
+    AgentML Initialization
     """
-    def __init__(self, saml, element, file_path, **kwargs):
+    def __init__(self, agentml, element, file_path, **kwargs):
         """
         Initialize a new Init instance
         """
-        super().__init__(saml, element, file_path)
+        super().__init__(agentml, element, file_path)
 
     def _parse_substitutions(self, element):
         """
@@ -22,4 +22,4 @@ class Init(Element):
         subs = element.findall('sub')
 
         for sub in subs:
-            self.saml.set_substitution(attribute(sub, 'word'), sub.text)
+            self.agentml.set_substitution(attribute(sub, 'word'), sub.text)

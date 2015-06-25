@@ -2,15 +2,14 @@ import os
 import logging
 from time import time
 from collections import Iterable
-
-from saml.common import schema, attribute, int_attribute
-from saml.parser import Element, Restrictable
+from agentml.common import schema, attribute, int_attribute
+from agentml.parser import Element, Restrictable
 from .container import ResponseContainer
 
 
 class Response(Element, Restrictable):
     """
-    SAML Response object
+    AgentML Response object
     """
     def __init__(self, trigger, element, file_path, **kwargs):
         """
@@ -21,7 +20,7 @@ class Response(Element, Restrictable):
         :param element: The XML Element object
         :type  element: etree._Element
 
-        :param file_path: The absolute path to the SAML file
+        :param file_path: The absolute path to the AgentML file
         :type  file_path: str
 
         :param kwargs: Default attributes
@@ -40,7 +39,7 @@ class Response(Element, Restrictable):
 
         # Parent __init__'s must be initialized BEFORE default attributes are assigned, but AFTER the above containers
         Restrictable.__init__(self)
-        Element.__init__(self, trigger.saml, element, file_path)
+        Element.__init__(self, trigger.agentml, element, file_path)
 
         # Default attributes
         self.emotion = kwargs['emotion'] if 'emotion' in kwargs else None
@@ -49,10 +48,10 @@ class Response(Element, Restrictable):
         self.glimit_blocking = False
         self.chance_blocking = False
 
-        with open(os.path.join(self.trigger.saml.script_path, 'schemas', 'tags', 'star.rng')) as file:
+        with open(os.path.join(self.trigger.agentml.script_path, 'schemas', 'tags', 'star.rng')) as file:
             self.schema = schema(file.read())
 
-        self._log = logging.getLogger('saml.parser.trigger.response')
+        self._log = logging.getLogger('agentml.parser.trigger.response')
 
     def get(self):
         """
@@ -76,7 +75,7 @@ class Response(Element, Restrictable):
         """
         Set active topics and limits after a response has been triggered
         :param user: The user triggering the response
-        :type  user: saml.User
+        :type  user: agentml.User
         """
         # User attributes
         if self.topic is not False:
@@ -85,7 +84,7 @@ class Response(Element, Restrictable):
 
         if self.global_limit:
             self._log.info('Enforcing Global Response Limit of {num} seconds'.format(num=self.global_limit))
-            self.saml.set_limit(self, (time() + self.global_limit), self.glimit_blocking)
+            self.agentml.set_limit(self, (time() + self.global_limit), self.glimit_blocking)
 
         if self.user_limit:
             self._log.info('Enforcing User Response Limit of {num} seconds'.format(num=self.user_limit))
@@ -102,9 +101,9 @@ class Response(Element, Restrictable):
 
             # Set a global variable
             if var_type == 'global':
-                self.trigger.saml.set_var(var_name, var_value)
+                self.trigger.agentml.set_var(var_name, var_value)
 
-        # saml.mood = self.mood
+        # agentml.mood = self.mood
 
     def _parse(self):
         """
@@ -125,7 +124,7 @@ class Response(Element, Restrictable):
             self._log.info('Assigning text only response')
             return
 
-        self._response = tuple(self.saml.parse_tags(template, self.trigger))
+        self._response = tuple(self.agentml.parse_tags(template, self.trigger))
 
     def _parse_priority(self, element):
         """
@@ -147,13 +146,13 @@ class Response(Element, Restrictable):
         var_type = attribute(element, 'type', 'user')
         if syntax == 'attribute':
             var_name  = attribute(element, 'name')
-            var_value   = self.saml.parse_tags(element, self.trigger) if len(element) else element.text
+            var_value   = self.agentml.parse_tags(element, self.trigger) if len(element) else element.text
         else:
             name_etree = element.find('name')
-            var_name   = self.saml.parse_tags(name_etree, self.trigger) if len(name_etree) else name_etree.text
+            var_name   = self.agentml.parse_tags(name_etree, self.trigger) if len(name_etree) else name_etree.text
 
             value_etree = element.find('value')
-            var_value = self.saml.parse_tags(value_etree, self.trigger) if len(value_etree) else value_etree.text
+            var_value = self.agentml.parse_tags(value_etree, self.trigger) if len(value_etree) else value_etree.text
 
         self.var = (var_type, var_name, var_value)
 

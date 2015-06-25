@@ -1,25 +1,25 @@
 import os
 import logging
-from saml.common import schema, attribute
-from saml.parser.tags import Tag
-from saml.errors import VarNotDefinedError
+from agentml.common import schema, attribute
+from agentml.parser.tags import Tag
+from agentml.errors import VarNotDefinedError
 
 
 class Var(Tag):
     def __init__(self, trigger, element):
         """
         Initialize a new Random Tag instance
-        :param trigger: The parent SAML instance
-        :type  trigger: Saml
+        :param trigger: The executing Trigger instance
+        :type  trigger: parser.trigger.Trigger
 
         :param element: The XML Element object
         :type  element: etree._Element
         """
         super().__init__(trigger, element)
-        self._log = logging.getLogger('saml.parser.tags.var')
+        self._log = logging.getLogger('agentml.parser.tags.var')
 
         # Define our schema
-        with open(os.path.join(self.trigger.saml.script_path, 'schemas', 'tags', 'var.rng')) as file:
+        with open(os.path.join(self.trigger.agentml.script_path, 'schemas', 'tags', 'var.rng')) as file:
             self.schema = schema(file.read())
 
         # Is this a User or Global variable?
@@ -31,7 +31,7 @@ class Var(Tag):
         """
         # Does the variable name have tags to parse?
         if len(self._element):
-            var = ''.join(map(str, self.trigger.saml.parse_tags(self._element, self.trigger)))
+            var = ''.join(map(str, self.trigger.agentml.parse_tags(self._element, self.trigger)))
         else:
             var = self._element.text or attribute(self._element, 'name')
 
@@ -43,7 +43,7 @@ class Var(Tag):
             if self.type == 'user':
                 return self.trigger.user.get_var(var)
             else:
-                return self.trigger.saml.get_var(var)
+                return self.trigger.agentml.get_var(var)
         except VarNotDefinedError:
             # Do we have a default value?
             if default:

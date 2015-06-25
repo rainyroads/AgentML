@@ -1,27 +1,27 @@
 import logging
 from abc import ABCMeta, abstractmethod
-from saml.parser import Element
-from saml.common import attribute
-from saml.parser.trigger.response import Response
-from saml.errors import VarNotDefinedError
+from agentml.parser import Element
+from agentml.common import attribute
+from agentml.parser.trigger.response import Response
+from agentml.errors import VarNotDefinedError
 
 
 class BaseCondition(metaclass=ABCMeta):
     """
-    SAML Base Condition class
+    AgentML Base Condition class
     """
-    def __init__(self, saml, element, **kwargs):
+    def __init__(self, agentml, element, **kwargs):
         """
         Initialize a new Base Condition instance
-        :param saml: The parent SAML instance
-        :type  saml: Saml
+        :param agentml: The parent AgentML instance
+        :type  agentml: AgentML
 
         :param element: The XML Element object
         :type  element: etree._Element
 
         :param kwargs: Default attributes
         """
-        self.saml = saml
+        self.agentml = agentml
         self._element = element
 
         # Containers and default attributes
@@ -29,19 +29,19 @@ class BaseCondition(metaclass=ABCMeta):
         self._else = None
 
         self.type = kwargs['type'] if 'type' in kwargs else attribute(self._element, 'type', 'user_var')
-        self._log = logging.getLogger('saml.parser.trigger.condition')
+        self._log = logging.getLogger('agentml.parser.trigger.condition')
 
     def evaluate(self, user):
         """
         Evaluate the conditional statement and return its contents if a successful evaluation takes place
         :param user: The active user object
-        :type  user: saml.User or None
+        :type  user: agentml.User or None
 
         :return: True if the condition evaluates successfully, otherwise False
         :rtype : bool
         """
         for statement in self.statements:
-            evaluated = statement.evaluate(self.saml, user)
+            evaluated = statement.evaluate(self.agentml, user)
             if evaluated:
                 return evaluated
 
@@ -114,7 +114,7 @@ class BaseCondition(metaclass=ABCMeta):
 
 class Condition(Element, BaseCondition):
     """
-    SAML Condition object
+    AgentML Condition object
     """
     def __init__(self, trigger, element, file_path):
         """
@@ -125,13 +125,13 @@ class Condition(Element, BaseCondition):
         :param element: The XML Element object
         :type  element: etree._Element
 
-        :param file_path: The absolute path to the SAML file
+        :param file_path: The absolute path to the AgentML file
         :type  file_path: str
         """
         self.trigger = trigger
-        BaseCondition.__init__(self, trigger.saml, element)
-        Element.__init__(self, trigger.saml, element, file_path)
-        self._log = logging.getLogger('saml.parser.trigger.condition')
+        BaseCondition.__init__(self, trigger.agentml, element)
+        Element.__init__(self, trigger.agentml, element, file_path)
+        self._log = logging.getLogger('agentml.parser.trigger.condition')
 
     def get_contents(self, element):
         """
@@ -187,16 +187,16 @@ class ConditionStatement:
         self.contents = contents
         self.value = value
         self.name = name
-        self._log = logging.getLogger('saml.parser.trigger.condition.statement')
+        self._log = logging.getLogger('agentml.parser.trigger.condition.statement')
 
-    def evaluate(self, saml, user=None):
+    def evaluate(self, agentml, user=None):
         """
         Evaluate the conditional statement and return its contents if a successful evaluation takes place
         :param user: The active user object
-        :type  user: saml.User or None
+        :type  user: agentml.User or None
         
-        :param saml: The active SAML instance
-        :type  saml: Saml
+        :param agentml: The active AgentML instance
+        :type  agentml: AgentML
 
         :return: Condition contents if the condition evaluates successfully, otherwise False
         :rtype : tuple or bool
@@ -210,7 +210,7 @@ class ConditionStatement:
             if self.type == self.USER_VAR:
                 key_value = user.get_var(self.name)
             elif self.type == self.GLOBAL_VAR:
-                key_value = saml.get_var(self.name)
+                key_value = agentml.get_var(self.name)
             elif self.type == self.TOPIC:
                 key_value = user.topic
             elif self.type == self.USER:
