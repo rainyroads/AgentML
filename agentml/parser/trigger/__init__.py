@@ -408,6 +408,9 @@ class Trigger(Element, Restrictable):
             for response in statement.contents:
                 self._responses.add(response, condition)
 
+        if condition.else_statement:
+            self._responses.add(condition.else_statement[0], condition)
+
     def _parse_chance(self, element):
         """
         Parse the chance of this trigger being successfully called

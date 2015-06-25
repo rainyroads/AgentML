@@ -139,8 +139,8 @@ class ResponseContainer:
             # If we have no responses in the response pool, that means a limit is being enforced for them all and
             # we need to move on to responses in the next priority bracket
             if not response_pool:
-                self._log.debug('All responses with a priority of {priority} have active limits enforced, '
-                                'continuing to the next priority bracket'.format(priority=priority))
+                self._log.debug('All responses with a priority of {priority} failed to pass one or more condition '
+                                'checks, continuing to the next priority bracket'.format(priority=priority))
                 continue
 
             # Start a loop so we can weed out responses that fail chance conditions

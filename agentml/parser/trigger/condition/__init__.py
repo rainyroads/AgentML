@@ -26,7 +26,7 @@ class BaseCondition(metaclass=ABCMeta):
 
         # Containers and default attributes
         self.statements = []
-        self._else = None
+        self.else_statement = None
 
         self.type = kwargs['type'] if 'type' in kwargs else attribute(self._element, 'type', 'user_var')
         self._log = logging.getLogger('agentml.parser.trigger.condition')
@@ -45,7 +45,7 @@ class BaseCondition(metaclass=ABCMeta):
             if evaluated:
                 return evaluated
 
-        return self._else or False
+        return self.else_statement or False
 
     @abstractmethod
     def get_contents(self, element):
@@ -109,7 +109,7 @@ class BaseCondition(metaclass=ABCMeta):
         :param element: The XML Element object
         :type  element: etree._Element
         """
-        self._else = self.get_contents(element)
+        self.else_statement = self.get_contents(element)
 
 
 class Condition(Element, BaseCondition):
