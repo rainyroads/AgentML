@@ -348,3 +348,45 @@ class BlockingTests(AgentMLTestCase):
     def test_response_blocking(self):
         self.get_reply('response blocking test', 'First!')
         self.get_reply('response blocking test', self.success)
+
+
+class RedirectTests(AgentMLTestCase):
+    def test_atomic_redirect(self):
+        self.get_reply('redirect test', self.success)
+        self.get_reply('shorthand redirect test', self.success)
+
+    def test_atomic_redirect_with_topic(self):
+        self.get_reply('enter test topic', self.success)
+        self.topic('test')
+
+        self.get_reply('test topic redirect test', self.success)
+
+        self.get_reply('exit test topic', self.success)
+        self.topic(None)
+        self.get_reply('test topic redirect test', None)
+
+        self.get_reply('enter test topic', self.success)
+        self.topic('test')
+
+        self.get_reply('test topic redirect outside of topic test', self.success)
+        self.topic(None)
+
+    def test_atomic_redirect_with_topic_and_group(self):
+        self.get_reply('enter test topic', self.success)
+        self.topic('test')
+
+        self.get_reply('test grouped topic redirect test', self.success, {'group1'})
+
+    def test_wildcard_redirect(self):
+        self.get_reply('wildcard redirect test foo and bar without baz plus 42', 'foo and bar plus 42')
+        self.get_reply('wildcard redirect test foo and bar without baz plus qux', None)
+
+    def test_wildcard_redirect_with_topic(self):
+        self.get_reply('enter test topic', self.success)
+        self.topic('test')
+
+        self.get_reply('test topic wildcard redirect test foo and bar without baz plus 42', 'foo and bar plus 42')
+        self.get_reply('test topic wildcard redirect test foo and bar without baz plus qux', None)
+
+        self.get_reply('wildcard redirect test foo and bar without baz plus 42', 'foo and bar plus 42')
+        self.topic(None)

@@ -392,6 +392,15 @@ class Trigger(Element, Restrictable):
         self._log.info('Parsing new shorthand Response')
         self._responses.add(Response(self, element, self.file_path))
 
+    def _parse_redirect(self, element):
+        """
+        Parse a trigger redirect
+        :param element: The XML Element object
+        :type  element: etree._Element
+        """
+        self._log.info('Parsing new redirected Response')
+        self._responses.add(Response(self, element, self.file_path))
+
     def _parse_condition(self, element):
         """
         Parse a trigger condition
