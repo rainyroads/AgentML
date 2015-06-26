@@ -96,8 +96,9 @@ class AgentML:
                 # Set the group
                 if child.tag == 'group':
                     self._log.info('Setting Trigger group: {group}'.format(group=child.get('name')))
-                    defaults['groups'] = {child.get('name')}
+                    defaults['groups'] = {child.get('name')}  # TODO
                     parse_element(child)
+                    del defaults['groups']
                     continue
 
                 # Set the topic
@@ -105,6 +106,7 @@ class AgentML:
                     self._log.info('Setting Trigger topic: {topic}'.format(topic=child.get('name')))
                     defaults['topic'] = child.get('name')
                     parse_element(child)
+                    del defaults['topic']
                     continue
 
                 # Set the emotion
@@ -112,6 +114,7 @@ class AgentML:
                     self._log.info('Setting Trigger emotion: {emotion}'.format(emotion=child.get('name')))
                     defaults['emotion'] = child.get('name')
                     parse_element(child)
+                    del defaults['emotion']
                     continue
 
                 # Parse a standard Trigger element
@@ -120,10 +123,6 @@ class AgentML:
                         self.add_trigger(Trigger(self, child, file_path, **defaults))
                     except AgentMLError:
                         self._log.warn('Skipping Trigger due to an error', exc_info=True)
-                    finally:
-                        # Reset the dictionary of default attributes for the next trigger iteration
-                        self._log.debug('Resetting default Trigger attributes')
-                        defaults.clear()
 
         # Begin element iteration by parsing the root element
         parse_element(root)
@@ -498,12 +497,6 @@ class AgentML:
             append_tail(child)
 
         return response
-
-    def _parse_trigger(self, element, file_path):
-        try:
-            self._triggers[element.find('pattern').text] = Trigger(self, element, file_path)
-        except AgentMLError:
-            self._log.warn('Skipping pattern due to an error')
 
 
 class Message:
