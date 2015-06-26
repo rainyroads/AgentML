@@ -453,32 +453,67 @@
         </response>
     </trigger>
 
-    <trigger>
+    <trigger priority="23">
         <pattern>response priority test</pattern>
 
-        <response priority="3">
-            <limit>10</limit>
+        <response priority="10">
+            <limit>60</limit>
             <template>One</template>
         </response>
 
-        <response priority="2">
-            <limit>10</limit>
+        <response priority="9">
+            <limit>60</limit>
             <template>Two</template>
         </response>
 
-        <response priority="1">
-            <limit>10</limit>
+        <response priority="8">
+            <limit>60</limit>
             <template>Three</template>
         </response>
 
+        <response priority="7">
+            <limit>60</limit>
+            <template>Four</template>
+        </response>
+
+        <response priority="6">
+            <limit>60</limit>
+            <template>Five</template>
+        </response>
+
+        <response priority="5">
+            <limit>60</limit>
+            <template>Six</template>
+        </response>
+
+        <response priority="4">
+            <limit>60</limit>
+            <template>Seven</template>
+        </response>
+
+        <response priority="3">
+            <limit>60</limit>
+            <template>Eight</template>
+        </response>
+
+        <response priority="2">
+            <limit>60</limit>
+            <template>Nine</template>
+        </response>
+
+        <response priority="1">
+            <limit>60</limit>
+            <template>Ten</template>
+        </response>
+
         <response priority="-1">
-            <template>If you saw One, Two, Three before this message, this was a success!</template>
+            <template>Success!</template>
         </response>
 
         <condition>
             <if type="user" is="chell">
                 <response priority="0">
-                    <template>If you saw One, Two, Three before this message, this was a triumph!</template>
+                    <template>Triumph!</template>
                 </response>
             </if>
         </condition>

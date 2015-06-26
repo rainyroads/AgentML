@@ -316,14 +316,28 @@ class PriorityTests(AgentMLTestCase):
         self.get_reply('response priority test', 'One')
         self.get_reply('response priority test', 'Two')
         self.get_reply('response priority test', 'Three')
-        self.get_reply('response priority test', 'If you saw One, Two, Three before this message, this was a success!')
+        self.get_reply('response priority test', 'Four')
+        self.get_reply('response priority test', 'Five')
+        self.get_reply('response priority test', 'Six')
+        self.get_reply('response priority test', 'Seven')
+        self.get_reply('response priority test', 'Eight')
+        self.get_reply('response priority test', 'Nine')
+        self.get_reply('response priority test', 'Ten')
+        self.get_reply('response priority test', self.success)
 
     def test_response_priority_with_condition(self):
         self.username = 'chell'
         self.get_reply('response priority test', 'One')
         self.get_reply('response priority test', 'Two')
         self.get_reply('response priority test', 'Three')
-        self.get_reply('response priority test', 'If you saw One, Two, Three before this message, this was a triumph!')
+        self.get_reply('response priority test', 'Four')
+        self.get_reply('response priority test', 'Five')
+        self.get_reply('response priority test', 'Six')
+        self.get_reply('response priority test', 'Seven')
+        self.get_reply('response priority test', 'Eight')
+        self.get_reply('response priority test', 'Nine')
+        self.get_reply('response priority test', 'Ten')
+        self.get_reply('response priority test', 'Triumph!')
 
 
 class BlockingTests(AgentMLTestCase):
