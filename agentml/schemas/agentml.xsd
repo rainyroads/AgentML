@@ -63,6 +63,7 @@
                     <xs:element ref="condition"/>
                     <xs:element ref="response"/>
                     <xs:element ref="template"/>
+                    <xs:group ref="trigger.response.redirect.shorthand"/>
                 </xs:choice>
                 <xs:element ref="limit"/>
                 <xs:element ref="chance"/>
@@ -97,11 +98,14 @@
     <xs:element name="response">
         <xs:complexType>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element name="template">
-                    <xs:complexType mixed="true">
-                        <xs:group minOccurs="0" maxOccurs="unbounded" ref="anyElement"/>
-                    </xs:complexType>
-                </xs:element>
+                <xs:choice>
+                    <xs:group ref="trigger.response.redirect"/>
+                    <xs:element name="template">
+                        <xs:complexType mixed="true">
+                            <xs:group minOccurs="0" maxOccurs="unbounded" ref="anyElement"/>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:choice>
                 <xs:group ref="trigger.topic"/>
                 <xs:group ref="trigger.emotion"/>
                 <xs:element ref="limit"/>
@@ -112,6 +116,15 @@
             <xs:attribute name="weight" type="xs:integer"/>
         </xs:complexType>
     </xs:element>
+    <xs:group name="trigger.response.redirect">
+        <xs:sequence>
+            <xs:element name="redirect">
+                <xs:complexType mixed="true">
+                    <xs:group minOccurs="0" maxOccurs="unbounded" ref="anyElement"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:group>
     <xs:element name="template">
         <xs:complexType mixed="true">
             <xs:group minOccurs="0" maxOccurs="unbounded" ref="anyElement"/>
@@ -119,6 +132,17 @@
             <xs:attribute name="weight" type="xs:integer"/>
         </xs:complexType>
     </xs:element>
+    <xs:group name="trigger.response.redirect.shorthand">
+        <xs:sequence>
+            <xs:element name="redirect">
+                <xs:complexType mixed="true">
+                    <xs:group minOccurs="0" maxOccurs="unbounded" ref="anyElement"/>
+                    <xs:attribute name="priority" type="xs:integer"/>
+                    <xs:attribute name="weight" type="xs:integer"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:group>
     <xs:element name="condition">
         <xs:complexType>
             <xs:sequence>
