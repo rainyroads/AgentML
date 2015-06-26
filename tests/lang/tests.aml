@@ -127,6 +127,26 @@
         </response>
     </trigger>
 
+    <!-- Shorthand response tests -->
+    <trigger>
+        <pattern>shorthand response test</pattern>
+        <template>Success!</template>
+    </trigger>
+
+    <trigger>
+        <pattern>shorthand conditional response test</pattern>
+
+        <condition>
+            <if name="condition">
+                <template>Success!</template>
+            </if>
+
+            <else>
+                <template>Failure!</template>
+            </else>
+        </condition>
+    </trigger>
+
     <!-- Star formatting tests -->
     <trigger>
         <pattern>capitalize format (*)</pattern>

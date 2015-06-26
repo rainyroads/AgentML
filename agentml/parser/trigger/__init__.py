@@ -380,21 +380,17 @@ class Trigger(Element, Restrictable):
         :param element: The XML Element object
         :type  element: etree._Element
         """
-        # Get the responses weight
         self._log.info('Parsing new Response')
-        try:
-            weight = int(element.get('weight') or element.find('weight'))
-            self._log.info('Setting Response weight: {weight}'.format(weight=weight))
-        except TypeError:
-            # Weight attribute not defined, set a default value of 1
-            self._log.debug('Setting default Response weight of 1')
-            weight = 1
-        except ValueError:
-            # A value was returned, but it wasn't an integer. This should never happen with proper schema validation.
-            self._log.warn('Received non-integer value for weight attribute: {weight}'.format(element.get('weight')))
-            weight = 1
+        self._responses.add(Response(self, element, self.file_path))
 
-        self._responses.add(Response(self, element, self.file_path, weight=weight))
+    def _parse_template(self, element):
+        """
+        Parse a trigger shorthand response
+        :param element: The XML Element object
+        :type  element: etree._Element
+        """
+        self._log.info('Parsing new shorthand Response')
+        self._responses.add(Response(self, element, self.file_path))
 
     def _parse_condition(self, element):
         """

@@ -62,6 +62,7 @@
                 <xs:choice>
                     <xs:element ref="condition"/>
                     <xs:element ref="response"/>
+                    <xs:element ref="template"/>
                 </xs:choice>
                 <xs:element ref="limit"/>
                 <xs:element ref="chance"/>
@@ -96,7 +97,11 @@
     <xs:element name="response">
         <xs:complexType>
             <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element ref="template"/>
+                <xs:element name="template">
+                    <xs:complexType mixed="true">
+                        <xs:group minOccurs="0" maxOccurs="unbounded" ref="anyElement"/>
+                    </xs:complexType>
+                </xs:element>
                 <xs:group ref="trigger.topic"/>
                 <xs:group ref="trigger.emotion"/>
                 <xs:element ref="limit"/>
@@ -110,6 +115,8 @@
     <xs:element name="template">
         <xs:complexType mixed="true">
             <xs:group minOccurs="0" maxOccurs="unbounded" ref="anyElement"/>
+            <xs:attribute name="priority" type="xs:integer"/>
+            <xs:attribute name="weight" type="xs:integer"/>
         </xs:complexType>
     </xs:element>
     <xs:element name="condition">
@@ -133,9 +140,10 @@
     </xs:element>
     <xs:element name="if">
         <xs:complexType>
-            <xs:sequence>
-                <xs:element maxOccurs="unbounded" ref="response"/>
-            </xs:sequence>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element ref="response"/>
+                <xs:element ref="template"/>
+            </xs:choice>
             <xs:attribute name="name"/>
             <xs:attribute name="type"/>
             <xs:attributeGroup ref="trigger.response.condition.operators"/>
@@ -143,9 +151,10 @@
     </xs:element>
     <xs:element name="elif">
         <xs:complexType>
-            <xs:sequence>
-                <xs:element maxOccurs="unbounded" ref="response"/>
-            </xs:sequence>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element ref="response"/>
+                <xs:element ref="template"/>
+            </xs:choice>
             <xs:attribute name="name"/>
             <xs:attribute name="type"/>
             <xs:attributeGroup ref="trigger.response.condition.operators"/>
@@ -153,9 +162,10 @@
     </xs:element>
     <xs:element name="else">
         <xs:complexType>
-            <xs:sequence>
-                <xs:element maxOccurs="unbounded" ref="response"/>
-            </xs:sequence>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element ref="response"/>
+                <xs:element ref="template"/>
+            </xs:choice>
         </xs:complexType>
     </xs:element>
     <xs:attributeGroup name="trigger.response.condition.operators">

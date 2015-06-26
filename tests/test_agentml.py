@@ -44,6 +44,17 @@ class BasicResponseTests(AgentMLTestCase):
         self.get_reply('required bar test', 'bar')
         self.get_reply('foo required test foo', None)
 
+    def test_response_shorthand(self):
+        self.get_reply('shorthand response test', self.success)
+
+    def test_response_shorthand_with_condition(self):
+        self.get_reply('shorthand conditional response test', self.failure)
+
+        self.get_reply('Set user var condition to foo', 'Setting user variable condition to foo')
+        self.user_var('condition', 'foo')
+
+        self.get_reply('shorthand conditional response test', self.success)
+
     def test_wildcard(self):
         self.get_reply('wildcard test foo', 'foo')
 

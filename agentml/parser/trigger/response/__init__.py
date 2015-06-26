@@ -2,7 +2,7 @@ import os
 import logging
 from time import time
 from collections import Iterable
-from agentml.common import schema, attribute, int_attribute
+from agentml.common import schema, attribute, int_attribute, int_element
 from agentml.parser import Element, Restrictable
 from .container import ResponseContainer
 
@@ -27,6 +27,7 @@ class Response(Element, Restrictable):
         """
         # Containers and default attributes
         self.priority = int_attribute(element, 'priority')
+        self.weight = int_attribute(element, 'weight', 1) or int_element(element, 'weight', 1)
         self.trigger = trigger
         self._response = ()
         self.topic = False
@@ -43,7 +44,6 @@ class Response(Element, Restrictable):
 
         # Default attributes
         self.emotion = kwargs['emotion'] if 'emotion' in kwargs else None
-        self.weight = kwargs['weight'] if 'weight' in kwargs else int_attribute(self._element, 'weight', 1)
         self.ulimit_blocking = False
         self.glimit_blocking = False
         self.chance_blocking = False
@@ -103,28 +103,33 @@ class Response(Element, Restrictable):
             if var_type == 'global':
                 self.trigger.agentml.set_var(var_name, var_value)
 
-        # agentml.mood = self.mood
-
     def _parse(self):
         """
         Loop through all child elements and execute any available parse methods for them
         """
+        def parse_template(element):
+            # If the response element has no tags, just store the raw text as the only response
+            if not len(element):
+                self._response = (element.text,)
+                self._log.info('Assigning text only response')
+                return
+
+            # Otherwise, parse the tags now
+            self._response = tuple(self.agentml.parse_tags(element, self.trigger))
+
+        # Is this a shorthand template?
+        if self._element.tag == 'template':
+            return parse_template(self._element)
+
         # Find the template and parse any other defined tags
         template = self._element.find('template')
+        parse_template(template)
         for child in self._element:
             method_name = '_parse_' + child.tag
 
             if hasattr(self, method_name):
                 parse = getattr(self, method_name)
                 parse(child)
-
-        # If the response element has no tags, just store the raw text as the only response
-        if not len(template):
-            self._response = (template.text,)
-            self._log.info('Assigning text only response')
-            return
-
-        self._response = tuple(self.agentml.parse_tags(template, self.trigger))
 
     def _parse_priority(self, element):
         """

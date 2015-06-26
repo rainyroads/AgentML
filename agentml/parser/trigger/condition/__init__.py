@@ -142,7 +142,8 @@ class Condition(Element, BaseCondition):
         :return: A list of responses
         :rtype : list of Response
         """
-        return [Response(self.trigger, child, self.file_path) for child in element if child.tag == 'response']
+        return [Response(self.trigger, child, self.file_path)
+                for child in element if child.tag in ['response', 'template']]
 
 
 class ConditionStatement:
