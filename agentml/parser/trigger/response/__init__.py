@@ -77,7 +77,10 @@ class Response(Element, Restrictable):
 
         if self.redirect:
             self._log.info('Redirecting response to: {msg}'.format(msg=response))
-            return self.agentml.get_reply(user.id, response)
+            response = self.agentml.get_reply(user.id, response)
+            if not response:
+                self._log.info('Failed to retrieve a valid response when redirecting')
+                return ''
 
         return response
 
