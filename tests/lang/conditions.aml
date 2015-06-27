@@ -1,0 +1,83 @@
+<!DOCTYPE agentml SYSTEM "agentml.rng">
+
+<agentml version="0.2" xmlns="">
+    <!-- Should succeed -->
+    <trigger>
+        <pattern>custom condition test one</pattern>
+        <condition type="foo_bar">
+            <if name="foo" is="bar">
+                <template>Success!</template>
+            </if>
+            
+            <else>
+                <template>Failure!</template>
+            </else>
+        </condition>
+    </trigger>
+
+    <!-- Should succeed -->
+    <trigger>
+        <pattern>custom condition test two</pattern>
+        <condition type="foo_bar">
+            <if name="bar" is="foo">
+                <template>Success!</template>
+            </if>
+            
+            <else>
+                <template>Failure!</template>
+            </else>
+        </condition>
+    </trigger>
+
+    <!-- Should succeed -->
+    <trigger>
+        <pattern>custom condition test three</pattern>
+        <condition type="foo_bar">
+            <if name="baz">
+                <template>Failure!</template>
+            </if>
+            
+            <else>
+                <template>Success!</template>
+            </else>
+        </condition>
+    </trigger>
+
+    <!-- Should succeed -->
+    <trigger>
+        <pattern>custom condition test four</pattern>
+        <condition type="foo_bar">
+            <if name="foo" is_not="bar">
+                <template>Failure!</template>
+            </if>
+            
+            <else>
+                <template>Success!</template>
+            </else>
+        </condition>
+    </trigger>
+
+    <!-- Should succeed -->
+    <trigger>
+        <pattern>custom condition test five</pattern>
+        <condition type="foo_bar">
+            <if name="foo" is_not="foo">
+                <template>Success!</template>
+            </if>
+            
+            <else>
+                <template>Failure!</template>
+            </else>
+        </condition>
+    </trigger>
+
+    <!-- Should fail to return a response -->
+    <trigger>
+        <pattern>custom condition test six</pattern>
+        <condition type="foo_bar">
+            <if name="qux">
+                <template>Failure!</template>
+            </if>
+        </condition>
+    </trigger>
+</agentml>

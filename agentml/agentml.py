@@ -7,6 +7,7 @@ from agentml.common import schema, normalize, attribute, int_attribute
 from agentml.parser.init import Init
 from agentml.parser.trigger import Trigger
 from agentml.parser.tags import Condition, Redirect, Random, Var, Tag
+from agentml.parser.trigger.condition.types import UserVarType, GlobalVarType, TopicType, UserType, ConditionType
 from agentml.logger import RequestLogger, ResponseLogger
 from agentml.constants import AnyGroup
 from agentml.errors import AgentMLError, VarNotDefinedError, UserNotDefinedError, ParserBlockingError, LimitError
@@ -39,6 +40,8 @@ class AgentML:
 
         # Define our base / system tags
         self._tags = {'condition': Condition, 'redirect': Redirect, 'random': Random, 'var': Var}
+        self.conditions = {'user_var': UserVarType(), 'global_var': GlobalVarType(), 'topic': TopicType(),
+                           'user': UserType()}
 
         # Containers
         self._global_vars   = {}
@@ -433,6 +436,27 @@ class AgentML:
         # User does not exist, so let's create a new one
         self._users[identifier] = User(identifier)
         return self._users[identifier]
+
+    def add_condition(self, name, cond_class):
+        """
+        Add a new custom condition type parser
+        :param name: The name of the condition type
+        :type  name: str
+
+        :param cond_class: The Class
+        :return:
+        """
+        # Has this condition type already been defined?
+        if name in self.conditions:
+            self._log.warn('Overwriting an existing Condition Type class: {type}'.format(type=name))
+
+        if not issubclass(cond_class, ConditionType):
+            self._log.error('Condition Type class must implement the base ConditionType interface, please review the '
+                            'documentation on defining custom condition types. (Refusing to set the condition type '
+                            '"{type}")'.format(type=name))
+            return
+
+        self.conditions[name] = cond_class(name)
 
     def set_tag(self, name, tag_class):
         """

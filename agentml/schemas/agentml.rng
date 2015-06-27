@@ -274,14 +274,7 @@
     <define name="trigger.response.condition">
         <element name="condition" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
             <optional>
-                <attribute name="type">
-                    <choice>
-                        <value>user_var</value>
-                        <value>global_var</value>
-                        <value>user</value>
-                        <value>topic</value>
-                    </choice>
-                </attribute>
+                <attribute name="type"/>
             </optional>
 
             <ref name="trigger.response.condition.if"/>
