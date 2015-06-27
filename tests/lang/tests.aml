@@ -64,6 +64,18 @@
     </trigger>
 
     <trigger>
+        <pattern>multiline atomic test</pattern>
+
+        <response>
+            <template>
+                The quick brown fox
+                jumps over the lazy
+                dog
+            </template>
+        </response>
+    </trigger>
+
+    <trigger>
         <pattern>optional [foo|bar] test 1</pattern>
 
         <response>
