@@ -3,6 +3,7 @@ import logging
 import unittest
 from agentml import AgentML
 from agentml.errors import VarNotDefinedError
+from .conditions import FooBarType
 
 class AgentMLTestCase(unittest.TestCase):
     """
@@ -13,6 +14,7 @@ class AgentMLTestCase(unittest.TestCase):
         Set up the Unit Test
         """
         self.aml = AgentML(log_level=logging.WARN)
+        self.aml.add_condition('foo_bar', FooBarType)
         self.aml.load_directory(os.path.join(os.path.dirname(self.aml.script_path), 'tests', 'lang'))
         self.username = "unittest"
         self.success = 'Success!'

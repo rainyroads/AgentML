@@ -455,3 +455,13 @@ class LoggerTests(AgentMLTestCase):
         self.assertEqual(str(self.aml.response_log.most_recent().request.message), 'required foo test')
 
         self.assertEqual(len(self.aml.response_log.entries), 3)
+
+
+class CustomConditionTypeTests(AgentMLTestCase):
+    def test_foo_bar_condition_type(self):
+        self.get_reply('custom condition test one', self.success)
+        self.get_reply('custom condition test two', self.success)
+        self.get_reply('custom condition test three', self.success)
+        self.get_reply('custom condition test four', self.success)
+        self.get_reply('custom condition test five', self.success)
+        self.get_reply('custom condition test six', None)
