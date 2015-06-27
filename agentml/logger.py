@@ -27,7 +27,6 @@ class InternalLogger:
     def most_recent(self):
         """
         Fetch the most recent log entry
-        :rtype: tuple or None
         """
         return self._log_entries[0] if len(self._log_entries) else None
 
