@@ -177,3 +177,13 @@ def int_element(element, name, default=0):
             return default
 
     return default
+
+
+def newlines_to_spaces(text):
+    """
+    Strips newlines and any spacing surrounding the newlines and replaces them with a single space
+    :param text: The text to parse
+    :type  text: str
+    """
+    newline_pattern = re.compile('\s*\n\s*')
+    return newline_pattern.sub(' ', text)

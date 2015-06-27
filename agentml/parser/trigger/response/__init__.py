@@ -1,8 +1,7 @@
-import os
 import logging
 from time import time
 from collections import Iterable
-from agentml.common import schema, attribute, int_attribute, int_element
+from agentml.common import attribute, int_attribute, newlines_to_spaces
 from agentml.parser import Element, Restrictable
 from .container import ResponseContainer
 
@@ -124,7 +123,7 @@ class Response(Element, Restrictable):
         def parse_template(element):
             # If the response element has no tags, just store the raw text as the only response
             if not len(element):
-                self._response = (element.text,)
+                self._response = (newlines_to_spaces(element.text),)
                 self._log.info('Assigning text only response')
                 return
 

@@ -22,6 +22,9 @@ class BasicResponseTests(AgentMLTestCase):
         self.get_reply('Atom.. test!', self.success)
         self.get_reply('A!T!O!M! T!E!S!T!', self.success)
 
+    def test_atomic_with_multiple_lines(self):
+        self.get_reply('multiline atomic test', 'The quick brown fox jumps over the lazy dog')
+
     def test_optionals(self):
         self.get_reply('optional test 1', self.success)
         self.get_reply('optional foo test 1', self.success)

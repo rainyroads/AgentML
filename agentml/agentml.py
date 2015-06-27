@@ -3,7 +3,7 @@ import re
 import logging
 from time import time
 from lxml import etree
-from agentml.common import schema, normalize, attribute, int_attribute
+from agentml.common import schema, normalize, attribute, int_attribute, newlines_to_spaces
 from agentml.parser.init import Init
 from agentml.parser.trigger import Trigger
 from agentml.parser.tags import Condition, Redirect, Random, Var, Tag
@@ -494,6 +494,7 @@ class AgentML:
         head = element.text if isinstance(element.text, str) else None
         if head:
             if head.strip():
+                head = newlines_to_spaces(head)
                 self._log.debug('Appending heading text: {text}'.format(text=head))
             response.append(head)
 
@@ -502,6 +503,7 @@ class AgentML:
             tail = e.tail if isinstance(e.tail, str) else None
             if tail:
                 if tail.strip():
+                    tail = newlines_to_spaces(tail)
                     self._log.debug('Appending trailing text: {text}'.format(text=tail))
                 response.append(tail)
         
