@@ -583,6 +583,11 @@
     </trigger>
 
     <trigger>
+        <pattern>bad redirect test</pattern>
+        <redirect>dead end redirect</redirect>
+    </trigger>
+
+    <trigger>
         <pattern>wildcard redirect test (*) and (*) without * plus (#)</pattern>
         <redirect>wildcard redirect destination <star/> and <star index="2"/> plus <star index="3"/></redirect>
     </trigger>
@@ -629,5 +634,15 @@
     <trigger>
         <pattern>template redirect test</pattern>
         <template>Status: <redirect>redirect destination</redirect>!</template>
+    </trigger>
+
+    <trigger>
+        <pattern>template default redirect test</pattern>
+        <template>Status: <redirect default="Failure!">dead end redirect</redirect>!</template>
+    </trigger>
+
+    <trigger>
+        <pattern>template bad redirect test</pattern>
+        <template>Status: <redirect>dead end redirect</redirect>!</template>
     </trigger>
 </agentml>

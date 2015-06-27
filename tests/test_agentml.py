@@ -354,6 +354,7 @@ class RedirectTests(AgentMLTestCase):
     def test_atomic_redirect(self):
         self.get_reply('redirect test', self.success)
         self.get_reply('shorthand redirect test', self.success)
+        self.get_reply('bad redirect test', '')
 
     def test_atomic_redirect_with_topic(self):
         self.get_reply('enter test topic', self.success)
@@ -390,6 +391,11 @@ class RedirectTests(AgentMLTestCase):
 
         self.get_reply('wildcard redirect test foo and bar without baz plus 42', 'foo and bar plus 42')
         self.topic(None)
+
+    def test_template_redirect(self):
+        self.get_reply('template redirect test', 'Status: {status}!'.format(status=self.success))
+        self.get_reply('template default redirect test', 'Status: {status}!'.format(status=self.failure))
+        self.get_reply('template bad redirect test', 'Status: !')
 
 
 class LoggerTests(AgentMLTestCase):
