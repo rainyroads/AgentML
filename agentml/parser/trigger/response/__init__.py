@@ -37,8 +37,8 @@ class Response(Element, Restrictable):
         # What the topic should be *changed* to after this response is sent. False = No change
         self.topic = False
 
-        # Variable to set. Format is (type, name, value)
-        self.var = (None, None, None)
+        # Variables to set, list of tuple(type, name, value)
+        self.vars = []
 
         # Wildcard containers
         self.stars = {
@@ -104,8 +104,8 @@ class Response(Element, Restrictable):
             self._log.info('Enforcing User Response Limit of {num} seconds'.format(num=self.user_limit))
             user.set_limit(self, (time() + self.user_limit))
 
-        if self.var[0]:
-            var_type, var_name, var_value = self.var
+        for var in self.vars:
+            var_type, var_name, var_value = var
             var_name  = ''.join(map(str, var_name)) if isinstance(var_name, Iterable) else var_name
             var_value = ''.join(map(str, var_value)) if isinstance(var_value, Iterable) else var_value
 
@@ -180,7 +180,7 @@ class Response(Element, Restrictable):
             value_etree = element.find('value')
             var_value = self.agentml.parse_tags(value_etree, self.trigger) if len(value_etree) else value_etree.text
 
-        self.var = (var_type, var_name, var_value)
+        self.vars.append((var_type, var_name, var_value))
 
     def __str__(self):
         return self.get()

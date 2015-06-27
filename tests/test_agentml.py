@@ -218,6 +218,24 @@ class VarTests(AgentMLTestCase):
                        'Setting global variable unittest to {expected}'.format(expected=self.success))
         self.global_var('unittest', self.success)
 
+    def test_set_multiple_user_vars(self):
+        self.get_reply('Set user var unittestone to foo and unittesttwo to bar',
+                       'Setting user variable unittestone to foo and unittesttwo to bar')
+        self.user_var('unittestone', 'foo')
+        self.user_var('unittesttwo', 'bar')
+
+    def test_set_multiple_global_vars(self):
+        self.get_reply('Set global var unittestone to foo and unittesttwo to bar',
+                       'Setting global variable unittestone to foo and unittesttwo to bar')
+        self.global_var('unittestone', 'foo')
+        self.global_var('unittesttwo', 'bar')
+
+        self.username = 'var_test'
+        self.global_var('unittestone', 'foo')
+        self.global_var('unittesttwo', 'bar')
+        self.get_reply('Get global var unittestone', 'foo')
+        self.get_reply('Get global var unittesttwo', 'bar')
+
 
 class ConditionTests(AgentMLTestCase):
     def test_condition(self):

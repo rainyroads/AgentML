@@ -207,9 +207,9 @@
                     <ref name="trigger.chance"/>
                 </optional>
 
-                <optional>
+                <zeroOrMore>
                     <ref name="trigger.var"/>
-                </optional>
+                </zeroOrMore>
             </interleave>
         </element>
     </define>

@@ -38,7 +38,7 @@ class Trigger(Element, Restrictable):
         self.groups = kwargs['groups'] if 'groups' in kwargs else None
         self.topic = kwargs['topic'] if 'topic' in kwargs else None
         self._responses = kwargs['responses'] if 'responses' in kwargs else ResponseContainer()
-        self.var = (None, None, None)
+        self.vars = []  # list of tuple(type, name, value)
 
         # Pattern metadata
         self.pattern_is_atomic = False
@@ -171,8 +171,8 @@ class Trigger(Element, Restrictable):
             self._log.info('Enforcing User Trigger Limit of {num} seconds'.format(num=self.user_limit))
             user.set_limit(self, (time() + self.user_limit), self.ulimit_blocking)
 
-        if self.var[0]:
-            var_type, var_name, var_value = self.var
+        for var in self.vars:
+            var_type, var_name, var_value = var
             var_name  = ''.join(map(str, var_name)) if isinstance(var_name, Iterable) else var_name
             var_value = ''.join(map(str, var_value)) if isinstance(var_value, Iterable) else var_value
 

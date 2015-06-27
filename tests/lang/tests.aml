@@ -299,6 +299,40 @@
         </response>
     </trigger>
 
+    <trigger>
+        <pattern>set user var (_) to (*) and (_) to (*)</pattern>
+
+        <response>
+            <template>Setting user variable <star/> to <star index="2" format="raw"/> and <star index="3"/> to <star index="4" format="raw"/></template>
+            <var>
+                <name><star/></name>
+                <value><star index="2" format="raw"/></value>
+            </var>
+
+            <var>
+                <name><star index="3"/></name>
+                <value><star index="4" format="raw"/></value>
+            </var>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>set global var (_) to (*) and (_) to (*)</pattern>
+
+        <response>
+            <template>Setting global variable <star/> to <star index="2" format="raw"/> and <star index="3"/> to <star index="4" format="raw"/></template>
+            <var type="global">
+                <name><star/></name>
+                <value><star index="2" format="raw"/></value>
+            </var>
+
+            <var type="global">
+                <name><star index="3"/></name>
+                <value><star index="4" format="raw"/></value>
+            </var>
+        </response>
+    </trigger>
+
     <!-- Condition tests -->
     <trigger>
         <pattern>(cond|condition) test (1|one)</pattern>
