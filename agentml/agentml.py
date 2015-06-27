@@ -7,6 +7,7 @@ from agentml.common import schema, normalize, attribute, int_attribute
 from agentml.parser.init import Init
 from agentml.parser.trigger import Trigger
 from agentml.parser.tags import Condition, Random, Var, Tag
+from agentml.logger import RequestLogger, ResponseLogger
 from agentml.constants import AnyGroup
 from agentml.errors import AgentMLError, VarNotDefinedError, UserNotDefinedError, ParserBlockingError, LimitError
 
@@ -45,6 +46,10 @@ class AgentML:
         self._users         = {}
         self._triggers      = {}
         self._substitutions = []
+
+        # Loggers
+        self.request_log = RequestLogger()
+        self.response_log = ResponseLogger()
 
         # Triggers must be sorted before replies are retrieved
         self.sorted = False
@@ -176,6 +181,10 @@ class AgentML:
         user = self.get_user(user)
         groups = groups or {None}
 
+        # Log this request
+        message = Message(self, message)
+        request_log_entry = self.request_log.add(user, message, groups)
+
         # Fetch triggers in our topic and make sure we're not in an empty topic
         triggers = [trigger for trigger in self._sorted_triggers if user.topic == trigger.topic]
 
@@ -202,7 +211,6 @@ class AgentML:
             user.topic = None
             triggers = [trigger for trigger in self._sorted_triggers if user.topic == trigger.topic]
 
-        message = Message(self, message)
         for trigger in triggers:
             try:
                 match = trigger.match(user, message)
@@ -210,7 +218,9 @@ class AgentML:
                 return
 
             if match:
-                return str(match)
+                message = str(match)
+                request_log_entry.response = self.response_log.add(message, request_log_entry)
+                return message
 
         # If we're still here, no reply was matched. If we're in a topic, exit and retry
         if user.topic:
