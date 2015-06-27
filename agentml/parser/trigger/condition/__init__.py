@@ -147,14 +147,9 @@ class Condition(Element, BaseCondition):
 
 
 class ConditionStatement:
-    # Condition types
-    USER_VAR = 'user_var'
-    GLOBAL_VAR = 'global_var'
-    TOPIC = 'topic'
-    USER = 'user'
-
-    types = [USER_VAR, GLOBAL_VAR, TOPIC, USER]
-
+    """
+    Condition Statement object
+    """
     # Condition operators
     IS = 'is'
     IS_NOT = 'is_not'
@@ -206,18 +201,12 @@ class ConditionStatement:
                         .format(statement=' '.join(filter(None, [self.type, self.name, self.operator, self.value]))))
 
         # Get the value of our key type
-        key_value = None
-        try:
-            if self.type == self.USER_VAR:
-                key_value = user.get_var(self.name)
-            elif self.type == self.GLOBAL_VAR:
-                key_value = agentml.get_var(self.name)
-            elif self.type == self.TOPIC:
-                key_value = user.topic
-            elif self.type == self.USER:
-                key_value = user.id
-        except VarNotDefinedError:
-            key_value = None
+        if self.type not in agentml.conditions:
+            self._log.error('Unknown condition type, "{type}", unable to evaluate condition statement'
+                            .format(type=self.type))
+            return
+
+        key_value = agentml.conditions[self.type].get(agentml, user, self.name)
 
         # Atomic comparisons
         if self.operator is None and key_value:
