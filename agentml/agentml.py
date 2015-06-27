@@ -6,7 +6,7 @@ from lxml import etree
 from agentml.common import schema, normalize, attribute, int_attribute
 from agentml.parser.init import Init
 from agentml.parser.trigger import Trigger
-from agentml.parser.tags import Condition, Random, Var, Tag
+from agentml.parser.tags import Condition, Redirect, Random, Var, Tag
 from agentml.logger import RequestLogger, ResponseLogger
 from agentml.constants import AnyGroup
 from agentml.errors import AgentMLError, VarNotDefinedError, UserNotDefinedError, ParserBlockingError, LimitError
@@ -38,7 +38,7 @@ class AgentML:
             self._schema = schema(file.read())
 
         # Define our base / system tags
-        self._tags = {'condition': Condition, 'random': Random, 'var': Var}
+        self._tags = {'condition': Condition, 'redirect': Redirect, 'random': Random, 'var': Var}
 
         # Containers
         self._global_vars   = {}

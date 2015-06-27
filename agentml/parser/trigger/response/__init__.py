@@ -131,16 +131,16 @@ class Response(Element, Restrictable):
             # Otherwise, parse the tags now
             self._response = tuple(self.agentml.parse_tags(element, self.trigger))
 
+        # Is this a shorthand template?
+        if self._element.tag == 'template':
+            return parse_template(self._element)
+
         # Is this a redirect?
         redirect = self._element if self._element.tag == 'redirect' else self._element.find('redirect')
         if redirect is not None:
             self._log.info('Parsing response as a redirect')
             self.redirect = True
             return parse_template(redirect)
-
-        # Is this a shorthand template?
-        if self._element.tag == 'template':
-            return parse_template(self._element)
 
         # Find the template and parse any other defined tags
         template = self._element.find('template')

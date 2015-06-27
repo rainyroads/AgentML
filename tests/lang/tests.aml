@@ -625,4 +625,9 @@
             </trigger>
         </group>
     </topic>
+
+    <trigger>
+        <pattern>template redirect test</pattern>
+        <template>Status: <redirect>redirect destination</redirect>!</template>
+    </trigger>
 </agentml>
