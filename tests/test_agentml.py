@@ -348,3 +348,92 @@ class BlockingTests(AgentMLTestCase):
     def test_response_blocking(self):
         self.get_reply('response blocking test', 'First!')
         self.get_reply('response blocking test', self.success)
+
+
+class RedirectTests(AgentMLTestCase):
+    def test_atomic_redirect(self):
+        self.get_reply('redirect test', self.success)
+        self.get_reply('shorthand redirect test', self.success)
+        self.get_reply('bad redirect test', '')
+
+    def test_atomic_redirect_with_topic(self):
+        self.get_reply('enter test topic', self.success)
+        self.topic('test')
+
+        self.get_reply('test topic redirect test', self.success)
+
+        self.get_reply('exit test topic', self.success)
+        self.topic(None)
+        self.get_reply('test topic redirect test', None)
+
+        self.get_reply('enter test topic', self.success)
+        self.topic('test')
+
+        self.get_reply('test topic redirect outside of topic test', self.success)
+        self.topic(None)
+
+    def test_atomic_redirect_with_topic_and_group(self):
+        self.get_reply('enter test topic', self.success)
+        self.topic('test')
+
+        self.get_reply('test grouped topic redirect test', self.success, {'group1'})
+
+    def test_wildcard_redirect(self):
+        self.get_reply('wildcard redirect test foo and bar without baz plus 42', 'foo and bar plus 42')
+        self.get_reply('wildcard redirect test foo and bar without baz plus qux', None)
+
+    def test_wildcard_redirect_with_topic(self):
+        self.get_reply('enter test topic', self.success)
+        self.topic('test')
+
+        self.get_reply('test topic wildcard redirect test foo and bar without baz plus 42', 'foo and bar plus 42')
+        self.get_reply('test topic wildcard redirect test foo and bar without baz plus qux', None)
+
+        self.get_reply('wildcard redirect test foo and bar without baz plus 42', 'foo and bar plus 42')
+        self.topic(None)
+
+    def test_template_redirect(self):
+        self.get_reply('template redirect test', 'Status: {status}!'.format(status=self.success))
+        self.get_reply('template default redirect test', 'Status: {status}!'.format(status=self.failure))
+        self.get_reply('template bad redirect test', 'Status: !')
+
+
+class LoggerTests(AgentMLTestCase):
+    def test_request_logger(self):
+        self.get_reply('atomic test', self.success)
+        self.assertEqual(str(self.aml.request_log.most_recent().message), 'atomic test')
+        self.assertEqual(self.aml.request_log.most_recent().response.message, self.success)
+
+        self.get_reply('optional foo test 1', self.success)
+        self.assertEqual(str(self.aml.request_log.most_recent().message), 'optional foo test 1')
+        self.assertEqual(self.aml.request_log.most_recent().response.message, self.success)
+
+        self.get_reply('required test', None)
+        self.assertEqual(str(self.aml.request_log.most_recent().message), 'required test')
+        self.assertEqual(self.aml.request_log.most_recent().response, None)
+
+        self.get_reply('required foo test', 'foo')
+        self.assertEqual(str(self.aml.request_log.most_recent().message), 'required foo test')
+        self.assertEqual(self.aml.request_log.most_recent().response.message, 'foo')
+
+        self.assertEqual(len(self.aml.request_log.entries), 4)
+
+    def test_response_logger(self):
+        self.get_reply('atomic test', self.success)
+        self.assertEqual(self.aml.response_log.most_recent().message, self.success)
+        self.assertEqual(str(self.aml.response_log.most_recent().request.message), 'atomic test')
+
+        self.get_reply('optional foo test 1', self.success)
+        self.assertEqual(self.aml.response_log.most_recent().message, self.success)
+        self.assertEqual(str(self.aml.response_log.most_recent().request.message), 'optional foo test 1')
+
+        # No successful response for this message, so the most recent entry should still be the last one
+        self.get_reply('required test', None)
+        self.assertEqual(self.aml.response_log.most_recent().message, self.success)
+        self.assertEqual(str(self.aml.response_log.most_recent().request.message), 'optional foo test 1')
+
+        self.get_reply('required foo test', 'foo')
+        self.assertEqual(self.aml.response_log.most_recent().message, 'foo')
+        self.assertEqual(str(self.aml.response_log.most_recent().request.message), 'required foo test')
+
+        self.assertEqual(len(self.aml.response_log.entries), 3)

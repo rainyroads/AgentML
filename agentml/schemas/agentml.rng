@@ -100,6 +100,7 @@
                         <ref name="trigger.response.condition"/>
                         <ref name="trigger.response"/>
                         <ref name="trigger.response.shorthand"/>
+                        <ref name="trigger.response.redirect.shorthand"/>
                     </choice>
                 </oneOrMore>
 
@@ -178,14 +179,17 @@
             </optional>
 
             <interleave>
-                <element name="template">
-                    <oneOrMore>
-                        <choice>
-                            <text/>
-                            <ref name="anyElement"/>
-                        </choice>
-                    </oneOrMore>
-                </element>
+                <choice>
+                    <ref name="trigger.response.redirect"/>
+                    <element name="template">
+                        <oneOrMore>
+                            <choice>
+                                <text/>
+                                <ref name="anyElement"/>
+                            </choice>
+                        </oneOrMore>
+                    </element>
+                </choice>
 
                 <optional>
                     <ref name="trigger.topic"/>
@@ -210,8 +214,42 @@
         </element>
     </define>
 
+    <define name="trigger.response.redirect">
+        <element name="redirect">
+            <oneOrMore>
+                <choice>
+                    <text/>
+                    <ref name="anyElement"/>
+                </choice>
+            </oneOrMore>
+        </element>
+    </define>
+
     <define name="trigger.response.shorthand">
         <element name="template" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="priority">
+                    <data type="integer"/>
+                </attribute>
+            </optional>
+
+            <optional>
+                <attribute name="weight">
+                    <data type="integer"/>
+                </attribute>
+            </optional>
+
+            <oneOrMore>
+                <choice>
+                    <text/>
+                    <ref name="anyElement"/>
+                </choice>
+            </oneOrMore>
+        </element>
+    </define>
+
+    <define name="trigger.response.redirect.shorthand">
+        <element name="redirect" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
             <optional>
                 <attribute name="priority">
                     <data type="integer"/>

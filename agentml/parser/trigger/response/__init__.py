@@ -25,31 +25,35 @@ class Response(Element, Restrictable):
 
         :param kwargs: Default attributes
         """
-        # Containers and default attributes
         self.priority = int_attribute(element, 'priority')
-        self.weight = int_attribute(element, 'weight', 1) or int_element(element, 'weight', 1)
+        self.weight = int_attribute(element, 'weight', 1)
         self.trigger = trigger
+
+        # If the redirect attribute is True, the response will contain a template used to request a different response,
+        # otherwise it contains a template for the response message
         self._response = ()
+        self.redirect = False
+
+        # What the topic should be *changed* to after this response is sent. False = No change
         self.topic = False
+
+        # Variable to set. Format is (type, name, value)
         self.var = (None, None, None)
+
+        # Wildcard containers
         self.stars = {
             'normalized': (),
             'case_preserved': (),
             'raw': ()
         }
 
-        # Parent __init__'s must be initialized BEFORE default attributes are assigned, but AFTER the above containers
         Restrictable.__init__(self)
         Element.__init__(self, trigger.agentml, element, file_path)
 
-        # Default attributes
-        self.emotion = kwargs['emotion'] if 'emotion' in kwargs else None
+        # Blocking attributes
         self.ulimit_blocking = False
         self.glimit_blocking = False
         self.chance_blocking = False
-
-        with open(os.path.join(self.trigger.agentml.script_path, 'schemas', 'tags', 'star.rng')) as file:
-            self.schema = schema(file.read())
 
         self._log = logging.getLogger('agentml.parser.trigger.response')
 
@@ -68,7 +72,17 @@ class Response(Element, Restrictable):
             'case_preserved': (),
             'raw': ()
         }
+        user = self.trigger.user
         self.trigger.user = None
+
+        if self.redirect:
+            self._log.info('Redirecting response to: {msg}'.format(msg=response))
+            groups = self.agentml.request_log.most_recent().groups
+            response = self.agentml.get_reply(user.id, response, groups)
+            if not response:
+                self._log.info('Failed to retrieve a valid response when redirecting')
+                return ''
+
         return response
 
     def apply_reactions(self, user):
@@ -120,6 +134,13 @@ class Response(Element, Restrictable):
         # Is this a shorthand template?
         if self._element.tag == 'template':
             return parse_template(self._element)
+
+        # Is this a redirect?
+        redirect = self._element if self._element.tag == 'redirect' else self._element.find('redirect')
+        if redirect is not None:
+            self._log.info('Parsing response as a redirect')
+            self.redirect = True
+            return parse_template(redirect)
 
         # Find the template and parse any other defined tags
         template = self._element.find('template')

@@ -453,7 +453,7 @@
         </response>
     </trigger>
 
-    <trigger priority="23">
+    <trigger>
         <pattern>response priority test</pattern>
 
         <response priority="10">
@@ -556,5 +556,93 @@
         <response>
             <template>Success!</template>
         </response>
+    </trigger>
+
+    <!-- Redirect tests -->
+    <trigger>
+        <pattern>redirect destination</pattern>
+        <template>Success!</template>
+    </trigger>
+
+    <trigger>
+        <pattern>wildcard redirect destination (*) and (*) plus (#)</pattern>
+        <template><star/> and <star index="2"/> plus <star index="3"/></template>
+    </trigger>
+
+    <trigger>
+        <pattern>redirect test</pattern>
+
+        <response>
+            <redirect>redirect destination</redirect>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>shorthand redirect test</pattern>
+        <redirect>redirect destination</redirect>
+    </trigger>
+
+    <trigger>
+        <pattern>bad redirect test</pattern>
+        <redirect>dead end redirect</redirect>
+    </trigger>
+
+    <trigger>
+        <pattern>wildcard redirect test (*) and (*) without * plus (#)</pattern>
+        <redirect>wildcard redirect destination <star/> and <star index="2"/> plus <star index="3"/></redirect>
+    </trigger>
+
+    <topic name="test">
+        <trigger>
+            <pattern>test topic redirect destination</pattern>
+            <template>Success!</template>
+        </trigger>
+
+        <trigger>
+            <pattern>test topic redirect test</pattern>
+            <redirect>test topic redirect destination</redirect>
+        </trigger>
+
+        <trigger>
+            <pattern>test topic redirect outside of topic test</pattern>
+            <redirect>redirect destination</redirect>
+        </trigger>
+
+        <trigger>
+            <pattern>test topic wildcard redirect destination (*) and (*) plus (#)</pattern>
+            <template><star/> and <star index="2"/> plus <star index="3"/></template>
+        </trigger>
+
+        <trigger>
+            <pattern>test topic wildcard redirect test (*) and (*) without * plus (#)</pattern>
+            <redirect>test topic wildcard redirect destination <star/> and <star index="2"/> plus <star index="3"/></redirect>
+        </trigger>
+
+        <group name="group1">
+            <trigger>
+                <pattern>test grouped topic redirect destination</pattern>
+                <template>Success!</template>
+            </trigger>
+
+            <trigger>
+                <pattern>test grouped topic redirect test</pattern>
+                <redirect>test grouped topic redirect destination</redirect>
+            </trigger>
+        </group>
+    </topic>
+
+    <trigger>
+        <pattern>template redirect test</pattern>
+        <template>Status: <redirect>redirect destination</redirect>!</template>
+    </trigger>
+
+    <trigger>
+        <pattern>template default redirect test</pattern>
+        <template>Status: <redirect default="Failure!">dead end redirect</redirect>!</template>
+    </trigger>
+
+    <trigger>
+        <pattern>template bad redirect test</pattern>
+        <template>Status: <redirect>dead end redirect</redirect>!</template>
     </trigger>
 </agentml>
