@@ -1,8 +1,72 @@
 # AgentML
-Software **A**gent **M**arkup **L**anguage
-
-## Introduction
 AgentML is in simple terms an XML dialect for creating natural language software agents. It is a project inspired by AIML and RiveScript.
 
-The documentation for this project is still under construction, but for a brief overview of what SAML is and how it works, you can refer to the current working draft:
-https://github.com/FujiMakoto/AgentML/wiki/AgentML-0.1-Working-Draft
+To provide a quick example of how it works, here is a demonstration AML file that allows you to introduce yourself to an "agent"
+```xml
+<agentml version="0.2" xmlns="">
+    <!-- Hello! -->
+    <trigger>
+        <pattern>(hello|hi|hiya|good evening|good morning)</pattern>
+
+        <!-- Do we know this person already? -->
+        <condition type="user_var">
+            <if name="first_name">
+                <response priority="2">
+                    <limit unit="minutes">3</limit>
+
+                    <template>
+                        <random>
+                            <item>Hi <var name="first_name"/>!</item>
+                            <item>Hello, <var name="first_name"/>!</item>
+                            <item>Hello <var name="first_name"/>.</item>
+                            <item><star format="capitalize"/> <var name="first_name"/>.</item>
+                        </random>
+                    </template>
+                </response>
+
+                <!-- We just said hello to them! -->
+                <template priority="1">Hello yet again, <var name="first_name"/>.</template>
+            </if>
+        </condition>
+
+        <!-- If not, let's ask them their name! -->
+        <response>
+            <topic>whats your name</topic>
+
+            <template>
+                <random>
+                    <item>Hi! What is your name?</item>
+                    <item>Hello! What's your name?</item>
+                    <item>Hiya! Who are you?</item>
+                    <item><star format="capitalize"/>! Who is this?</item>
+                </random>
+            </template>
+        </response>
+    </trigger>
+
+    <!-- Response to us asking them their name -->
+    <topic name="whats your name">
+        <!-- First name only -->
+        <trigger>
+            <pattern>[my|the] [name is] (_)</pattern>
+
+            <response>
+                <var name="first_name"><star format="title"/></var>
+                <topic/>
+
+                <template>Hello, <star format="title"/>, it's nice to meet you!</template>
+            </response>
+        </trigger>
+
+        <!-- First and last name (optional) -->
+        <trigger priority="1">
+            <pattern>[my|the] [name is] (_) (_)</pattern>
+
+            <response>
+                <var name="last_name"><star index="2" format="title"/></var>
+                <redirect>my name is <star/></redirect>
+            </response>
+        </trigger>
+    </topic>
+</agentml>
+```
