@@ -120,36 +120,45 @@ class Response(Element, Restrictable):
         """
         Loop through all child elements and execute any available parse methods for them
         """
-        def parse_template(element):
-            # If the response element has no tags, just store the raw text as the only response
-            if not len(element):
-                self._response = (newlines_to_spaces(element.text),)
-                self._log.info('Assigning text only response')
-                return
-
-            # Otherwise, parse the tags now
-            self._response = tuple(self.agentml.parse_tags(element, self.trigger))
-
         # Is this a shorthand template?
         if self._element.tag == 'template':
-            return parse_template(self._element)
+            return self._parse_template(self._element)
 
-        # Is this a redirect?
-        redirect = self._element if self._element.tag == 'redirect' else self._element.find('redirect')
-        if redirect is not None:
-            self._log.info('Parsing response as a redirect')
-            self.redirect = True
-            return parse_template(redirect)
+        # Is this a shorthand redirect?
+        if self._element.tag == 'redirect':
+            return self._parse_redirect(self._element)
 
-        # Find the template and parse any other defined tags
-        template = self._element.find('template')
-        parse_template(template)
         for child in self._element:
             method_name = '_parse_' + child.tag
 
             if hasattr(self, method_name):
                 parse = getattr(self, method_name)
                 parse(child)
+
+    def _parse_template(self, element):
+        """
+        Parse the response template
+        :param element: The XML Element object
+        :type  element: etree._Element
+        """
+        # If the response element has no tags, just store the raw text as the only response
+        if not len(element):
+            self._response = (newlines_to_spaces(element.text),)
+            self._log.info('Assigning text only response')
+            return
+
+        # Otherwise, parse the tags now
+        self._response = tuple(self.agentml.parse_tags(element, self.trigger))
+
+    def _parse_redirect(self, element):
+        """
+        Parse a redirect statement
+        :param element: The XML Element object
+        :type  element: etree._Element
+        """
+        self._log.info('Parsing response as a redirect')
+        self.redirect = True
+        return self._parse_template(element)
 
     def _parse_priority(self, element):
         """
