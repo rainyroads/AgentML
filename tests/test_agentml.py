@@ -88,6 +88,17 @@ class BasicResponseTests(AgentMLTestCase):
     def test_empty_discarded_wildcard(self):
         self.get_reply('discarded wildcard test foo', None)
 
+    def test_demonstration_code(self):
+        self.get_reply('Hello.', ['Hi! What is your name?', "Hello! What's your name?", 'Hiya! Who are you?',
+                                  'Hello! Who is this?'])
+
+        self.get_reply('My name is Foo Bar.', "Hello, Foo, it's nice to meet you!")
+        self.user_var('first_name', 'Foo')
+        self.user_var('last_name', 'Bar')
+
+        self.get_reply('Hiya!', ['Hi Foo!', 'Hello, Foo!', 'Hello Foo.', 'Hiya Foo.'])
+        self.get_reply('Good evening.', 'Hello yet again, Foo.')
+
 
 class StarFormattingTests(AgentMLTestCase):
     """

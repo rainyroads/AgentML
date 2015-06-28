@@ -5,6 +5,7 @@ from agentml import AgentML
 from agentml.errors import VarNotDefinedError
 from .conditions import FooBarType
 
+
 class AgentMLTestCase(unittest.TestCase):
     """
     Base class for all AgentML test cases
@@ -30,13 +31,17 @@ class AgentMLTestCase(unittest.TestCase):
         :type  message: str
 
         :param expected: The expected response
-        :type  expected: str or None
+        :type  expected: str, None or List
 
         :param groups: The trigger groups to search, defaults to only matching non-grouped triggers
         :type  groups: set or AnyGroup
         """
         reply = self.aml.get_reply(self.username, message, groups)
-        self.assertEqual(reply, expected)
+
+        if isinstance(expected, list):
+            self.assertIn(reply, expected)
+        else:
+            self.assertEqual(reply, expected)
 
     def user_var(self, var, expected):
         """
@@ -100,3 +105,19 @@ class AgentMLTestCase(unittest.TestCase):
                 break
 
         self.assertEqual(responses, expected)
+
+
+class AgentMLBasicTestCase(unittest.TestCase):
+    """
+    Simple test case utilizing the AgentML demonstration code
+    """
+    def setUp(self, **kwargs):
+        """
+        Set up the Unit Test
+        """
+        self.aml = AgentML(log_level=logging.WARN)
+        self.aml.add_condition('foo_bar', FooBarType)
+        self.aml.load_directory(os.path.join(os.path.dirname(self.aml.script_path), 'tests', 'lang'))
+        self.username = "unittest"
+        self.success = 'Success!'
+        self.failure = 'Failure!'

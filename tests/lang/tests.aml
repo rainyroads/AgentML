@@ -1,59 +1,6 @@
 <!DOCTYPE agentml SYSTEM "agentml.rng">
 
 <agentml version="0.1" xmlns="">
-    <!-- Hello, Yuki! -->
-    <trigger>
-        <pattern>(hello|hi|hiya|good evening|good morning)</pattern>
-
-        <condition type="user_var">
-            <if name="name">
-                <response priority="1">
-                    <template>
-                        <random>
-                            <item>Hi <var name="name"/>!</item>
-                            <item>Hello again, <var name="name"/>!</item>
-                            <item>Hello <var name="name"/>.</item>
-                        </random>
-                    </template>
-                </response>
-            </if>
-        </condition>
-
-        <response>
-            <topic>whats_your_name</topic>
-            <limit>15</limit>
-
-            <template>
-                <random>
-                    <item>Hi! What is your name?</item>
-                    <item>Hello! What's your name?</item>
-                    <item>Hiya! Who are you?</item>
-                    <item><star format="title"/>! Who is this?</item>
-                </random>
-            </template>
-        </response>
-    </trigger>
-
-    <topic name="whats_your_name">
-        <trigger>
-            <pattern>(_)</pattern>
-
-            <response>
-                <topic/>
-
-                <template>
-                    <random>
-                        <item weight="3">Hello <star format="title"/>, it's nice to meet you!</item>
-                        <item>Nice to meet you, <star format="title"/>!</item>
-                        <item>Hi <star format="title"/>, my name is Yuki!</item>
-                    </random>
-                </template>
-
-                <var name="name"><star format="title"/></var>
-            </response>
-        </trigger>
-    </topic>
-
     <!-- Basic response tests -->
     <trigger>
         <pattern>atomic test</pattern>
