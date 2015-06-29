@@ -1,0 +1,20 @@
+<!DOCTYPE agentml SYSTEM "agentml.rng">
+
+<agentml version="0.2" xmlns="">
+    <!-- Who created you? -->
+    <trigger>
+        <pattern>who [was it that] (created|made) you</pattern>
+        <template>I was created by Makoto.</template>
+    </trigger>
+
+    <trigger>
+        <pattern>who were you (created|made) by</pattern>
+        <redirect>who created you</redirect>
+    </trigger>
+
+    <!-- Who is Makoto? -->
+    <trigger>
+        <pattern>who is makoto</pattern>
+        <template>Makoto is my creator.</template>
+    </trigger>
+</agentml>

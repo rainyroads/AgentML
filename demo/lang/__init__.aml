@@ -1,0 +1,90 @@
+<!DOCTYPE agentml SYSTEM "agentml.rng">
+
+<agentml version="0.1">
+    <init>
+        <substitutions>
+            <sub word="atom">atomic</sub>
+            <sub word="I'm">I am</sub>
+            <sub word="I'd">I would</sub>
+            <sub word="I've">I have</sub>
+            <sub word="I'll">I will</sub>
+            <sub word="don't">do not</sub>
+            <sub word="isn't">is not</sub>
+            <sub word="you'd">you would</sub>
+            <sub word="you're">you are</sub>
+            <sub word="you've">you have</sub>
+            <sub word="you'll">you will</sub>
+            <sub word="he'd">he would</sub>
+            <sub word="he's">he is</sub>
+            <sub word="he'll">he will</sub>
+            <sub word="she'd">she would</sub>
+            <sub word="she's">she is</sub>
+            <sub word="she'll">she will</sub>
+            <sub word="they'd">they would</sub>
+            <sub word="they're">they are</sub>
+            <sub word="they've">they have</sub>
+            <sub word="they'll">they will</sub>
+            <sub word="we'd">we would</sub>
+            <!-- TODO: This displays room for improvement with substitutions. Both "were" and "we're" end up subbed
+            <sub word="we're">we are</sub> -->
+            <sub word="we've">we have</sub>
+            <sub word="we'll">we will</sub>
+            <sub word="whats">what is</sub>
+            <sub word="what's">what is</sub>
+            <sub word="what're">what are</sub>
+            <sub word="what've">what have</sub>
+            <sub word="what'll">what will</sub>
+            <sub word="can't">can not</sub>
+            <sub word="whos">who is</sub>
+            <sub word="who's">who is</sub>
+            <sub word="who'd">who would</sub>
+            <sub word="who'll">who will</sub>
+            <sub word="don't">do not</sub>
+            <sub word="didn't">did not</sub>
+            <sub word="it's">it is</sub>
+            <sub word="could've">could have</sub>
+            <sub word="couldn't">could not</sub>
+            <sub word="should've">should have</sub>
+            <sub word="shouldn't">should not</sub>
+            <sub word="would've">would have</sub>
+            <sub word="wouldn't">would not</sub>
+            <sub word="when's">when is</sub>
+            <sub word="when're">when are</sub>
+            <sub word="when'd">when did</sub>
+            <sub word="y">why</sub>
+            <sub word="u">you</sub>
+            <sub word="ur">your</sub>
+            <sub word="r">are</sub>
+            <sub word="n">and</sub>
+            <sub word="im">I am</sub>
+            <sub word="wat">what</sub>
+            <sub word="wats">what is</sub>
+            <sub word="ohh">oh</sub>
+            <sub word="becuse">because</sub>
+            <sub word="becasue">because</sub>
+            <sub word="becuase">because</sub>
+            <sub word="practise">practice</sub>
+            <sub word="fav">favorite</sub>
+            <sub word="fave">favorite</sub>
+            <sub word="yesi">yes I</sub>
+            <sub word="yetit">yet it</sub>
+            <sub word="iam">I am</sub>
+            <sub word="welli">well I</sub>
+            <sub word="wellit">well it</sub>
+            <sub word="amfine">am fine</sub>
+            <sub word="aman">am an</sub>
+            <sub word="amon">am on</sub>
+            <sub word="amnot">am not</sub>
+            <sub word="realy">really</sub>
+            <sub word="iamusing">i am using</sub>
+            <sub word="amleaving">am leaving</sub>
+            <sub word="yuo">you</sub>
+            <sub word="youre">you are</sub>
+            <sub word="didnt">did not</sub>
+            <sub word="ain't">is not</sub>
+            <sub word="aint">is not</sub>
+            <sub word="wanna">want to</sub>
+            <sub word="you're">you are</sub>
+        </substitutions>
+    </init>
+</agentml>
