@@ -3,6 +3,7 @@ import re
 import logging
 from time import time
 from lxml import etree
+from typewriter import typewrite
 from agentml.common import schema, normalize, attribute, int_attribute, newlines_to_spaces
 from agentml.parser.init import Init
 from agentml.parser.trigger import Trigger
@@ -533,6 +534,22 @@ class AgentML:
             append_tail(child)
 
         return response
+
+    def interpreter(self):
+        """
+        Launch an AML interpreter session for testing
+        """
+        while True:
+            message = input('[#] ')
+            if message.lower().strip() == 'exit':
+                break
+
+            reply = self.get_reply('#interpreter#', message)
+            if not reply:
+                print('No reply received.', end='\n\n')
+                continue
+
+            typewrite(reply, end='\n\n')
 
 
 class Message:
