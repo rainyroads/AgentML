@@ -53,7 +53,7 @@ setup(
     keywords=['bot', 'chatbot', 'chatterbot', 'ai', 'aiml', 'rivescript'],
 
     packages=find_packages(exclude=['tests', 'demo']),
-    install_requires=['lxml>=3.4.4,<3.5', 'typewriter>=1.0,<1.1'],
+    install_requires=['lxml>=3.4.4,<3.5'],
 
     package_data={
         'agentml': ['intelligence/*.aml', 'schemas/*.rng', 'schemas/*.xsd', 'schemas/tags/*.rng'],

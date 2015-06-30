@@ -1,2 +1,1 @@
 lxml~=3.4.4
-typewriter~=1.0
