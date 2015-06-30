@@ -9,7 +9,7 @@ from setuptools import setup, find_packages
 # To use a consistent encoding
 # from codecs import open
 from os import path
-from agentml import __version__
+# from agentml import __version__
 
 here = path.abspath(path.dirname(__file__))
 
@@ -23,7 +23,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version=__version__,
+    version='0.2a1',
 
     description='An XML dialect for creating natural language software agents',
     # long_description=long_description,
@@ -53,7 +53,7 @@ setup(
     keywords=['bot', 'chatbot', 'chatterbot', 'ai', 'aiml', 'rivescript'],
 
     packages=find_packages(exclude=['tests', 'demo']),
-    install_requires=['lxml>=3.4.4,<3.5', 'typewriter>=1.0,<1.1'],
+    install_requires=['lxml>=3.4.4,<3.5'],
 
     package_data={
         'agentml': ['intelligence/*.aml', 'schemas/*.rng', 'schemas/*.xsd', 'schemas/tags/*.rng'],
