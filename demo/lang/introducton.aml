@@ -1,0 +1,146 @@
+<!DOCTYPE agentml SYSTEM "https://github.com/FujiMakoto/AgentML">
+
+<agentml version="0.2">
+    <!-- Hello! -->
+    <trigger>
+        <pattern>(hello|hi|hiya|good evening|good morning)</pattern>
+
+        <!-- Do we know this person already? -->
+        <condition type="user_var">
+            <if name="first_name">
+                <response priority="2">
+                    <limit unit="minutes">3</limit>
+
+                    <template>
+                        <random>
+                            <item>Hi <var name="first_name"/>!</item>
+                            <item>Hello, <var name="first_name"/>!</item>
+                            <item>Hello <var name="first_name"/>.</item>
+                            <item><star format="capitalize"/> <var name="first_name"/>.</item>
+                        </random>
+                    </template>
+                </response>
+
+                <!-- We just said hello to them! -->
+                <template priority="1">Hello yet again, <var name="first_name"/>.</template>
+            </if>
+        </condition>
+
+        <!-- If not, let's ask them their name! -->
+        <response>
+            <topic>whats your name</topic>
+
+            <template>
+                <random>
+                    <item>Hi! What is your name?</item>
+                    <item>Hello! What's your name?</item>
+                    <item>Hiya! Who are you?</item>
+                    <item><star format="capitalize"/>! Who is this?</item>
+                </random>
+            </template>
+        </response>
+    </trigger>
+
+    <!-- Response to us asking them their name -->
+    <topic name="whats your name">
+        <!-- First name only -->
+        <trigger>
+            <pattern>[my|the] [name is] (_)</pattern>
+
+            <response>
+                <var name="first_name"><star format="title"/></var>
+                <topic/>
+
+                <template>Hello, <star format="title"/>, it's nice to meet you!</template>
+            </response>
+        </trigger>
+
+        <!-- First and last name (optional) -->
+        <trigger priority="1">
+            <pattern>[my|the] [name is] (_) (_)</pattern>
+
+            <response>
+                <var name="last_name"><star index="2" format="title"/></var>
+                <redirect>my name is <star/></redirect>
+            </response>
+        </trigger>
+    </topic>
+
+    <!-- My name is.. -->
+    <trigger>
+        <pattern>(my|the) name is (_)</pattern>
+
+        <response>
+            <var name="first_name"><star index="2" format="title"/></var>
+            <template>Okay, I'll call you <star index="2" format="title"/> from now on.</template>
+        </response>
+    </trigger>
+
+    <trigger priority="1">
+        <pattern>(my|the) name is (_) (_)</pattern>
+
+        <response>
+            <var name="last_name"><star index="3" format="title"/></var>
+            <redirect>my name is <star index="2"/></redirect>
+        </response>
+    </trigger>
+
+    <!-- Who am I? -->
+    <trigger>
+        <pattern>(who am i|what is my name|do you know who i am|do you know what my name is|do you know my name)</pattern>
+
+        <condition>
+            <if name="first_name">
+                <template>You told me your name was <var name="first_name"/>.</template>
+            </if>
+
+            <else>
+                <template>I don't know what your name is.</template>
+            </else>
+        </condition>
+    </trigger>
+
+    <!-- Who are you? -->
+    <trigger>
+        <pattern>(who are you|what is your name|what are you called|do you have a name)</pattern>
+        <template>
+            <random>
+                <item>My only purpose is to provide a demonstration of AgentML's functionality, I have no name.</item>
+                <item>I do not have a name.</item>
+            </random>
+        </template>
+    </trigger>
+
+    <!-- How are you? -->
+    <trigger>
+        <pattern>how are you [doing|feeling] [today|right now]</pattern>
+        <response>
+            <topic>how are you</topic>
+
+            <template>
+                <random>
+                    <item>I'm okay. How are you?</item>
+                    <item>I'm doing okay. How are you?</item>
+                    <item>I'm alright. How about you?</item>
+                </random>
+            </template>
+        </response>
+    </trigger>
+
+    <topic name="how are you">
+        <trigger>
+            <pattern>[i am] (okay|fine|not bad|alright|decent|good)</pattern>
+            <template>That's good to hear.</template>
+        </trigger>
+
+        <trigger>
+            <pattern>[i am] (great|awesome|wonderful)</pattern>
+            <template>Glad to hear you're in such a good mood!</template>
+        </trigger>
+
+        <trigger>
+            <pattern>[i am] (bad|horrible|terrible|sad|miserable|depressed|angry|annoyed|sick)</pattern>
+            <template>I'm sorry to hear that. I hope you feel better soon.</template>
+        </trigger>
+    </topic>
+</agentml>

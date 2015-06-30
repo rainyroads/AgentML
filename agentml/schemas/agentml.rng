@@ -1,0 +1,607 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+    <!-- Software Agent Markup Language, v0.2a1 -->
+    <start>
+        <element name="agentml" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <attribute name="version">
+                <data type="float"/>
+            </attribute>
+
+            <oneOrMore>
+                <choice>
+                    <ref name="triggerGroup"/>
+                    <ref name="emotionsGroup"/>
+                    <ref name="identityGroup"/>
+                    <ref name="initGroup"/>
+                </choice>
+            </oneOrMore>
+        </element>
+    </start>
+
+    <define name="anyElement">
+        <zeroOrMore>
+            <element>
+                <anyName/>
+                <zeroOrMore>
+                    <choice>
+                        <attribute>
+                            <anyName/>
+                        </attribute>
+                        <text/>
+                        <ref name="anyElement"/>
+                    </choice>
+                </zeroOrMore>
+            </element>
+        </zeroOrMore>
+    </define>
+
+    <!-- [Group] Trigger -->
+    <!--
+        A trigger group can be initialized by either a <trigger> element directly,
+        or grouped into <topic> and/or <emotion> elements for convenience.
+
+        Triggers grouped into <topic> / <emotion> tags will automatically have the
+        specified topic / emotion applied to all the contained triggers.
+    -->
+    <define name="triggerGroup">
+        <oneOrMore>
+            <choice>
+                <ref name="trigger"/>
+
+                <element name="group">
+                    <attribute name="name"/>
+                    <ref name="triggerGroup"/>
+                </element>
+
+                <element name="emotion">
+                    <attribute name="name"/>
+                    <ref name="triggerGroup"/>
+                </element>
+
+                <element name="topic">
+                    <attribute name="name"/>
+                    <ref name="triggerGroup"/>
+                </element>
+            </choice>
+        </oneOrMore>
+    </define>
+
+    <!-- [Element] Trigger -->
+    <define name="trigger">
+        <element name="trigger" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="priority">
+                    <data type="integer"/>
+                </attribute>
+            </optional>
+
+            <interleave>
+                <optional>
+                    <zeroOrMore>
+                        <ref name="trigger.group"/>
+                    </zeroOrMore>
+                </optional>
+
+                <optional>
+                    <ref name="trigger.topic"/>
+                </optional>
+
+                <optional>
+                    <ref name="trigger.emotion"/>
+                </optional>
+
+                <optional>
+                    <ref name="trigger.blocking"/>
+                </optional>
+
+                <ref name="trigger.pattern"/>
+
+                <oneOrMore>
+                    <choice>
+                        <ref name="trigger.response.condition"/>
+                        <ref name="trigger.response"/>
+                        <ref name="trigger.response.shorthand"/>
+                        <ref name="trigger.response.redirect.shorthand"/>
+                    </choice>
+                </oneOrMore>
+
+                <optional>
+                    <ref name="trigger.limit"/>
+                </optional>
+
+                <optional>
+                    <ref name="trigger.chance"/>
+                </optional>
+            </interleave>
+        </element>
+    </define>
+
+    <!-- [Attributes] Trigger -->
+    <define name="trigger.group">
+        <element name="group">
+            <text/>
+        </element>
+    </define>
+
+    <define name="trigger.topic">
+        <element name="topic">
+            <text/>
+        </element>
+    </define>
+
+    <define name="trigger.emotion">
+        <element name="emotion">
+            <text/>
+        </element>
+    </define>
+
+    <define name="trigger.blocking">
+        <element name="blocking" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <data type="boolean"/>
+        </element>
+    </define>
+
+    <define name="trigger.pattern">
+        <element name="pattern" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="regex">
+                    <data type="boolean"/>
+                </attribute>
+            </optional>
+
+            <optional>
+                <attribute name="normalize">
+                    <data type="boolean"/>
+                </attribute>
+            </optional>
+
+            <optional>
+                <attribute name="substitute">
+                    <data type="boolean"/>
+                </attribute>
+            </optional>
+
+            <text/>
+        </element>
+    </define>
+
+    <define name="trigger.response">
+        <element name="response" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="priority">
+                    <data type="integer"/>
+                </attribute>
+            </optional>
+
+            <optional>
+                <attribute name="weight">
+                    <data type="integer"/>
+                </attribute>
+            </optional>
+
+            <interleave>
+                <choice>
+                    <ref name="trigger.response.redirect"/>
+                    <element name="template">
+                        <oneOrMore>
+                            <choice>
+                                <text/>
+                                <ref name="anyElement"/>
+                            </choice>
+                        </oneOrMore>
+                    </element>
+                </choice>
+
+                <optional>
+                    <ref name="trigger.topic"/>
+                </optional>
+
+                <optional>
+                    <ref name="trigger.emotion"/>
+                </optional>
+
+                <optional>
+                    <ref name="trigger.limit"/>
+                </optional>
+
+                <optional>
+                    <ref name="trigger.chance"/>
+                </optional>
+
+                <zeroOrMore>
+                    <ref name="trigger.var"/>
+                </zeroOrMore>
+            </interleave>
+        </element>
+    </define>
+
+    <define name="trigger.response.redirect">
+        <element name="redirect">
+            <oneOrMore>
+                <choice>
+                    <text/>
+                    <ref name="anyElement"/>
+                </choice>
+            </oneOrMore>
+        </element>
+    </define>
+
+    <define name="trigger.response.shorthand">
+        <element name="template" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="priority">
+                    <data type="integer"/>
+                </attribute>
+            </optional>
+
+            <optional>
+                <attribute name="weight">
+                    <data type="integer"/>
+                </attribute>
+            </optional>
+
+            <oneOrMore>
+                <choice>
+                    <text/>
+                    <ref name="anyElement"/>
+                </choice>
+            </oneOrMore>
+        </element>
+    </define>
+
+    <define name="trigger.response.redirect.shorthand">
+        <element name="redirect" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="priority">
+                    <data type="integer"/>
+                </attribute>
+            </optional>
+
+            <optional>
+                <attribute name="weight">
+                    <data type="integer"/>
+                </attribute>
+            </optional>
+
+            <oneOrMore>
+                <choice>
+                    <text/>
+                    <ref name="anyElement"/>
+                </choice>
+            </oneOrMore>
+        </element>
+    </define>
+
+    <define name="trigger.response.condition">
+        <element name="condition" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="type"/>
+            </optional>
+
+            <ref name="trigger.response.condition.if"/>
+
+            <zeroOrMore>
+                <ref name="trigger.response.condition.elif"/>
+            </zeroOrMore>
+
+            <optional>
+                <ref name="trigger.response.condition.else"/>
+            </optional>
+        </element>
+    </define>
+
+    <define name="trigger.response.condition.if">
+        <element name="if">
+            <optional>
+                <attribute name="name"/>
+            </optional>
+
+            <optional>
+                <attribute name="type"/>
+            </optional>
+
+            <optional>
+                <ref name="trigger.response.condition.operators"/>
+            </optional>
+
+            <oneOrMore>
+                <choice>
+                    <ref name="trigger.response"/>
+                    <ref name="trigger.response.shorthand"/>
+                </choice>
+            </oneOrMore>
+        </element>
+    </define>
+
+    <define name="trigger.response.condition.elif">
+        <element name="elif">
+            <optional>
+                <attribute name="name"/>
+            </optional>
+
+            <optional>
+                <attribute name="type"/>
+            </optional>
+
+            <optional>
+                <ref name="trigger.response.condition.operators"/>
+            </optional>
+
+            <oneOrMore>
+                <choice>
+                    <ref name="trigger.response"/>
+                    <ref name="trigger.response.shorthand"/>
+                </choice>
+            </oneOrMore>
+        </element>
+    </define>
+
+    <define name="trigger.response.condition.else">
+        <element name="else">
+            <oneOrMore>
+                <choice>
+                    <ref name="trigger.response"/>
+                    <ref name="trigger.response.shorthand"/>
+                </choice>
+            </oneOrMore>
+        </element>
+    </define>
+
+    <define name="trigger.response.condition.operators">
+        <choice datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <attribute name="is"/>
+            <attribute name="is_not"/>
+            <attribute name="gt">
+                <choice>
+                    <data type="integer"/>
+                    <data type="float"/>
+                </choice>
+            </attribute>
+            <attribute name="gte">
+                <choice>
+                    <data type="integer"/>
+                    <data type="float"/>
+                </choice>
+            </attribute>
+            <attribute name="lt">
+                <choice>
+                    <data type="integer"/>
+                    <data type="float"/>
+                </choice>
+            </attribute>
+            <attribute name="lte">
+                <choice>
+                    <data type="integer"/>
+                    <data type="float"/>
+                </choice>
+            </attribute>
+        </choice>
+    </define>
+
+    <define name="trigger.limit">
+        <element name="limit" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="unit">
+                    <choice>
+                        <value>seconds</value>
+                        <value>minutes</value>
+                        <value>hours</value>
+                        <value>days</value>
+                        <value>weeks</value>
+                        <value>months</value>
+                        <value>years</value>
+                    </choice>
+                </attribute>
+            </optional>
+
+            <optional>
+                <attribute name="type">
+                    <choice>
+                        <value>global</value>
+                        <value>user</value>
+                    </choice>
+                </attribute>
+            </optional>
+
+            <optional>
+                <attribute name="blocking">
+                    <data type="boolean"/>
+                </attribute>
+            </optional>
+
+            <choice>
+                <data type="integer"/>
+                <data type="float"/>
+            </choice>
+        </element>
+    </define>
+
+    <define name="trigger.chance">
+        <element name="chance" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="blocking">
+                    <data type="boolean"/>
+                </attribute>
+            </optional>
+
+            <choice>
+                <data type="integer"/>
+                <data type="float"/>
+            </choice>
+        </element>
+    </define>
+
+    <define name="trigger.var">
+        <element name="var">
+            <optional>
+                <attribute name="type">
+                    <choice>
+                        <value>user</value>
+                        <value>global</value>
+                    </choice>
+                </attribute>
+            </optional>
+
+            <choice>
+                <ref name="trigger.var.attributeFormat"/>
+                <ref name="trigger.var.elementFormat"/>
+            </choice>
+        </element>
+    </define>
+
+    <define name="trigger.var.attributeFormat">
+        <attribute name="name"/>
+        <choice>
+            <text/>
+            <ref name="anyElement"/>
+        </choice>
+    </define>
+
+    <define name="trigger.var.elementFormat">
+        <element name="name">
+            <choice>
+                <text/>
+                <ref name="anyElement"/>
+            </choice>
+        </element>
+
+        <element name="value">
+            <choice>
+                <text/>
+                <ref name="anyElement"/>
+            </choice>
+        </element>
+    </define>
+
+    <!-- [Group] Emotions -->
+    <!--
+        Emotions are defined once in a single <emotions> element. Any subsequent use of this
+        element will overwrite the previous definition.
+
+        Emotions are defined on three levels: primary, secondary and tertiary emotions.
+    -->
+    <define name="emotionsGroup">
+        <element name="emotions">
+            <oneOrMore>
+                <ref name="emotions.primary"/>
+            </oneOrMore>
+        </element>
+    </define>
+
+    <!-- [Elements] Emotions -->
+    <define name="emotions.primary">
+        <element name="primary">
+            <attribute name="name"/>
+
+            <zeroOrMore>
+                <ref name="emotions.secondary"/>
+            </zeroOrMore>
+        </element>
+    </define>
+
+    <define name="emotions.secondary">
+        <element name="secondary">
+            <attribute name="name"/>
+
+            <zeroOrMore>
+                <ref name="emotions.tertiary"/>
+            </zeroOrMore>
+        </element>
+    </define>
+
+    <define name="emotions.tertiary">
+        <element name="tertiary">
+            <attribute name="name"/>
+        </element>
+    </define>
+
+    <!-- [Group] Identity -->
+    <!--
+        This element contains miscellaneous information about the Software Agent's identity,
+        such as the name, nicknames, age (epoch) and gender.
+    -->
+    <define name="identityGroup">
+        <element name="identity">
+            <interleave>
+                <ref name="identity.name"/>
+
+                <zeroOrMore>
+                    <ref name="identity.nickname"/>
+                </zeroOrMore>
+
+                <optional>
+                    <ref name="identity.gender"/>
+                </optional>
+
+                <optional>
+                    <ref name="identity.epoch"/>
+                </optional>
+            </interleave>
+        </element>
+    </define>
+
+    <!-- [Elements] Identity -->
+    <define name="identity.name">
+        <element name="name">
+            <text/>
+        </element>
+    </define>
+
+    <define name="identity.nickname">
+        <element name="nickname">
+            <text/>
+        </element>
+    </define>
+
+    <define name="identity.gender">
+        <element name="gender">
+            <choice>
+                <value>male</value>
+                <value>female</value>
+                <value>neutral</value>
+            </choice>
+        </element>
+    </define>
+
+    <define name="identity.epoch">
+        <element name="epoch" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <data type="integer"/>
+        </element>
+    </define>
+
+    <!-- [Group] Init -->
+    <!--
+        Contains tasks to be executed once on startup, such as pre-defining
+        global variables and substitutions.
+    -->
+    <define name="initGroup">
+        <element name="init">
+            <interleave>
+                <zeroOrMore>
+                    <ref name="init.var"/>
+                </zeroOrMore>
+
+                <zeroOrMore>
+                    <ref name="init.substitutions"/>
+                </zeroOrMore>
+            </interleave>
+        </element>
+    </define>
+
+    <!-- [Elements] Init -->
+    <define name="init.var">
+        <element name="var">
+            <text/>
+        </element>
+    </define>
+
+    <define name="init.substitutions">
+        <element name="substitutions">
+            <oneOrMore>
+                <element name="sub">
+                    <attribute name="word"/>
+                    <text/>
+                </element>
+            </oneOrMore>
+        </element>
+    </define>
+</grammar>
