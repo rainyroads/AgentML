@@ -1,0 +1,36 @@
+<grammar xmlns="http://relaxng.org/ns/structure/1.0">
+    <!-- SAML Redirect Tag -->
+    <start>
+        <element name="redirect" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+            <optional>
+                <attribute name="default">
+                    <text/>
+                </attribute>
+            </optional>
+
+            <oneOrMore>
+                <choice>
+                    <text/>
+                    <ref name="anyElement"/>
+                </choice>
+            </oneOrMore>
+        </element>
+    </start>
+
+    <define name="anyElement">
+        <zeroOrMore>
+            <element>
+                <anyName/>
+                <zeroOrMore>
+                    <choice>
+                        <attribute>
+                            <anyName/>
+                        </attribute>
+                        <text/>
+                        <ref name="anyElement"/>
+                    </choice>
+                </zeroOrMore>
+            </element>
+        </zeroOrMore>
+    </define>
+</grammar>

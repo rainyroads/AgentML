@@ -1,0 +1,641 @@
+<!DOCTYPE agentml SYSTEM "agentml.rng">
+
+<agentml version="0.1" xmlns="">
+    <!-- Basic response tests -->
+    <trigger>
+        <pattern>atomic test</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>multiline atomic test</pattern>
+
+        <response>
+            <template>
+                The quick brown fox
+                jumps over the lazy
+                dog
+            </template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>optional [foo|bar] test 1</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>[foo] optional test 2</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>[foo] optional test 3 [bar]</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>required (foo|bar) test</pattern>
+
+        <response>
+            <template><star/></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>wildcard test (*)</pattern>
+
+        <response>
+            <template><star/></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>alpha wildcard test (_)</pattern>
+
+        <response>
+            <template><star/></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>numeric wildcard test (#)</pattern>
+
+        <response>
+            <template><star/></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>discarded * wildcard test (*)</pattern>
+
+        <response>
+            <template><star/></template>
+        </response>
+    </trigger>
+
+    <!-- Shorthand response tests -->
+    <trigger>
+        <pattern>shorthand response test</pattern>
+        <template>Success!</template>
+    </trigger>
+
+    <trigger>
+        <pattern>shorthand conditional response test</pattern>
+
+        <condition>
+            <if name="condition">
+                <template>Success!</template>
+            </if>
+
+            <else>
+                <template>Failure!</template>
+            </else>
+        </condition>
+    </trigger>
+
+    <!-- Star formatting tests -->
+    <trigger>
+        <pattern>capitalize format (*)</pattern>
+
+        <response>
+            <template><star format="capitalize"/></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>title format (*)</pattern>
+
+        <response>
+            <template><star format="title"/></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>upper format (*)</pattern>
+
+        <response>
+            <template><star format="upper"/></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>case preserved format (*)</pattern>
+
+        <response>
+            <template><star format="case_preserved"/></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>raw format (*)</pattern>
+
+        <response>
+            <template><star format="raw"/></template>
+        </response>
+    </trigger>
+
+    <!-- Trigger limit tests -->
+    <trigger>
+        <pattern>global limit test</pattern>
+
+        <limit type="global">1</limit>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>user limit test</pattern>
+
+        <limit>1</limit>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <!-- Response limit tests -->
+    <trigger>
+        <pattern>global response limit test</pattern>
+
+        <response priority="1">
+            <template>First!</template>
+
+            <limit type="global">1</limit>
+        </response>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>user response limit test</pattern>
+
+        <response priority="1">
+            <template>First!</template>
+
+            <limit>1</limit>
+        </response>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <!-- Chance test -->
+    <trigger>
+        <pattern>response chance</pattern>
+
+        <response>
+            <chance>40</chance>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>trigger chance</pattern>
+
+        <chance>60</chance>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <!-- Var tests -->
+    <trigger>
+        <pattern>get user var (_)</pattern>
+
+        <response>
+            <template><var><star/></var></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>get global var (_)</pattern>
+
+        <response>
+            <template><var type="global"><star/></var></template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>set user var (_) to (*)</pattern>
+
+        <response>
+            <template>Setting user variable <star/> to <star index="2" format="raw"/></template>
+            <var>
+                <name><star/></name>
+                <value><star index="2" format="raw"/></value>
+            </var>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>set global var (_) to (*)</pattern>
+
+        <response>
+            <template>Setting global variable <star/> to <star index="2" format="raw"/></template>
+            <var type="global">
+                <name><star/></name>
+                <value><star index="2" format="raw"/></value>
+            </var>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>set user var (_) to (*) and (_) to (*)</pattern>
+
+        <response>
+            <template>Setting user variable <star/> to <star index="2" format="raw"/> and <star index="3"/> to <star index="4" format="raw"/></template>
+            <var>
+                <name><star/></name>
+                <value><star index="2" format="raw"/></value>
+            </var>
+
+            <var>
+                <name><star index="3"/></name>
+                <value><star index="4" format="raw"/></value>
+            </var>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>set global var (_) to (*) and (_) to (*)</pattern>
+
+        <response>
+            <template>Setting global variable <star/> to <star index="2" format="raw"/> and <star index="3"/> to <star index="4" format="raw"/></template>
+            <var type="global">
+                <name><star/></name>
+                <value><star index="2" format="raw"/></value>
+            </var>
+
+            <var type="global">
+                <name><star index="3"/></name>
+                <value><star index="4" format="raw"/></value>
+            </var>
+        </response>
+    </trigger>
+
+    <!-- Condition tests -->
+    <trigger>
+        <pattern>(cond|condition) test (1|one)</pattern>
+
+        <condition>
+            <if name="condition">
+                <response>
+                    <template>Success!</template>
+                </response>
+            </if>
+
+            <else>
+                <response>
+                    <template>Failure!</template>
+                </response>
+            </else>
+        </condition>
+    </trigger>
+
+    <trigger>
+        <pattern>(cond|condition) test (2|two)</pattern>
+
+        <condition>
+            <if name="condition" is="foo">
+                <response>
+                    <template>Success! Var is foo</template>
+                </response>
+            </if>
+
+            <elif name="condition" is="bar">
+                <response>
+                    <template>Success! Var is bar</template>
+                </response>
+            </elif>
+
+            <else>
+                <response>
+                    <template>Failure!</template>
+                </response>
+            </else>
+        </condition>
+    </trigger>
+
+    <trigger>
+        <pattern>(cond|condition) test (3|three)</pattern>
+
+        <condition>
+            <if name="condition" lte="10">
+                <response>
+                    <template>Success! Var is less than or equal to 10</template>
+                </response>
+            </if>
+        </condition>
+    </trigger>
+
+    <trigger>
+        <pattern>(cond|condition) test (4|four)</pattern>
+
+        <response>
+            <template>
+                <condition>
+                    <if name="condition">
+                        The value of the condition variable is "<var name="condition"/>"
+                    </if>
+
+                    <else>
+                        The condition variable has not been set!
+                    </else>
+                </condition>
+            </template>
+        </response>
+    </trigger>
+
+    <!-- Topic tests -->
+    <trigger>
+        <pattern>enter test topic</pattern>
+
+        <response>
+            <topic>test</topic>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <topic name="test">
+        <trigger>
+            <pattern>test topic test</pattern>
+
+            <response>
+                <template>Success!</template>
+            </response>
+        </trigger>
+
+        <trigger>
+            <pattern>exit test topic</pattern>
+
+            <response>
+                <topic/>
+                <template>Success!</template>
+            </response>
+        </trigger>
+    </topic>
+
+    <!-- Group tests -->
+    <group name="public">
+        <trigger>
+            <pattern>public group test</pattern>
+
+            <response>
+                <template>Success!</template>
+            </response>
+        </trigger>
+    </group>
+
+    <trigger>
+        <group>group1</group>
+        <group>group2</group>
+        <group>group3</group>
+
+        <pattern>multigroup test</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <group>group1</group>
+        <group>group2</group>
+        <topic>test</topic>
+
+        <pattern>test topic group test</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <!-- Priority tests -->
+    <trigger>
+        <pattern>priority test</pattern>
+
+        <response>
+            <template>Failure!</template>
+        </response>
+    </trigger>
+
+    <trigger priority="1">
+        <pattern>priority test</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>response priority test</pattern>
+
+        <response priority="10">
+            <limit>60</limit>
+            <template>One</template>
+        </response>
+
+        <response priority="9">
+            <limit>60</limit>
+            <template>Two</template>
+        </response>
+
+        <response priority="8">
+            <limit>60</limit>
+            <template>Three</template>
+        </response>
+
+        <response priority="7">
+            <limit>60</limit>
+            <template>Four</template>
+        </response>
+
+        <response priority="6">
+            <limit>60</limit>
+            <template>Five</template>
+        </response>
+
+        <response priority="5">
+            <limit>60</limit>
+            <template>Six</template>
+        </response>
+
+        <response priority="4">
+            <limit>60</limit>
+            <template>Seven</template>
+        </response>
+
+        <response priority="3">
+            <limit>60</limit>
+            <template>Eight</template>
+        </response>
+
+        <response priority="2">
+            <limit>60</limit>
+            <template>Nine</template>
+        </response>
+
+        <response priority="1">
+            <limit>60</limit>
+            <template>Ten</template>
+        </response>
+
+        <response priority="-1">
+            <template>Success!</template>
+        </response>
+
+        <condition>
+            <if type="user" is="chell">
+                <response priority="0">
+                    <template>Triumph!</template>
+                </response>
+            </if>
+        </condition>
+    </trigger>
+
+    <!-- Blocking tests -->
+    <trigger priority="1">
+        <pattern>blocking test</pattern>
+
+        <limit blocking="false">15</limit>
+
+        <response>
+            <template>First!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>blocking test</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>response blocking test</pattern>
+
+        <blocking>false</blocking>
+
+        <response>
+            <limit>15</limit>
+
+            <template>First!</template>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>response blocking test</pattern>
+
+        <response>
+            <template>Success!</template>
+        </response>
+    </trigger>
+
+    <!-- Redirect tests -->
+    <trigger>
+        <pattern>redirect destination</pattern>
+        <template>Success!</template>
+    </trigger>
+
+    <trigger>
+        <pattern>wildcard redirect destination (*) and (*) plus (#)</pattern>
+        <template><star/> and <star index="2"/> plus <star index="3"/></template>
+    </trigger>
+
+    <trigger>
+        <pattern>redirect test</pattern>
+
+        <response>
+            <redirect>redirect destination</redirect>
+        </response>
+    </trigger>
+
+    <trigger>
+        <pattern>shorthand redirect test</pattern>
+        <redirect>redirect destination</redirect>
+    </trigger>
+
+    <trigger>
+        <pattern>bad redirect test</pattern>
+        <redirect>dead end redirect</redirect>
+    </trigger>
+
+    <trigger>
+        <pattern>wildcard redirect test (*) and (*) without * plus (#)</pattern>
+        <redirect>wildcard redirect destination <star/> and <star index="2"/> plus <star index="3"/></redirect>
+    </trigger>
+
+    <topic name="test">
+        <trigger>
+            <pattern>test topic redirect destination</pattern>
+            <template>Success!</template>
+        </trigger>
+
+        <trigger>
+            <pattern>test topic redirect test</pattern>
+            <redirect>test topic redirect destination</redirect>
+        </trigger>
+
+        <trigger>
+            <pattern>test topic redirect outside of topic test</pattern>
+            <redirect>redirect destination</redirect>
+        </trigger>
+
+        <trigger>
+            <pattern>test topic wildcard redirect destination (*) and (*) plus (#)</pattern>
+            <template><star/> and <star index="2"/> plus <star index="3"/></template>
+        </trigger>
+
+        <trigger>
+            <pattern>test topic wildcard redirect test (*) and (*) without * plus (#)</pattern>
+            <redirect>test topic wildcard redirect destination <star/> and <star index="2"/> plus <star index="3"/></redirect>
+        </trigger>
+
+        <group name="group1">
+            <trigger>
+                <pattern>test grouped topic redirect destination</pattern>
+                <template>Success!</template>
+            </trigger>
+
+            <trigger>
+                <pattern>test grouped topic redirect test</pattern>
+                <redirect>test grouped topic redirect destination</redirect>
+            </trigger>
+        </group>
+    </topic>
+
+    <trigger>
+        <pattern>template redirect test</pattern>
+        <template>Status: <redirect>redirect destination</redirect>!</template>
+    </trigger>
+
+    <trigger>
+        <pattern>template default redirect test</pattern>
+        <template>Status: <redirect default="Failure!">dead end redirect</redirect>!</template>
+    </trigger>
+
+    <trigger>
+        <pattern>template bad redirect test</pattern>
+        <template>Status: <redirect>dead end redirect</redirect>!</template>
+    </trigger>
+</agentml>
