@@ -11,7 +11,7 @@ class Init(Element):
         """
         Initialize a new Init instance
         """
-        super().__init__(agentml, element, file_path)
+        super(Init, self).__init__(agentml, element, file_path)
 
     def _parse_substitutions(self, element):
         """

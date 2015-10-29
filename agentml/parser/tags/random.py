@@ -15,7 +15,7 @@ class Random(Tag):
         :type  element: etree._Element
         """
         self._responses = ()
-        super().__init__(trigger, element)
+        super(Random, self).__init__(trigger, element)
 
         # Define our schema
         with open(os.path.join(self.trigger.agentml.script_path, 'schemas', 'tags', 'random.rng')) as file:

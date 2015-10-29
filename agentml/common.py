@@ -51,7 +51,12 @@ def normalize(string, pattern=False, preserve_case=False):
     if not isinstance(string, str):
         return ''
 
-    string = string.strip() if preserve_case else string.strip().casefold()
+    # Case folding is not supported in Python2
+    try:
+        string = string.strip() if preserve_case else string.strip().casefold()
+    except AttributeError:
+        string = string.strip() if preserve_case else string.strip().lower()
+
     return regex.sub('', string)
 
 

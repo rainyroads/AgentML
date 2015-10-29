@@ -1,8 +1,10 @@
 import logging
+from six import add_metaclass
 from abc import ABCMeta, abstractmethod
 
 
-class Tag(metaclass=ABCMeta):
+@add_metaclass(ABCMeta)
+class Tag(object):
     """
     Tag base class
     """

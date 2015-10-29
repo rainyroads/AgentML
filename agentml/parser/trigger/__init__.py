@@ -274,7 +274,7 @@ class Trigger(Element, Restrictable):
         :type  element: etree._Element
         """
         self._log.debug('Setting Trigger topic: {topic}'.format(topic=element.text))
-        super()._parse_topic(element)
+        super(Trigger, self)._parse_topic(element)
 
     def _parse_emotion(self, element):
         """
