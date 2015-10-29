@@ -178,7 +178,7 @@ class AgentML:
         :type  user: str
 
         :param message: The message to retrieve a reply to
-        :type  message: str
+        :type  message: basestring
 
         :param groups: The trigger groups to search, defaults to only matching non-grouped triggers
         :type  groups: set or AnyGroup
@@ -499,7 +499,7 @@ class AgentML:
         response = []
 
         # Add the starting text to the response list
-        head = element.text if isinstance(element.text, str) else None
+        head = element.text if isinstance(element.text, basestring) else None
         if head:
             if head.strip():
                 head = newlines_to_spaces(head)
@@ -508,7 +508,7 @@ class AgentML:
 
         # Internal method for appending an elements tail to the response list
         def append_tail(e):
-            tail = e.tail if isinstance(e.tail, str) else None
+            tail = e.tail if isinstance(e.tail, basestring) else None
             if tail:
                 if tail.strip():
                     tail = newlines_to_spaces(tail)

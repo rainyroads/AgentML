@@ -107,7 +107,7 @@ class Request:
         :type  user: agentml.User
 
         :param message: The request message
-        :type  message: str
+        :type  message: agentml.Message or basestring
 
         :param groups: The request groups
         :type  groups: set

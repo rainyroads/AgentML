@@ -135,7 +135,7 @@ class Trigger(Element, Restrictable):
             return random_response
 
         # String match
-        if isinstance(self.pattern, str) and str(message) == self.pattern:
+        if isinstance(self.pattern, basestring) and str(message) == self.pattern:
             self._log.info('String Pattern matched: {match}'.format(match=self.pattern))
             return get_response()
 
