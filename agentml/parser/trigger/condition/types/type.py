@@ -1,6 +1,9 @@
 from abc import ABCMeta, abstractmethod
+from six import add_metaclass
 
-class ConditionType(metaclass=ABCMeta):
+
+@add_metaclass(ABCMeta)
+class ConditionType(object):
     def __init__(self, name):
         """
         Initialize a new Condition Type instance

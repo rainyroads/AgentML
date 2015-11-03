@@ -1,6 +1,7 @@
 from . import ConditionType
 from agentml.errors import VarNotDefinedError
 
+
 class UserVarType(ConditionType):
     """
     User Variable condition type
@@ -9,7 +10,7 @@ class UserVarType(ConditionType):
         """
         Initialize a new User Var Type instance
         """
-        super().__init__('user_var')
+        super(UserVarType, self).__init__('user_var')
 
     def get(self, agentml, user=None, key=None):
         """

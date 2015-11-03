@@ -48,10 +48,15 @@ def normalize(string, pattern=False, preserve_case=False):
     """
     regex = re.compile(r'([^\s\w\(\)\[\]\|\*#])+') if pattern else re.compile(r'([^\s\w]|_)+')
 
-    if not isinstance(string, str):
+    if not isinstance(string, basestring):
         return ''
 
-    string = string.strip() if preserve_case else string.strip().casefold()
+    # Case folding is not supported in Python2
+    try:
+        string = string.strip() if preserve_case else string.strip().casefold()
+    except AttributeError:
+        string = string.strip() if preserve_case else string.strip().lower()
+
     return regex.sub('', string)
 
 
@@ -62,7 +67,7 @@ def attribute(element, attribute, default=None):
     :type  element: etree._Element
 
     :param attribute: The name of the attribute to evaluate
-    :type  attribute: str
+    :type  attribute: basestring
 
     :param default: The default value to return if the attribute is not defined
     """
@@ -100,7 +105,7 @@ def int_attribute(element, attribute, default=0):
     :type  element: etree._Element
 
     :param attribute: The name of the attribute to evaluate
-    :type  attribute: str
+    :type  attribute: basestring
 
     :param default: The default value to return if the attribute is not defined
     :type  default: int

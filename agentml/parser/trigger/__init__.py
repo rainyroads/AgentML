@@ -135,7 +135,7 @@ class Trigger(Element, Restrictable):
             return random_response
 
         # String match
-        if isinstance(self.pattern, str) and str(message) == self.pattern:
+        if isinstance(self.pattern, basestring) and str(message) == self.pattern:
             self._log.info('String Pattern matched: {match}'.format(match=self.pattern))
             return get_response()
 
@@ -274,7 +274,7 @@ class Trigger(Element, Restrictable):
         :type  element: etree._Element
         """
         self._log.debug('Setting Trigger topic: {topic}'.format(topic=element.text))
-        super()._parse_topic(element)
+        super(Trigger, self)._parse_topic(element)
 
     def _parse_emotion(self, element):
         """

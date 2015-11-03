@@ -1,6 +1,7 @@
 from . import ConditionType
 from agentml.errors import VarNotDefinedError
 
+
 class GlobalVarType(ConditionType):
     """
     Global Variable condition type
@@ -9,7 +10,7 @@ class GlobalVarType(ConditionType):
         """
         Initialize a new Global Var Type instance
         """
-        super().__init__('global_var')
+        super(GlobalVarType, self).__init__('global_var')
 
     def get(self, agentml, user=None, key=None):
         """

@@ -1,5 +1,6 @@
 from . import ConditionType
 
+
 class TopicType(ConditionType):
     """
     Topic condition type
@@ -8,7 +9,7 @@ class TopicType(ConditionType):
         """
         Initialize a new Topic Type instance
         """
-        super().__init__('topic')
+        super(TopicType, self).__init__('topic')
 
     def get(self, agentml, user=None, key=None):
         """

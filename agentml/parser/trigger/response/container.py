@@ -5,7 +5,7 @@ from agentml.common import weighted_choice
 from agentml.errors import LimitError, ChanceError
 
 
-class ResponseContainer:
+class ResponseContainer(object):
     """
     Container for Response objects
     """

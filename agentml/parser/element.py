@@ -3,7 +3,7 @@ from lxml import etree
 from agentml.common import attribute, bool_attribute
 
 
-class Element:
+class Element(object):
     """
     Base AgentML element class
     """
@@ -38,7 +38,7 @@ class Element:
                 parse(child)
 
 
-class Restrictable:
+class Restrictable(object):
     """
     Restrictable element boilerplate parsers
     """

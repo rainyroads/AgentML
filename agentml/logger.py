@@ -2,7 +2,7 @@ import logging
 from collections import deque
 
 
-class InternalLogger:
+class InternalLogger(object):
     def __init__(self, max_entries=100):
         """
         Initialize a new base Internal Logger instance
@@ -64,6 +64,7 @@ class InternalLogger:
         self._debug_log.info('Removing maximum entries restriction')
         self._log_entries(deque(self._log_entries))
 
+
 ###############
 # Requests    #
 ###############
@@ -74,7 +75,7 @@ class RequestLogger(InternalLogger):
         :param max_entries: The maximum number of log entries to retain at any given time
         :type  max_entries: int
         """
-        super().__init__(max_entries)
+        super(RequestLogger, self).__init__(max_entries)
         self._debug_log = logging.getLogger('agentml.logger.requests')
 
     def add(self, user, message, groups):
@@ -106,7 +107,7 @@ class Request:
         :type  user: agentml.User
 
         :param message: The request message
-        :type  message: str
+        :type  message: agentml.Message or basestring
 
         :param groups: The request groups
         :type  groups: set
@@ -133,7 +134,7 @@ class ResponseLogger(InternalLogger):
         :param max_entries: The maximum number of log entries to retain at any given time
         :type  max_entries: int
         """
-        super().__init__(max_entries)
+        super(ResponseLogger, self).__init__(max_entries)
         self._debug_log = logging.getLogger('agentml.logger.responses')
 
     def add(self, message, request):

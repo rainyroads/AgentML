@@ -1,12 +1,13 @@
 import logging
+from six import add_metaclass
 from abc import ABCMeta, abstractmethod
 from agentml.parser import Element
 from agentml.common import attribute
 from agentml.parser.trigger.response import Response
-from agentml.errors import VarNotDefinedError
 
 
-class BaseCondition(metaclass=ABCMeta):
+@add_metaclass(ABCMeta)
+class BaseCondition(object):
     """
     AgentML Base Condition class
     """

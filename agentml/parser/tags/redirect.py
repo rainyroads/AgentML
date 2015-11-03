@@ -14,7 +14,7 @@ class Redirect(Tag):
         :param element: The XML Element object
         :type  element: etree._Element
         """
-        super().__init__(trigger, element)
+        super(Redirect, self).__init__(trigger, element)
         self._log = logging.getLogger('agentml.parser.tags.redirect')
 
         # Define our schema
