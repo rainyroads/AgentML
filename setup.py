@@ -23,7 +23,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.3',
+    version='0.3.1',
 
     description='An XML dialect for creating natural language software agents',
     # long_description=long_description,
@@ -44,7 +44,9 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-        'Programming Language :: Python',
+
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
 
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Text Processing :: Markup :: XML'
@@ -53,7 +55,7 @@ setup(
     keywords=['bot', 'chatbot', 'chatterbot', 'ai', 'aiml', 'rivescript'],
 
     packages=find_packages(exclude=['tests', 'demo']),
-    install_requires=['lxml>=3.4.4,<3.5'],
+    install_requires=['lxml>=3.4.4,<3.5', 'six>=1.10.0<1.11'],
 
     package_data={
         'agentml': ['intelligence/*.aml', 'schemas/*.rng', 'schemas/*.xsd', 'schemas/tags/*.rng'],

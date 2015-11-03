@@ -4,6 +4,7 @@ import sre_constants
 import random
 from time import time
 from collections import Iterable
+from six import string_types
 from agentml.parser import Element, Restrictable
 from agentml.common import normalize, int_attribute, bool_attribute, bool_element
 from agentml.errors import AgentMLSyntaxError, ParserBlockingError, LimitError, ChanceError
@@ -135,7 +136,7 @@ class Trigger(Element, Restrictable):
             return random_response
 
         # String match
-        if isinstance(self.pattern, basestring) and str(message) == self.pattern:
+        if isinstance(self.pattern, string_types) and str(message) == self.pattern:
             self._log.info('String Pattern matched: {match}'.format(match=self.pattern))
             return get_response()
 

@@ -1,4 +1,5 @@
 from __future__ import print_function, unicode_literals
+from six import string_types
 import os
 import re
 import logging
@@ -17,16 +18,16 @@ from agentml.errors import AgentMLError, VarNotDefinedError, UserNotDefinedError
 __author__     = "Makoto Fujimoto"
 __copyright__  = 'Copyright 2015, Makoto Fujimoto'
 __license__    = "MIT"
-__version__    = "0.3"
+__version__    = "0.3.1"
 __maintainer__ = "Makoto Fujimoto"
 
 
 class AgentML:
-    def __init__(self, log_level=logging.INFO):
+    def __init__(self, log_level=logging.WARN):
         """
         Initialize a new AgentML instance
 
-        :param log_level: The debug logging level, defaults to logging.INFO during alpha
+        :param log_level: The debug logging level, defaults to logging.WARN
         :type  log_level: int
         """
         # Debug logger
@@ -34,7 +35,7 @@ class AgentML:
         self._log.setLevel(log_level)
         log_formatter = logging.Formatter("[%(asctime)s] %(levelname)s.%(name)s: %(message)s")
         console_logger = logging.StreamHandler()
-        console_logger.setLevel(logging.DEBUG)
+        console_logger.setLevel(log_level)
         console_logger.setFormatter(log_formatter)
         self._log.addHandler(console_logger)
 
@@ -178,7 +179,7 @@ class AgentML:
         :type  user: str
 
         :param message: The message to retrieve a reply to
-        :type  message: basestring
+        :type  message: string_types
 
         :param groups: The trigger groups to search, defaults to only matching non-grouped triggers
         :type  groups: set or AnyGroup
@@ -499,7 +500,7 @@ class AgentML:
         response = []
 
         # Add the starting text to the response list
-        head = element.text if isinstance(element.text, basestring) else None
+        head = element.text if isinstance(element.text, string_types) else None
         if head:
             if head.strip():
                 head = newlines_to_spaces(head)
@@ -508,7 +509,7 @@ class AgentML:
 
         # Internal method for appending an elements tail to the response list
         def append_tail(e):
-            tail = e.tail if isinstance(e.tail, basestring) else None
+            tail = e.tail if isinstance(e.tail, string_types) else None
             if tail:
                 if tail.strip():
                     tail = newlines_to_spaces(tail)

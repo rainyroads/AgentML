@@ -1,6 +1,7 @@
 import re
 import random
 from lxml import etree
+from six import string_types
 
 
 def schema(relaxng):
@@ -48,7 +49,7 @@ def normalize(string, pattern=False, preserve_case=False):
     """
     regex = re.compile(r'([^\s\w\(\)\[\]\|\*#])+') if pattern else re.compile(r'([^\s\w]|_)+')
 
-    if not isinstance(string, basestring):
+    if not isinstance(string, string_types):
         return ''
 
     # Case folding is not supported in Python2
