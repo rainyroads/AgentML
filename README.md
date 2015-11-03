@@ -1,4 +1,6 @@
 # AgentML
+[![Build Status](https://travis-ci.org/FujiMakoto/AgentML.svg?branch=release-v0.3.1)](https://travis-ci.org/FujiMakoto/AgentML)
+
 AgentML is in simple terms an XML dialect for creating natural language software agents. It is a project inspired by [AIML](http://www.alicebot.org/aiml.html) and [RiveScript](http://www.rivescript.com).
 
 ## Usage
