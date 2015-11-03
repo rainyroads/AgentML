@@ -44,7 +44,9 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-        'Programming Language :: Python',
+
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
 
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Text Processing :: Markup :: XML'
