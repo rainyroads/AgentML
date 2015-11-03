@@ -23,11 +23,11 @@ __maintainer__ = "Makoto Fujimoto"
 
 
 class AgentML:
-    def __init__(self, log_level=logging.INFO):
+    def __init__(self, log_level=logging.WARN):
         """
         Initialize a new AgentML instance
 
-        :param log_level: The debug logging level, defaults to logging.INFO during alpha
+        :param log_level: The debug logging level, defaults to logging.WARN
         :type  log_level: int
         """
         # Debug logger
@@ -35,7 +35,7 @@ class AgentML:
         self._log.setLevel(log_level)
         log_formatter = logging.Formatter("[%(asctime)s] %(levelname)s.%(name)s: %(message)s")
         console_logger = logging.StreamHandler()
-        console_logger.setLevel(logging.DEBUG)
+        console_logger.setLevel(log_level)
         console_logger.setFormatter(log_formatter)
         self._log.addHandler(console_logger)
 
