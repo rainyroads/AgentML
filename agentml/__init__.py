@@ -1,4 +1,5 @@
 from __future__ import print_function, unicode_literals
+from six import string_types
 import os
 import re
 import logging
@@ -178,7 +179,7 @@ class AgentML:
         :type  user: str
 
         :param message: The message to retrieve a reply to
-        :type  message: basestring
+        :type  message: string_types
 
         :param groups: The trigger groups to search, defaults to only matching non-grouped triggers
         :type  groups: set or AnyGroup
@@ -499,7 +500,7 @@ class AgentML:
         response = []
 
         # Add the starting text to the response list
-        head = element.text if isinstance(element.text, basestring) else None
+        head = element.text if isinstance(element.text, string_types) else None
         if head:
             if head.strip():
                 head = newlines_to_spaces(head)
@@ -508,7 +509,7 @@ class AgentML:
 
         # Internal method for appending an elements tail to the response list
         def append_tail(e):
-            tail = e.tail if isinstance(e.tail, basestring) else None
+            tail = e.tail if isinstance(e.tail, string_types) else None
             if tail:
                 if tail.strip():
                     tail = newlines_to_spaces(tail)
