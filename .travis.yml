@@ -11,5 +11,6 @@ install:
   - "pip install -r requirements.txt"
   - "pip install coveralls"
 # command to run tests
-script: nosetests
+script:
+  - nosetests --with-coverage --cover-package=agentml
 after_success: coveralls
