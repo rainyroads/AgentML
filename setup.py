@@ -17,6 +17,12 @@ here = path.abspath(path.dirname(__file__))
 # with open(path.join(here, 'DESCRIPTION.rst'), encoding='utf-8') as f:
 #     long_description = f.read()
 
+
+def readme():
+    with open('README.rst') as f:
+        return f.read()
+
+
 setup(
     name='AgentML',
 
@@ -26,7 +32,7 @@ setup(
     version='0.3.1',
 
     description='An XML dialect for creating natural language software agents',
-    # long_description=long_description,
+    long_description=readme(),
 
     # The project's main homepage.
     url='https://github.com/FujiMakoto/AgentML',
