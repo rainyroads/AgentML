@@ -1,4 +1,4 @@
-
+from __future__ import print_function, unicode_literals
 from six import string_types
 import os
 import re
@@ -149,7 +149,7 @@ class AgentML:
         Sort triggers and their associated responses
         """
         # Sort triggers by word and character length first
-        for priority, triggers in list(self._triggers.items()):
+        for priority, triggers in self._triggers.items():
             self._log.debug('Sorting priority {priority} triggers'.format(priority=priority))
 
             # Get and sort our atomic and wildcard patterns
@@ -166,7 +166,7 @@ class AgentML:
         # Finally, sort triggers by priority
         self._sorted_triggers = []
 
-        for triggers in [self._triggers[priority] for priority in sorted(list(self._triggers.keys()), reverse=True)]:
+        for triggers in [self._triggers[priority] for priority in sorted(self._triggers.keys(), reverse=True)]:
             for trigger in triggers:
                 self._sorted_triggers.append(trigger)
 
@@ -548,7 +548,7 @@ class AgentML:
         Launch an AML interpreter session for testing
         """
         while True:
-            message = eval(input('[#] '))
+            message = input('[#] ')
             if message.lower().strip() == 'exit':
                 break
 
