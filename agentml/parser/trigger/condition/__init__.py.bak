@@ -199,7 +199,7 @@ class ConditionStatement:
         :rtype : tuple or bool
         """
         self._log.debug('Evaluating conditional statement: {statement}'
-                        .format(statement=' '.join([_f for _f in [self.type, self.name, self.operator, self.value] if _f])))
+                        .format(statement=' '.join(filter(None, [self.type, self.name, self.operator, self.value]))))
 
         # Get the value of our key type
         if self.type not in agentml.conditions:
